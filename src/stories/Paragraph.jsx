@@ -7,7 +7,7 @@ export const Paragraph = ({
     content = 'Lorem ipsum mi nascetur pellentesque id aliquet porta consectetur auctor eget eget egestas eleifend pretium tristique morbi in sed ultrices dolor massa ullamcorper enim cras purus scelerisque a ut malesuada tincidunt pretium consectetur ultrices eu malesuada leo pellentesque tristique velit.',
     ...props
 }) => {
-    return <Body type={type} style={style} {...props}>{content}</Body>
+    return <Body type={type} fontStyle={style} {...props}>{content}</Body>
 }
 
 Paragraph.propTypes = {
