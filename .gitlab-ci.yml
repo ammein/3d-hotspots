@@ -1,11 +1,12 @@
 pages:
+  image: node:lts
   stage: deploy
   script:
-    - yarn # or yarn install if using yarn
-    - yarn build-storybook # or yarn build-storybook
+    - yarn install
+    - yarn build-storybook
     - mv storybook-static public
   artifacts:
     paths:
       - public
   only:
-    - main # or your desired branch for deployment
+    - main
