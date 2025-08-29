@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        /* This is the modern standard recommended by TypeScript for tools like Vite that use a bundler, correctly resolving ES modules and package.json exports. */
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
+        /* Path Aliases */
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        },
+        /* Vite Environment Types, This is a key addition. It loads Vite's specific type definitions, giving you autocompletion for environment variables like import.meta.env. */
+        "types": [
+            "vite"
+        ],
+        /* Linter Checks, Vite transpiles files individually. This setting enforces coding practices that are compatible with that process, preventing certain errors. */
+        "isolatedModules": true,
+        /* Since Vite handles all the building and bundling, we tell TypeScript not to generate any output files itself. Its only job is type-checking. */
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "include": [
+        "src"
+    ]
+}

@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+
+@theme {
+  --font-*: initial;
+  --font-regular: "3ds Regular", sans-serif;
+  --font-italic: "3ds Italic", sans-serif;
+  --font-light: "3ds Light", sans-serif;
+  --font-light-italic: "3ds Light Italic", sans-serif;
+  --font-semibold: "3ds Semibold", sans-serif;
+  --font-semibold-italic: "3ds Semibold Italic", sans-serif;
+  --font-bold: "3ds Bold", sans-serif;
+  --font-bold-italic: "3ds Bold Italic", sans-serif;
+  --color-*: initial;
+  --color-black-100: rgba(0, 0, 0, 1.0);
+  --color-black-80: rgba(0, 0, 0, 0.8);
+  --color-black-64: rgba(0, 0, 0, 0.64);
+  --color-black-48: rgba(0, 0, 0, 0.48);
+  --color-black-32: rgba(0, 0, 0, 0.32);
+  --color-black-16: rgba(0, 0, 0, 0.16);
+  --color-black-8: rgba(0, 0, 0, 0.08);
+  --color-white-100: rgba(255, 255, 255, 1.0);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-white-64: rgba(255, 255, 255, 0.64);
+  --color-white-48: rgba(255, 255, 255, 0.48);
+  --color-white-32: rgba(255, 255, 255, 0.32);
+  --color-white-16: rgba(255, 255, 255, 0.16);
+  --color-white-8: rgba(255, 255, 255, 0.08);
+  --color-corporateblue: #005686;
+  --color-blue: #0870d3;
+  --color-denimblue: #075cad;
+  --color-deepblue: #04315d;
+  --color-lightblue: #e9f7ff;
+  --color-lightgrey: #f4f6f8;
+  --color-darkgrey: #e3e7ec;
+  --color-red: #e32b2e;
+  --color-orange: #c95100;
+  --color-green: #1c8720;
+  --color-purpleblue: #4f6de3;
+  --spacing-dassault-0: 0px;
+  --spacing-dassault-4: 4px;
+  --spacing-dassault-8: 8px;
+  --spacing-dassault-16: 16px;
+  --spacing-dassault-24: 24px;
+  --spacing-dassault-32: 32px;
+  --spacing-dassault-40: 40px;
+  --spacing-dassault-64: 64px;
+  --spacing-dassault-72: 72px;
+  --spacing-dassault-168: 168px;
+  --radius-medium: 6px;
+  --radius-small: 2px;
+  --radius-full: 9999px;
+}
+
+:root {
+  color-scheme: light dark;
+
+  --border-small: 1px;
+  --border-medium: 2px;
+  --border-large: 4px;
+}
+
+@font-face {
+  font-family: "3ds Bold";
+  src: url("fonts/3DSV2-Bold.ttf");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "3ds Bold Italic";
+  src: url("fonts/3DSV2-BoldItalic.ttf");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "3ds Semibold";
+  src: url("fonts/3DSV2-SemiBold.ttf");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "3ds Semibold Italic";
+  src: url("fonts/3DSV2-SemiBoldItalic.ttf");
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "3ds Regular";
+  src: url("fonts/3DSV2-Regular.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "3ds Italic";
+  src: url("fonts/3DSV2-Italic.ttf");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "3ds Light";
+  src: url("fonts/3DSV2-Light.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "3ds Light Italic";
+  src: url("fonts/3DSV2-LightItalic.ttf");
+  font-weight: 400;
+  font-style: italic;
+}
