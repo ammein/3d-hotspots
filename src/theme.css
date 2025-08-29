@@ -62,52 +62,52 @@
 
 @font-face {
   font-family: "3ds Bold";
-  src: url("fonts/3DSV2-Bold.ttf");
+  src: url("../public/fonts/3DSV2-Bold.ttf");
   font-weight: 700;
 }
 
 @font-face {
   font-family: "3ds Bold Italic";
-  src: url("fonts/3DSV2-BoldItalic.ttf");
+  src: url("../public/fonts/3DSV2-BoldItalic.ttf");
   font-weight: 700;
   font-style: italic;
 }
 
 @font-face {
   font-family: "3ds Semibold";
-  src: url("fonts/3DSV2-SemiBold.ttf");
+  src: url("../public/fonts/3DSV2-SemiBold.ttf");
   font-weight: 600;
 }
 
 @font-face {
   font-family: "3ds Semibold Italic";
-  src: url("fonts/3DSV2-SemiBoldItalic.ttf");
+  src: url("../public/fonts/3DSV2-SemiBoldItalic.ttf");
   font-weight: 600;
   font-style: italic;
 }
 
 @font-face {
   font-family: "3ds Regular";
-  src: url("fonts/3DSV2-Regular.ttf");
+  src: url("../public/fonts/3DSV2-Regular.ttf");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "3ds Italic";
-  src: url("fonts/3DSV2-Italic.ttf");
+  src: url("../public/fonts/3DSV2-Italic.ttf");
   font-weight: 400;
   font-style: italic;
 }
 
 @font-face {
   font-family: "3ds Light";
-  src: url("fonts/3DSV2-Light.ttf");
+  src: url("../public/fonts/3DSV2-Light.ttf");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "3ds Light Italic";
-  src: url("fonts/3DSV2-LightItalic.ttf");
+  src: url("../public/fonts/3DSV2-LightItalic.ttf");
   font-weight: 400;
   font-style: italic;
 }

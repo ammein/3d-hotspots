@@ -1,4 +1,24 @@
-import '../src/theme.css'
+import { withThemeByClassName, withThemeByDataAttribute } from '@storybook/addon-themes';
+// import 'tailwindcss/index.css';
+import '@/theme.css'
+
+export const decorators = [
+  withThemeByClassName({
+    themes: {
+      light: 'light',
+      dark: 'dark',
+    },
+    defaultTheme: 'light',
+  }),
+  withThemeByDataAttribute({
+    themes: {
+      light: 'light',
+      dark: 'dark',
+    },
+    defaultTheme: 'light',
+    attributeName: 'data-mode',
+  })
+];
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {
