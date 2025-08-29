@@ -17,11 +17,3 @@ Headline.propTypes = {
     /** Weight of a font */
     weight: PropTypes.oneOf(['semibold', 'bold'])
 }
-
-// export const Body = ({
-//     type = 'body',
-//     style = 'regular',
-//     ...props
-// }) => {
-//     return <Paragraph  {...props}/>
-// }

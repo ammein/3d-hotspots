@@ -5,13 +5,13 @@ import {
 export const Body = ({
     type = 'body',
     color,
-    style,
+    fontStyle,
     ...props
 }) => {
 
     // 3. Render the selected component
     return (
-        <Paragraph as={type !== 'body' && 'span'} style={style} color={color} type={type} {...props}/>
+        <Paragraph as={type !== 'body' && 'span'} fontStyle={fontStyle} color={color} type={type} {...props}/>
     );
 };
 

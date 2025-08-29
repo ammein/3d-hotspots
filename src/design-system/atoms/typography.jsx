@@ -27,6 +27,16 @@ const paragraphStyle = styled.p`
     letter-spacing: ${props => props.type === "body" ? "-0.2px" : "0px"};
 `
 
+const paragraphFont = (props) => {
+    switch(props.type) {
+        case "body":
+            return props.fontStyle === "italic" ? "font-italic" : "font-regular"
+            
+        case "caption": 
+            return props.fontStyle === "italic" ? "font-light-italic" : "font-light"
+    }
+}
+
 /**
  * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web' , { 
  * color: string
@@ -40,18 +50,10 @@ export const Heading = tw(headingStyle)`${props => props.weight === "semibold" ?
 /**
  * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web', {
  *      color: string
- *      style: 'italic' | 'regular'
+ *      fontStyle: 'italic' | 'regular'
  *      type: 'body' | 'caption'
  * } & React.HTMLAttributes<HTMLParagraphElement>>}
  */
 export const Paragraph = tw(paragraphStyle)`
-    ${props => {
-        switch(props.type) {
-            case "body":
-                return props.style === "italic" ? "font-italic" : "font-regular"
-                
-            case "caption": 
-                return props.style === "italic" ? "font-light-italic" : "font-light"
-        }
-    }} ${props => props.color}
+    ${props => paragraphFont(props)} ${props => props.color}
 `

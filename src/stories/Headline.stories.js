@@ -1,7 +1,7 @@
-import { Headline } from './Typography'
+import { Headline } from './Headline'
 
 export default {
-    title: "Dassault Systemes/Headline",
+    title: "Dassault Systemes/Content/Headline",
     component: Headline,
     tags: ['autodocs']
 }
