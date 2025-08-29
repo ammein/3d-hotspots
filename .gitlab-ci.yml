@@ -4,7 +4,14 @@ pages:
   script:
     - yarn install
     - yarn build-storybook
-    - mv storybook-static public
+    # Create the public directory to hold our site files
+    - mkdir public
+
+    # Create the special _redirects file required by GitLab Pages to link to storybook's index.html
+    - echo "/ /storybook-static/index.html 301" > public/_redirects
+
+    # Move the storybook build output INTO the public directory
+    - mv storybook-static public/
   artifacts:
     paths:
       - public
