@@ -13,7 +13,7 @@ function Splash(){
     `;
 
     useFrame(() => {
-
+        
     })
 
     return (

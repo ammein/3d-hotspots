@@ -102,12 +102,12 @@
 @font-face {
   font-family: "3ds Light";
   src: url("../public/fonts/3DSV2-Light.ttf");
-  font-weight: 400;
+  font-weight: 300;
 }
 
 @font-face {
   font-family: "3ds Light Italic";
   src: url("../public/fonts/3DSV2-LightItalic.ttf");
-  font-weight: 400;
+  font-weight: 300;
   font-style: italic;
 }

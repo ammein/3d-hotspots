@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr'
 import tailwindcss from '@tailwindcss/vite';
+import { randomHash } from './src/helpers/utils'
 
 // https://vite.dev/config/
 import path from 'node:path';
@@ -18,6 +19,15 @@ export default defineConfig({
     alias: {
       '@': path.resolve(dirname, './src'),
     },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: (chunkInfo) => {
+          return `assets/[name]-${randomHash()}.js`;
+        }
+      }
+    }
   },
   test: {
     server: {

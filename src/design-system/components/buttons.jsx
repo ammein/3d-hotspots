@@ -177,7 +177,7 @@ const buttonStyle = styled.button`
  * buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
  * greyButton: boolean;
  * weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic"
- * } & React.HTMLAttributes<HTMLDivElement>>}
+ * } & React.HTMLAttributes<HTMLButtonElement>>}
  */
 export const Button = tw(buttonStyle)`
     ${props => props.weight}
