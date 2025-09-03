@@ -26,6 +26,7 @@ export default defineConfig([
       },
     },
     rules: {
+      "indent": ["error", 4], // Enforces 4-space indentation
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       "@typescript-eslint/no-unused-vars": [
         "warn", // or "error"

@@ -1,184 +1,171 @@
-import styled, { css } from 'styled-components'
-import tw from 'tailwind-styled-components';
-
-function greyButtonStyle(type) {
-    switch(type){
-        case "scream":
-            return css`
-                background: white;
-                border-radius: 100px;
-                outline: 1px var(--black-opacity64, rgba(0, 0, 0, 0.64)) solid;
-                outline-offset: -0.50px;
-                color: var(--black-opacity64, rgba(0, 0, 0, 0.64));
-                `
-
-        case "shout":
-            return css`
-                color: var(--black-opacity64, rgba(0, 0, 0, 0.64));
-                border-radius: 100px;
-                outline: 2px var(--black-opacity64, rgba(0, 0, 0, 0.64)) solid;
-                outline-offset: -2px;
-                `
-    }
-}
-
-function buttonTypeStyle(type, grey) {
-    switch(type) {
-        case "scream": 
-            return grey ? greyButtonStyle(type) : css`
-                        color: var(--color-white-opacity-100, white);
-                        background: var(--color-blue-opacity-100, #0870D3);
-                        border-radius: 28px;
-                        &:hover{
-                            color: #075CAD;
-                            background: white !important;
-                            outline: 2px #075CAD solid !important;
-                            outline-offset: -2px !important;
-                        }
-
-                        @media (prefers-color-scheme: dark){
-                            background: var(--color-white-opacity-100, white);
-                            color: #075CAD;
-
-                            &:hover {
-                                background: #075CAD !important;
-                                color: var(--color-white-opacity-100, white);
-                                outline: 2px white solid !important;
-                                outline-offset: -2px !important;
-                            }
-                        }
-                    `;
-                    
-        case "shout":
-            return grey ? greyButtonStyle(type) : css`
-                    background: none;
-                    color: #0870D3;
-                    outline: 2px #0870D3 solid;
-                    outline-offset: -2px;
-                    border-radius: 28px;
-                    &:hover{
-                        color: var(--color-white-opacity-100, #FFF);
-                        background: #075CAD !important;
-                    }
-
-                    @media (prefers-color-scheme: dark){
-                        color: var(--color-white-opacity-100, #FFF);
-                        outline: 2px white solid;
-                        outline-offset: -2px;
-
-                        &:hover {
-                            color: #075CAD;
-                            background: var(--color-white-opacity-100, white);
-                        }
-                    }
-                `
-
-        case "cheer":
-            return css`
-                background: none;
-                justify-content: center;
-                align-items: center;
-                gap: 8px;
-                display: inline-flex;
-                color: #0870D3;
-                word-wrap: break-word;
-                padding: 0;
-                svg {
-                    border-radius: 9999px;
-                    padding: 4px;
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 9999px;
-                    border: 2px #0870D3 solid;
-                }
-
-                @media (prefers-color-scheme: dark) {
-                    color: var(--color-white-opacity-100, white);
-                }
-            `
-
-        case "murmur":
-            return css`
-                background: none;
-                color: #0870D3;
-                justify-content: center;
-                align-items: center;
-                gap: 8px;
-                display: inline-flex;
-                padding: 0;
-                svg {
-                    width: 16px;
-                    height: 16px;
-                }
-
-                @media (prefers-color-scheme: dark) {
-                    color: var(--color-white-opacity-100, white);
-                }
-            `
-
-        case "circle":
-            return css`
-                background: var(--color-white-opacity-100, white);
-                box-shadow: 0px 16px 16px rgba(0, 0, 0, 0.32);
-                border-radius: 9999px;
-            `
-    }
-}
-
-function sizeButton(buttonType, icon, size) {
-    switch(true) {
-        case icon && buttonType !== "circle":
-            return css`
-                padding-top: ${size === "large" ? "14px": size === "regular" ? "12px" : "8px"};
-                padding-bottom: ${size === "large" ? "14px": size === "regular" ? "12px" : "8px"};
-                padding-left: ${size === "large" ? "24px": size === "regular" ? "16px" : "12px"};
-                padding-right: ${size === "large" ? "28px": size === "regular" ? "20px" : "12px"};
-                gap: ${size === "large" ? "8px" : size === "regular" ? "8px" : "4px"};
-                justify-content: center;
-                align-items: center;
-                border:none;
-            `
-
-        case !icon && buttonType !== "circle":
-            return css`
-                padding-left: ${size === "large" ? "40px": size === "regular" ? "24px" : "16px"};
-                padding-right: ${size === "large" ? "40px": size === "regular" ? "24px" : "16px"};
-                padding-top: ${size === "large" ? "14px": size === "regular" ? "12px" : "9.50px"};
-                padding-bottom: ${size === "large" ? "14px": size === "regular" ? "12px" : "9.50px"};
-                gap: 10px;
-                justify-content: flex-start;
-                align-items: flex-start;
-            `
-
-        default:
-            return css`
-                padding: ${(size === "large" || size === "regular") ? "24px" : "12px"};
-                min-width: ${(size === "large" || size === "regular") ? "64px" : "40px"};
-                min-height: ${(size === "large" || size === "regular") ? "64px" : "40px"};
-            `
-    }
-}
-
-const buttonStyle = styled.button`
-    border: none;
-    display: inline-flex;
-    cursor: pointer;
-    font-feature-settings: 'liga' off, 'clig' off;
-    font-size: ${({size}) => size === "large" ? "18px" : size === "regular" ? "16px" : "13px"};
-    line-height: ${({size}) => size === "large" ? "18px" : size === "regular" ? "16px" : "13px"};
-    ${({ icon, size, buttonType }) => (buttonType !== "cheer" || buttonType !== "murmur" || buttonType !== "circle") && sizeButton(buttonType, icon, size)}
-    ${({ buttonType, greyButton }) => buttonTypeStyle(buttonType, greyButton)}
-`
+import styled, { css } from "styled-components";
+import tw from "tailwind-styled-components";
 
 /**
- * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web', {
- * size: "large" | "regular" | "small";
- * icon: boolean;
- * buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
- * greyButton: boolean;
- * weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic"
- * } & React.HTMLAttributes<HTMLButtonElement>>}
+ * @typedef {{
+ * $size: "large" | "regular" | "small";
+ * $icon: boolean;
+ * $buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
+ * $greyButton: boolean;
+ * $weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic",
+ * $other: string
+ * }} Button
  */
-export const Button = tw(buttonStyle)`
-    ${props => props.weight}
-` 
+
+/**
+ * --- The Button Component ---
+ * A flexible button built with tailwind-styled-components.
+ *
+ * Props are prefixed with '$' to prevent them from being passed to the
+ * underlying DOM element, which is the standard convention for this library.
+ * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web', Button & React.HTMLAttributes<HTMLButtonElement>>}
+ */
+export const Button = tw.button`
+    inline-flex
+    items-center
+    justify-center
+    border-none
+    cursor-pointer
+    transition-colors
+    font-sans
+    ${(props) => props.$other}
+
+    ${({ $buttonType = "scream", $greyButton = false }) => {
+			// --- Button Type, Style, and Hover States ---
+			switch ($buttonType) {
+				case "scream":
+					return $greyButton
+						? `
+              bg-white-100
+              rounded-full
+              outline
+              outline-1
+              outline-[var(--black-64)]
+              outline-offset-[-0.5px]
+              text-black-64
+            `
+						: `
+              text-white-100
+              bg-[#0870D3]
+              rounded-[28px]
+              hover:text-[#075CAD]
+              hover:bg-white-100
+              hover:outline
+              hover:outline-2
+              hover:outline-[#075CAD]
+              hover:outline-offset-[-2px]
+              dark:bg-white-100
+              dark:text-[#075CAD]
+              dark:hover:bg-[#075CAD]
+              dark:hover:text-white-100
+              dark:hover:outline-white-100
+            `;
+				case "shout":
+					return $greyButton
+						? `
+              bg-transparent
+              rounded-full
+              outline
+              outline-2
+              !outline-black-64
+              outline-offset-[-2px]
+              text-black-64
+            `
+						: `
+              bg-transparent
+              text-[#0870D3]
+              outline
+              outline-2
+              outline-[#0870D3]
+              outline-offset-[-2px]
+              rounded-[28px]
+              hover:text-white-100
+              hover:bg-[#075CAD]
+              dark:text-white-100
+              dark:outline-white-100
+              dark:hover:text-[#075CAD]
+              dark:hover:bg-white-100
+            `;
+				case "cheer":
+					return `
+            bg-transparent
+            text-[#0870D3]
+            p-0
+            gap-2
+            dark:text-white-100
+            [&>svg]:rounded-full
+            [&>svg]:p-1
+            [&>svg]:w-4
+            [&>svg]:h-4
+            [&>svg]:border-2
+            [&>svg]:border-[#0870D3]
+          `;
+				case "murmur":
+					return `
+            bg-transparent
+            text-[#0870D3]
+            p-0
+            gap-2
+            dark:text-white-100
+            [&>svg]:w-4
+            [&>svg]:h-4
+          `;
+				case "circle":
+					return `
+            bg-white-100
+            shadow-[0px_16px_16px_rgba(0,0,0,0.32)]
+            rounded-full
+          `;
+				default:
+					return "";
+			}
+		}}
+
+    ${({ $buttonType = "scream", $size = "regular", $icon = false }) => {
+			// --- Sizing Logic based on Type and Icon ---
+			if ($buttonType === "circle") {
+				return $size === "large" || $size === "regular"
+					? "p-6 min-w-16 min-h-16"
+					: "p-3 min-w-10 min-h-10";
+			}
+
+			if ($buttonType === "scream" || $buttonType === "shout") {
+				if ($icon) {
+					return (
+						{
+							large: "py-[14px] pl-6 pr-7 gap-2",
+							regular: "py-3 pl-4 pr-5 gap-2",
+							small: "py-2 px-3 gap-1",
+						}[$size] || ""
+					);
+				} else {
+					return `gap-2.5 justify-start items-start ${
+						{
+							large: "px-10 py-[14px]",
+							regular: "px-6 py-3",
+							small: "px-4 py-[9.5px]",
+						}[$size] || ""
+					}`;
+				}
+			}
+			return "";
+		}}
+
+    ${({ $weight = "regular" }) =>
+			({
+				regular: "!font-normal",
+				italic: "!font-normal italic",
+				semibold: "!font-semibold",
+				"semibold-italic": "!font-semibold italic",
+				bold: "!font-bold",
+				"!bold-italic": "!font-bold italic",
+			}[$weight])}
+
+
+    ${({ $size = "regular" }) =>
+			({
+				large: "!text-[18px] !leading-[18px]",
+				regular: "!text-base !leading-4",
+				small: "!text-[13px] !leading-[13px]",
+			}[$size])}
+`;

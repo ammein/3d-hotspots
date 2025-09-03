@@ -24,7 +24,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         entryFileNames: (chunkInfo) => {
-          return `assets/[name]-${randomHash()}.js`;
+          return `[name]-${randomHash()}.js`;
         }
       }
     }

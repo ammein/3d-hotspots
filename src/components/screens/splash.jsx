@@ -1,26 +1,21 @@
-import { useFrame } from '@react-three/fiber'
-import styled from 'styled-components'
+import { useFrame } from "@react-three/fiber";
+import styled from "styled-components";
+import tw from "tailwind-styled-components";
+import withLoading from "../hoc/LoadingScreen";
 
-function Splash(){
+const SplashStyles = styled.div`
+	height: auto;
+	background: #fff;
+	background-blend-mode: color-burn;
+	backdrop-filter: blur(5px);
+`;
 
-    const SplashContainer = styled.div`
-        width: "75%";
-        height: auto;
-        background: #FFF;
-        background-blend-mode: color-burn;
-        backdrop-filter: blur(5px);
-        
+const SplashContainer = tw(SplashStyles)`
+        fixed w-3/4
     `;
 
-    useFrame(() => {
-        
-    })
-
-    return (
-        <SplashContainer>
-            
-        </SplashContainer>
-    )
+function Splash() {
+	return <SplashContainer></SplashContainer>;
 }
 
-export default Splash
+export default withLoading(Splash);

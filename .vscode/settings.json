@@ -12,6 +12,24 @@
     "tailwindCSS.experimental.classRegex": [
         "tw`([^`]*)", // tw`...`
         "tw\\.[^`]+`([^`]*)`", // tw.xxx<xxx>`...`
-        "tw\\(.*?\\).*?`([^`]*)" // tw(Component)<xxx>`...`
-    ]
+        "tw\\(.*?\\).*?`([^`]*)", // tw(Component)<xxx>`...`
+        "{\\s*\\/\\* tailwindcss \\*\\/\\s*\\[{0,1}\\\"(.*?)\\\"\\]{0,1}.*\\s*}" // For JSX props to be enable when comment available like this { /* tailwind */ [] }
+    ],
+    // For Vite Debug
+    "debug.javascript.terminalOptions": {
+        "resolveSourceMapLocations": [
+            "${workspaceFolder}/**",
+            "!**/node_modules/**",
+            "**/node_modules/.vite-temp/**"
+        ]
+    },
+    // VSCode Indent
+    "[javascript]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 2
+    },
+    "[javascriptreact]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+    }
 }
