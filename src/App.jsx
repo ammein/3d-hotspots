@@ -4,8 +4,9 @@ import { Canvas } from "@react-three/fiber";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import I18nProvider from "./components/AppManagement";
-import Splash from "./components/screens/splash";
+import I18nProvider from "@/components/AppManagement";
+import Splash from "@/components/screens/splash";
+import Model from "@/components/Model";
 
 gsap.registerPlugin(useGSAP);
 
@@ -20,7 +21,9 @@ function App() {
 					width: "100dvh",
 					height: "100dvh",
 				}}
-			></Canvas>
+			>
+				<Model url={"/model-transformed.glb"} />
+			</Canvas>
 		</I18nProvider>
 	);
 }

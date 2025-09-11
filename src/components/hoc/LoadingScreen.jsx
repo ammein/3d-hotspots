@@ -10,8 +10,8 @@ import { useI18n } from "../AppManagement";
  * @param {React.Component} WrappedComponent
  * @returns {React.Component}
  */
-const withAppManagement = (WrappedComponent) => {
-	return function AppManagement(props) {
+const withLoading = (WrappedComponent) => {
+	return function LoadingManagement(props) {
 		const context = useI18n();
 		const buttonLoadRef = useRef();
 		const [assetName, setAssetName] = useState("");
@@ -69,6 +69,12 @@ const withAppManagement = (WrappedComponent) => {
 						onStart: () => setAssetName("Font"),
 						onUpdate: ({ value }) => setProgress(value),
 						onUpdateParams: [progressRef.current],
+						// onComplete: () =>
+						// 	gsap.to(buttonLoadRef.current, {
+						// 		delay: 1.0,
+						// 		opacity: 0,
+						// 		duration: 0.75,
+						// 	}),
 					});
 				}
 			},
@@ -88,9 +94,6 @@ const withAppManagement = (WrappedComponent) => {
 					<Button
 						ref={buttonLoadRef}
 						disabled={progress !== 100}
-						style={{
-							display: context.ready ? "block" : "none",
-						}}
 						$buttonType="scream"
 						$size="large"
 						$weight="bold"
@@ -105,4 +108,4 @@ const withAppManagement = (WrappedComponent) => {
 	};
 };
 
-export default withAppManagement;
+export default withLoading;

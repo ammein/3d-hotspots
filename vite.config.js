@@ -20,6 +20,7 @@ export default defineConfig({
       '@': path.resolve(dirname, './src'),
     },
   },
+  assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
   build: {
     rollupOptions: {
       output: {
