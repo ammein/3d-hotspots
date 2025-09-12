@@ -5,40 +5,129 @@ Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interact
 */
 
 import { useEffect, useRef, useState } from "react";
-import { useGLTF, useAnimations } from "@react-three/drei";
-import { GLTFLoader, DRACOLoader } from "three-stdlib";
+import { useGLTF, useAnimations, PerspectiveCamera } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { KTX2Loader } from "three-stdlib";
 import withModelManagement from "./hoc/ModelManagement";
+import Fog from "./Fog";
+import { SheetProvider } from "@theatre/r3f";
+import { types } from "@theatre/core";
+import { useApp } from "./context/AppManagement";
 
-const gltfLoader = new GLTFLoader();
-const dracoloader = new DRACOLoader();
-dracoloader.setDecoderPath("https://www.gstatic.com/draco/v1/decoders/");
-gltfLoader.setDRACOLoader(dracoloader);
+useGLTF.setDecoderPath(
+	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
+);
 
-function Model(props) {
+const ktx2Loader = new KTX2Loader();
+ktx2Loader.setTranscoderPath(
+	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_KTX_PATH
+);
+
+/**
+ * Model Component
+ * @param {{ url: string, useDraco: boolean, useKTX2: boolean, zoom: number, animationNames: string[], hideItems: [] }} param0
+ * @returns
+ */
+function Model({
+	url,
+	useDraco,
+	useKTX2,
+	animationNames = [],
+	hideItems = [],
+	...rest
+}) {
+	const { appProject } = useApp();
+	const sheet = appProject.sheet("Model");
 	const group = useRef();
-	const [GLTF, setGLTF] = useState(null);
-	const { animations, scene } = useGLTF(props.url);
+	const { gl } = useThree();
+	const [focalRange, setFocalRange] = useState();
+	const [zoom, setZoom] = useState();
+	const { animations, scene } = useGLTF(url, useDraco, true, (loader) => {
+		if (useKTX2) {
+			loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+		}
+	});
 	const { actions } = useAnimations(animations, group);
+	const FogObject = sheet.object(
+		"Fog",
+		{
+			focalRange: types.number(25.0, {
+				range: [0, 100],
+			}),
+		},
+		{
+			reconfigure: true,
+		}
+	);
+
+	const CameraObject = sheet.object(
+		"Camera",
+		{
+			zoom: types.number(5.0, {
+				range: [0, 10],
+			}),
+		},
+		{
+			reconfigure: true,
+		}
+	);
 
 	useEffect(() => {
-		if (actions) {
-			actions.Scene.play();
+		if (actions && animationNames.length > 0) {
+			animationNames.forEach((name) => {
+				actions[name].play();
+			});
+		}
+
+		if (hideItems.length > 0) {
+			hideItems.forEach((item) => {
+				scene.getObjectByName(item).visible = false;
+			});
 		}
 
 		scene.traverse((object) => {
 			if (object.type === "Mesh") {
-				console.log(object);
+				// console.log(object);
 			}
 		});
-	}, [actions, scene]);
+	}, [actions, scene, url, animationNames, hideItems, rest.wireframe]);
 
-	gltfLoader.load(props.url, (gltf) => {
-		setGLTF(gltf.scene);
-	});
+	useEffect(() => {
+		let FogObjectUnsubscribe, CameraObjectUnsubscribe;
+		if (url.length > 0) {
+			console.log("Running Preload");
+			useGLTF.preload(url);
+		}
 
-	return GLTF && <primitive object={GLTF} />;
+		if (FogObject) {
+			FogObjectUnsubscribe = FogObject.onValuesChange(({ focalRange }) => {
+				setFocalRange(focalRange);
+			});
+		}
+
+		if (CameraObject) {
+			CameraObjectUnsubscribe = CameraObject.onValuesChange(({ zoom }) => {
+				setZoom(zoom);
+			});
+		}
+
+		return () => {
+			FogObjectUnsubscribe();
+			CameraObjectUnsubscribe();
+			sheet.detachObject("Fog");
+			sheet.detachObject("Camera");
+		};
+	}, []); // Run Once
+
+	return (
+		<>
+			<SheetProvider sheet={sheet}>
+				<PerspectiveCamera makeDefault position={[0, zoom, 0]} />
+				<primitive ref={group} object={scene} dispose={null} />
+				<Fog focalRange={focalRange} />
+			</SheetProvider>
+		</>
+	);
 }
-
-useGLTF.preload("/model-transformed.glb");
 
 export default withModelManagement(Model);

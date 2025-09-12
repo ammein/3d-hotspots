@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Exclude Three Public files
+public/three/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
-
+import { OrbitControls } from "@react-three/drei";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import I18nProvider from "@/components/AppManagement";
+import AppProvider from "@/components/context/AppManagement";
 import Splash from "@/components/screens/splash";
 import Model from "@/components/Model";
 
@@ -14,17 +14,33 @@ function App() {
 	const [count, setCount] = useState(0);
 
 	return (
-		<I18nProvider>
+		<AppProvider>
 			<Splash />
 			<Canvas
+				gl={{
+					preserveDrawingBuffer: import.meta.env.DEV,
+				}}
 				style={{
-					width: "100dvh",
+					width: "100dvw",
 					height: "100dvh",
 				}}
 			>
-				<Model url={"/model-transformed.glb"} />
+				<ambientLight intensity={Math.PI / 2.0} />
+				<pointLight intensity={10} position={[0, 3, 0]} />
+				<Model
+					url={"/model/model-transformed.glb"}
+					useDraco={true}
+					useKTX2={true}
+					animationNames={["Scene"]}
+				/>
+				<OrbitControls
+					autoRotate={true}
+					enableZoom={false}
+					enablePan={false}
+					enableRotate={false}
+				/>
 			</Canvas>
-		</I18nProvider>
+		</AppProvider>
 	);
 }
 

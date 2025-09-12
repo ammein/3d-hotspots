@@ -3,7 +3,7 @@ import useFontFaceObserver from "use-font-face-observer";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import Button from "@/components/Button";
-import { useI18n } from "../AppManagement";
+import { useApp } from "../context/AppManagement";
 
 /**
  * HOC for App Components
@@ -12,7 +12,7 @@ import { useI18n } from "../AppManagement";
  */
 const withLoading = (WrappedComponent) => {
 	return function LoadingManagement(props) {
-		const context = useI18n();
+		const context = useApp();
 		const buttonLoadRef = useRef();
 		const [assetName, setAssetName] = useState("");
 		const [progress, setProgress] = useState(0);

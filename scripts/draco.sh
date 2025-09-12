@@ -3,12 +3,13 @@
 # This script is to update draco library from github 
 # Author: Amin Shazrin
 
-draco_project_name=draco
-draco_git_url=https://github.com/google/draco.git
+draco_project_name="draco"
+draco_git_url="https://github.com/google/draco.git"
+draco_branch="main"
 draco_path="javascript/*"
-draco_local_path=./public/three/draco
+draco_local_path="./public/three" # Must be without $draco_project_name at the end of the path. Only directory where $draco_project_name will be clone
 source_dir=$(dirname "$0")
-except_draco_path=("$draco_path""example/" "$draco_path""npm/" "$draco_path""with_asserts/")
+except_draco_path=("$draco_path""example/" "$draco_path""npm/" "$draco_path""with_asserts/" "$draco_path""*.html")
 
 check_local_draco_folder(){
     if [[ ! -d "$draco_local_path" ]]; then
@@ -18,44 +19,37 @@ check_local_draco_folder(){
 }
 
 sparse_info(){
-    if [[ "$(git config --get core.sparseCheckout)" == "false" ]]; then
-        echo "Enabling Sparse Checkout"
-        git config core.sparseCheckout true
-    fi
+    git sparse-checkout init --no-cone
 
-    local items="$draco_path"
+    local items="!/*\n$draco_path"
 
-    if [[ ${#except_draco_path[@]} > 0 ]]; then
+    if [[ ${#except_draco_path[@]} -gt 0 ]]; then
         for item in "${except_draco_path[@]}"; do
-            items+=$'\n'"!$item"
+            items+="\n!$item"
         done
     fi
 
-    echo "Inserting .gitignore alike texts to sparse-checkout info"$'\n'"$items"
-    echo $items >> .git/info/sparse-checkout
+    echo -e $items >> .git/info/sparse-checkout
 }
 
 check_git(){
-    if [[ ! -d ".git" ]]; then
-        echo "Enabling Git Init"
-        git init
-    fi
-
     echo "Add Git Remote Origin to $draco_git_url"
-    git remote add origin -f $draco_git_url
+    git clone --filter=blob:none --no-checkout $draco_git_url
+    cd $draco_project_name
 }
 
 main(){
-    if [[ ! -d "$draco_local_path" ]]; then
+    if [[ ! -d "$draco_local_path""/$draco_project_name" ]]; then
         echo "Draco not exists"
         check_local_draco_folder
         cd $draco_local_path
         check_git
         sparse_info
-        git pull origin main
+        git checkout $draco_branch
     else
         echo "Draco exists"
         cd $draco_local_path
+        echo "Updating Draco..."
         git fetch origin
         git pull
     fi

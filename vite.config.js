@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr'
+import glsl from 'vite-plugin-glsl'
 import tailwindcss from '@tailwindcss/vite';
 import { randomHash } from './src/helpers/utils'
 
@@ -14,10 +15,10 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [react(), svgr(), tailwindcss()],
+  plugins: [react(), svgr(), tailwindcss(), glsl()],
   resolve: {
     alias: {
-      '@': path.resolve(dirname, './src'),
+      '@': path.resolve(dirname, './src')
     },
   },
   assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
