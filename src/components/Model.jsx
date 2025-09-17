@@ -4,15 +4,16 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useGLTF, useAnimations, PerspectiveCamera } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { KTX2Loader } from "three-stdlib";
-import withModelManagement from "./hoc/ModelManagement";
+import withModelManagement from "@/components/hoc/ModelManagement";
 import Fog from "./Fog";
 import { types } from "@theatre/core";
 import { editable } from "@theatre/r3f";
-import withTheatreManagement from "./hoc/TheatreManagement";
+import withTheatreManagement from "@/components/hoc/TheatreManagement";
+import { Color } from "three";
 
 useGLTF.setDecoderPath(
 	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -29,7 +30,7 @@ const EditableCamera = editable(PerspectiveCamera, "perspectiveCamera");
 
 /**
  * Model Component
- * @param {{ url: string, useDraco: boolean, useKTX2: boolean, zoom: number, animationNames: string[], hideItems: [] }} param0
+ * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [] } | { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues }} param0
  * @returns
  */
 function Model({
@@ -40,42 +41,57 @@ function Model({
 	hideItems = [],
 	...rest
 }) {
-	const { Fog: FogTheatre } = rest.theatre;
+	const ModelTheatre = rest.theatre;
 	const group = useRef();
-	const { gl } = useThree();
-	const { animations, scene } = useGLTF(url, useDraco, true, (loader) => {
-		if (useKTX2) {
-			loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+	const shader = useRef();
+	const { gl, scene, camera } = useThree();
+
+	const gltf = useGLTF(
+		url && url.length > 0 ? url : null,
+		useDraco,
+		true,
+		(loader) => {
+			if (useKTX2) {
+				loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+			}
 		}
-	});
-	const { actions } = useAnimations(animations, group);
+	);
+
+	const animations = gltf?.animations ?? null;
+	const GLTFScenes = gltf?.scene ?? null;
+
+	const { actions } = useAnimations(animations || [], group);
 
 	useEffect(() => {
 		if (actions && animationNames.length > 0) {
 			animationNames.forEach((name) => {
-				actions[name].play();
+				if (actions[name]) {
+					actions[name].play();
+				}
 			});
 		}
 
 		if (hideItems.length > 0) {
 			hideItems.forEach((item) => {
-				scene.getObjectByName(item).visible = false;
+				GLTFScenes.getObjectByName(item).visible = false;
 			});
 		}
 
-		scene.traverse((object) => {
-			if (object.type === "Mesh") {
-				// console.log(object);
-			}
-		});
-	}, [actions, scene, url, animationNames, hideItems, rest.wireframe]);
+		if (GLTFScenes) {
+			GLTFScenes.traverse((object) => {
+				if (object.type === "Mesh") {
+					// console.log(object);
+				}
+			});
+		}
+	}, [actions, GLTFScenes, animationNames, hideItems, rest.wireframe]);
 
 	useEffect(() => {
 		if (url.length > 0) {
 			console.log("Running Preload");
 			useGLTF.preload(url);
 		}
-	}, []); // Run Once
+	}, [url]); // Run Once
 
 	return (
 		<>
@@ -85,10 +101,24 @@ function Model({
 				position={[0, 0, 5]}
 				zoom={0.81}
 			/>
-			<primitive ref={group} object={scene} dispose={null} />
-			<Fog
-				focalRange={FogTheatre ? FogTheatre.focalRange : focalRangeDefault}
-			/>
+			{GLTFScenes && (
+				<>
+					<primitive ref={group} object={GLTFScenes} dispose={null} />
+					{ModelTheatre && ModelTheatre.Model && (
+						<Fog
+							ref={shader}
+							focalRange={ModelTheatre.Model.Fog.focalRange}
+							fogColor={
+								new Color(
+									ModelTheatre.Model.Fog.fogColor.r,
+									ModelTheatre.Model.Fog.fogColor.g,
+									ModelTheatre.Model.Fog.fogColor.b
+								)
+							}
+						/>
+					)}
+				</>
+			)}
 		</>
 	);
 }
@@ -100,6 +130,17 @@ const theatreJSModel = withTheatreManagement(Model, {
 				focalRange: types.number(focalRangeDefault, {
 					range: [0, 100],
 				}),
+				fogColor: types.rgba(
+					{
+						r: 1,
+						g: 1,
+						b: 1,
+						a: 1,
+					},
+					{
+						label: "Fog Color",
+					}
+				),
 			},
 			options: {
 				reconfigure: import.meta.env.DEV ? true : false,

@@ -1,6 +1,6 @@
 import { SheetProvider } from "@theatre/r3f";
 import { useApp } from "../context/AppManagement";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 /**
  * @typedef {{
@@ -26,6 +26,14 @@ import { useEffect, useState, useMemo } from "react";
  */
 
 /**
+ * @typedef {Record<string, any>} ReferenceStateAny
+ */
+
+/**
+ * @typedef {Record<string, Record<string, TheatreObject>>} TheatreOptionsValues
+ */
+
+/**
  * @callback ReferenceStateSetter
  * @param {ReferenceState} state
  * @returns {void}
@@ -34,75 +42,94 @@ import { useEffect, useState, useMemo } from "react";
 /**
  *
  * @param {import('react').JSX} WrappedComponent
- * @param {Record<string, Record<string, TheatreObject>>} TheatreOptionsValues
+ * @param {TheatreOptionsValues} theatreOptions
  * @returns
  */
 const withTheatreManagement = (WrappedComponent, theatreOptions) => {
 	return (props) => {
 		const { appProject } = useApp();
 
-		/** @type {useState<ReferenceState>} */
-		const [unsubscribe, setSubscribe] = useState({});
-		const [values, setValues] = useState({});
+		/** @type {[TheatreObjects, Function]} */
+		const [objects, setObjects] = useState({});
+
+		/** @type {[TheatreValues, Function]} */
+		const [theatreValues, setTheatreValues] = useState({});
 
 		/**
-		 * To Get Sheet from the main project
-		 * @type {import('@theatre/core').ISheet}
+		 * Build the sheet once per HOC call
 		 */
 		const sheet = useMemo(() => {
-			return appProject.sheet(Object.keys(theatreOptions)[0]);
-		}, [theatreOptions]);
+			const firstKey = Object.keys(theatreOptions)[0];
+			return appProject.sheet(firstKey);
+		}, [theatreOptions, appProject]);
 
+		// Seed objects + initial values
 		useEffect(() => {
-			if (appProject.isReady) {
-				const allOpts = Object.values(theatreOptions)[0];
-				for (const options in allOpts) {
-					if (!Object.hasOwn(allOpts, options)) continue;
+			if (!appProject.isReady) return;
 
-					let theatreOptions = allOpts[options];
+			const newObjects = {};
+			const newValues = {};
 
-					setSubscribe((prevVal) => {
-						return {
-							...prevVal,
-							[options]: sheet
-								.object(
-									options,
-									Object.values(theatreOptions)[0],
-									Object.values(theatreOptions)[1]
-								)
-								.onValuesChange((props) => {
-									setValues((prevVal) => {
-										return {
-											...prevVal,
-											[options]: {
-												...props,
-											},
-										};
-									});
-								}),
-						};
-					});
+			for (const sheetName in theatreOptions) {
+				const sheetObjects = theatreOptions[sheetName];
+				newObjects[sheetName] = {};
+				newValues[sheetName] = {};
+
+				for (const objName in sheetObjects) {
+					if (!Object.hasOwn(sheetObjects, objName)) continue;
+
+					const { props, options } = sheetObjects[objName];
+					const obj = sheet.object(objName, props, options);
+
+					newObjects[sheetName][objName] = obj;
+					newValues[sheetName][objName] = obj.value; // ✅ seed initial
 				}
 			}
-		}, [appProject]);
 
-		// Unsubscribe Once
-		useEffect(() => {
+			setObjects(newObjects);
+			setTheatreValues(newValues);
+
 			return () => {
-				for (const name in unsubscribe) {
-					let theatreObjectUnsubscribe = unsubscribe[name];
-
-					theatreObjectUnsubscribe();
-					sheet.detachObject(name);
+				for (const sheetName in newObjects) {
+					for (const objName in newObjects[sheetName]) {
+						sheet.detachObject(objName);
+					}
 				}
-
-				setSubscribe({});
+				setObjects({});
 			};
-		}, []);
+		}, [appProject, theatreOptions, sheet]);
+
+		// Subscribe to changes
+		useEffect(() => {
+			const unsubCallbacks = [];
+
+			for (const sheetName in objects) {
+				for (const objName in objects[sheetName]) {
+					const obj = objects[sheetName][objName];
+					if (!obj) continue;
+
+					const unsub = obj.onValuesChange((val) => {
+						setTheatreValues((prev) => ({
+							...prev,
+							[sheetName]: {
+								...prev[sheetName],
+								[objName]: val,
+							},
+						}));
+					});
+
+					unsubCallbacks.push(unsub);
+				}
+			}
+
+			return () => {
+				unsubCallbacks.forEach((fn) => fn());
+			};
+		}, [objects]);
 
 		return (
 			<SheetProvider sheet={sheet}>
-				<WrappedComponent {...props} theatre={values} />;
+				<WrappedComponent {...props} theatre={theatreValues} />
 			</SheetProvider>
 		);
 	};

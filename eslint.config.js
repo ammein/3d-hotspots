@@ -11,6 +11,9 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['**/*.{js,jsx}'],
+    plugins: [
+      'react-hooks'
+    ],
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],
@@ -28,6 +31,8 @@ export default defineConfig([
     rules: {
       "indent": ["error", 4], // Enforces 4-space indentation
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+      'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
       "@typescript-eslint/no-unused-vars": [
         "warn", // or "error"
         {

@@ -4,6 +4,7 @@ precision mediump float;
 #endif
 
 uniform float               focalRange;
+uniform vec3                fogColor;
 
 #define RESOLUTION          resolution
 #define CAMERA_NEAR_CLIP    cameraNear
@@ -20,13 +21,13 @@ void mainImage(const in vec4 inputColor, const in vec2 uv,
     // Define focal point
     float focalDistance = 1.0;
 
-    float depth = texture2D(depthBuffer, st).r;
+    float depth = SAMPLER_FNC(depthBuffer, st).r;
     depth = linearizeDepth(depth);
     
     depth = min( abs(depth  - focalDistance) / focalRange, 1.0);
 
     // Mix White Background and crisp scene images based on depth
-    color.rgb = mix(vec3(1.), texture2D(inputBuffer, st).rgb, 1.0-depth);
+    color.rgb = mix(fogColor, SAMPLER_FNC(inputBuffer, st).rgb, 1.0-depth);
 
     // Debug Depth
     #ifdef DEBUG
