@@ -11,7 +11,7 @@ import { useApp } from "../context/AppManagement";
  * @returns {React.Component}
  */
 const withLoading = (WrappedComponent) => {
-	return function LoadingManagement(props) {
+	return (props) => {
 		const context = useApp();
 		const buttonLoadRef = useRef();
 		const [assetName, setAssetName] = useState("");

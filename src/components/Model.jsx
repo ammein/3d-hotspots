@@ -10,9 +10,9 @@ import { useThree } from "@react-three/fiber";
 import { KTX2Loader } from "three-stdlib";
 import withModelManagement from "./hoc/ModelManagement";
 import Fog from "./Fog";
-import { SheetProvider } from "@theatre/r3f";
 import { types } from "@theatre/core";
-import { useApp } from "./context/AppManagement";
+import { editable } from "@theatre/r3f";
+import withTheatreManagement from "./hoc/TheatreManagement";
 
 useGLTF.setDecoderPath(
 	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -22,6 +22,10 @@ const ktx2Loader = new KTX2Loader();
 ktx2Loader.setTranscoderPath(
 	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_KTX_PATH
 );
+
+const focalRangeDefault = 25.0;
+
+const EditableCamera = editable(PerspectiveCamera, "perspectiveCamera");
 
 /**
  * Model Component
@@ -36,41 +40,15 @@ function Model({
 	hideItems = [],
 	...rest
 }) {
-	const { appProject } = useApp();
-	const sheet = appProject.sheet("Model");
+	const { Fog: FogTheatre } = rest.theatre;
 	const group = useRef();
 	const { gl } = useThree();
-	const [focalRange, setFocalRange] = useState();
-	const [zoom, setZoom] = useState();
 	const { animations, scene } = useGLTF(url, useDraco, true, (loader) => {
 		if (useKTX2) {
 			loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
 		}
 	});
 	const { actions } = useAnimations(animations, group);
-	const FogObject = sheet.object(
-		"Fog",
-		{
-			focalRange: types.number(25.0, {
-				range: [0, 100],
-			}),
-		},
-		{
-			reconfigure: true,
-		}
-	);
-
-	const CameraObject = sheet.object(
-		"Camera",
-		{
-			zoom: types.number(5.0, {
-				range: [0, 10],
-			}),
-		},
-		{
-			reconfigure: true,
-		}
-	);
 
 	useEffect(() => {
 		if (actions && animationNames.length > 0) {
@@ -93,41 +71,41 @@ function Model({
 	}, [actions, scene, url, animationNames, hideItems, rest.wireframe]);
 
 	useEffect(() => {
-		let FogObjectUnsubscribe, CameraObjectUnsubscribe;
 		if (url.length > 0) {
 			console.log("Running Preload");
 			useGLTF.preload(url);
 		}
-
-		if (FogObject) {
-			FogObjectUnsubscribe = FogObject.onValuesChange(({ focalRange }) => {
-				setFocalRange(focalRange);
-			});
-		}
-
-		if (CameraObject) {
-			CameraObjectUnsubscribe = CameraObject.onValuesChange(({ zoom }) => {
-				setZoom(zoom);
-			});
-		}
-
-		return () => {
-			FogObjectUnsubscribe();
-			CameraObjectUnsubscribe();
-			sheet.detachObject("Fog");
-			sheet.detachObject("Camera");
-		};
 	}, []); // Run Once
 
 	return (
 		<>
-			<SheetProvider sheet={sheet}>
-				<PerspectiveCamera makeDefault position={[0, zoom, 0]} />
-				<primitive ref={group} object={scene} dispose={null} />
-				<Fog focalRange={focalRange} />
-			</SheetProvider>
+			<EditableCamera
+				theatreKey="Camera"
+				makeDefault
+				position={[0, 0, 5]}
+				zoom={0.81}
+			/>
+			<primitive ref={group} object={scene} dispose={null} />
+			<Fog
+				focalRange={FogTheatre ? FogTheatre.focalRange : focalRangeDefault}
+			/>
 		</>
 	);
 }
 
-export default withModelManagement(Model);
+const theatreJSModel = withTheatreManagement(Model, {
+	Model: {
+		Fog: {
+			props: {
+				focalRange: types.number(focalRangeDefault, {
+					range: [0, 100],
+				}),
+			},
+			options: {
+				reconfigure: import.meta.env.DEV ? true : false,
+			},
+		},
+	},
+});
+
+export default withModelManagement(theatreJSModel);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const withModelManagement = (WrappedComponent) => {
-	return function ModelManagement(props) {
+	return (props) => {
 		const [wireframe, setWireframe] = useState(false);
 		const [hotspotID, setHotspotID] = useState(null);
 		const [rotationDegree, setRotationDegree] = useState(0);

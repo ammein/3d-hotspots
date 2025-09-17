@@ -7,7 +7,7 @@ import tw from "tailwind-styled-components";
  * $icon: boolean;
  * $buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
  * $greyButton: boolean;
- * $weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic",
+ * $weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic";
  * $other: string
  * }} Button
  */
