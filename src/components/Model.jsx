@@ -4,7 +4,7 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { Suspense, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useGLTF, useAnimations, PerspectiveCamera } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { GLTFLoader, KTX2Loader } from "three-stdlib";
@@ -14,6 +14,7 @@ import { types } from "@theatre/core";
 import { editable } from "@theatre/r3f";
 import withTheatreManagement from "@/components/hoc/TheatreManagement";
 import { Color } from "three";
+import { useDebounce } from "use-debounce";
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -45,13 +46,34 @@ function Model({
   const group = useRef();
   const shader = useRef();
   const { gl, scene, camera } = useThree();
+  const [urlDebounced] = useDebounce(url, 1000);
 
-  const gltf = useGLTF(url, useDraco, true, (loader) => {
-    loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
-  });
+  const gltf = useMemo(() => {
+    let gltf;
+
+    // Since useGLTF does not have error handling, this try and catch will try to handle gltf load as possible or return undefined
+    try {
+      gltf = useGLTF(urlDebounced, useDraco, true, (loader) => {
+        loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+      });
+    } catch (err) {
+      // err argument caught an instanceof Promise as well and needs to initialize second loads.
+      // Somehow it causes a bug here due to try wrapper above is still ongoing Promise
+      if (err instanceof Promise) {
+        gltf = useGLTF(urlDebounced, useDraco, true, (loader) => {
+          loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+        });
+      }
+      console.warn(
+        "Looks like you trying to load an invalid model paths.\nMake sure you don't include `public` directory to your path...\n",
+        err
+      );
+    }
+
+    return gltf;
+  }, [urlDebounced]);
 
   const animations = gltf?.animations ?? null;
-  const GLTFScenes = gltf?.scene ?? null;
 
   const { actions } = useAnimations(animations || [], group);
 
@@ -66,25 +88,25 @@ function Model({
 
     if (hideItems.length > 0) {
       hideItems.forEach((item) => {
-        GLTFScenes.getObjectByName(item).visible = false;
+        gltf.scenes.getObjectByName(item).visible = false;
       });
     }
 
-    if (GLTFScenes) {
-      GLTFScenes.traverse((object) => {
+    if (gltf) {
+      gltf.scene.traverse((object) => {
         if (object.type === "Mesh") {
           // console.log(object);
         }
       });
     }
-  }, [actions, GLTFScenes, animationNames, hideItems, rest.wireframe]);
+  }, [actions, gltf, animationNames, hideItems, rest.wireframe]);
 
   useEffect(() => {
-    if (url.length > 0) {
+    if (url.length > 0 && gltf && gltf.scene) {
       console.log("Running Preload");
       useGLTF.preload(url);
     }
-  }, [url]); // Run Once
+  }, [url, gltf]); // Run Once
 
   return (
     <>
@@ -94,9 +116,9 @@ function Model({
         position={[0, 0, 5]}
         zoom={0.81}
       />
-      {gltf && (
-        <Suspense fallback={null}>
-          <primitive ref={group} object={GLTFScenes} dispose={null} />
+      {gltf && gltf.scene && (
+        <>
+          <primitive ref={group} object={gltf.scene} dispose={null} />
           {FogTheatreJS && (
             <Fog
               ref={shader}
@@ -110,7 +132,7 @@ function Model({
               }
             />
           )}
-        </Suspense>
+        </>
       )}
     </>
   );

@@ -3,6 +3,7 @@ import withTheatreManagement from "../hoc/TheatreManagement";
 import { types } from "@theatre/core";
 import Model from "@/components/Model";
 import { OrbitControls } from "@react-three/drei";
+import { Suspense } from "react";
 
 const ambientLightIntensity = Math.PI / 2.0;
 
@@ -19,16 +20,18 @@ const Main = (props) => {
       <ambientLight intensity={ambientLightIntensity} />
       <pointLight intensity={10} position={[0, 3, 0]} />
       {MainTheatreJS && MainTheatreJS.model.length > 0 && (
-        <Model
-          url={MainTheatreJS.model}
-          useDraco={MainTheatreJS.draco}
-          useKTX2={MainTheatreJS.ktx2}
-          animationNames={
-            MainTheatreJS.animations.length > 0
-              ? MainTheatreJS.animations.split(",")
-              : []
-          }
-        />
+        <Suspense fallback={null}>
+          <Model
+            url={MainTheatreJS.model}
+            useDraco={MainTheatreJS.draco}
+            useKTX2={MainTheatreJS.ktx2}
+            animationNames={
+              MainTheatreJS.animations.length > 0
+                ? MainTheatreJS.animations.split(",")
+                : []
+            }
+          />
+        </Suspense>
       )}
       <OrbitControls
         autoRotate={OrbitControlsTheatreJS && OrbitControlsTheatreJS.autoRotate}
