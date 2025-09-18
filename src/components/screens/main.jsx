@@ -30,6 +30,11 @@ const Main = (props) => {
                 ? MainTheatreJS.animations.split(",")
                 : []
             }
+            hideItems={
+              MainTheatreJS.hideItems.length > 0
+                ? MainTheatreJS.hideItems.split(",")
+                : []
+            }
           />
         </Suspense>
       )}
@@ -59,6 +64,9 @@ const MainScene = withTheatreManagement(Main, "Scene / Main", {
       }),
       animations: types.string("", {
         label: "List of Animations (To activate multiple animations, use ',')",
+      }),
+      hideItems: types.string("", {
+        label: "Hide Items (Multiple items, use ',')",
       }),
     },
   },

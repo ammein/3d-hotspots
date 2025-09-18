@@ -65,16 +65,16 @@ const withLoading = (WrappedComponent) => {
         if (isFontLoaded && context.ready) {
           gsap.to(progressRef.current, {
             value: 100,
-            duration: 0.9,
+            duration: 0.5,
             onStart: () => setAssetName("Font"),
             onUpdate: ({ value }) => setProgress(value),
             onUpdateParams: [progressRef.current],
-            // onComplete: () =>
-            // 	gsap.to(buttonLoadRef.current, {
-            // 		delay: 1.0,
-            // 		opacity: 0,
-            // 		duration: 0.75,
-            // 	}),
+            onComplete: () =>
+              gsap.to(buttonLoadRef.current, {
+                delay: 0.6,
+                opacity: 0,
+                duration: 0.75,
+              }),
           });
         }
       },
@@ -97,7 +97,9 @@ const withLoading = (WrappedComponent) => {
             $buttonType="scream"
             $size="large"
             $weight="bold"
-            $other={/* tailwindcss */ "mx-auto fixed z-100"}
+            $other={
+              /* tailwindcss */ "mx-auto fixed z-100 top-[50%] left-[50%] -translate-1/2"
+            }
           >
             {progress.toFixed(0) + "% " + loadText}
           </Button>

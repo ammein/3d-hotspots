@@ -86,16 +86,30 @@ function Model({
       });
     }
 
-    if (hideItems.length > 0) {
-      hideItems.forEach((item) => {
-        gltf.scenes.getObjectByName(item).visible = false;
-      });
+    if (hideItems.length > 0 && gltf && gltf.scene) {
+      hideItems
+        .map((val) => val.trim())
+        .filter((val) => val.length > 0 && /^\S*$/g.test(val))
+        .forEach((name) => {
+          let obj = gltf.scene.getObjectByName(name);
+
+          if (obj) {
+            obj.visible = false;
+          } else {
+            console.warn("Couldn't find the object named: ", name, "\n");
+          }
+        });
     }
 
     if (gltf) {
       gltf.scene.traverse((object) => {
         if (object.type === "Mesh") {
           // console.log(object);
+        }
+
+        if (hideItems.length === 0 && object.type === "Mesh") {
+          // Default set all object to true.
+          gltf.scene.getObjectByName(object.name).visible = true;
         }
       });
     }
