@@ -30,7 +30,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
  */
 
 /**
- * @typedef {Record<string, Record<string, TheatreObject>>} TheatreOptionsValues
+ * @typedef {Record<string, TheatreObject>} TheatreOptionsValues
  */
 
 /**
@@ -40,99 +40,86 @@ import { useEffect, useState, useMemo, useCallback } from "react";
  */
 
 /**
- *
+ * HOC for TheatreJS
  * @param {import('react').JSX} WrappedComponent
+ * @param {string} sheetName Name of TheatreJS Sheet
  * @param {TheatreOptionsValues} theatreOptions
  * @returns
  */
-const withTheatreManagement = (WrappedComponent, theatreOptions) => {
-	return (props) => {
-		const { appProject } = useApp();
+const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
+  return (props) => {
+    const { appProject } = useApp();
 
-		/** @type {[TheatreObjects, Function]} */
-		const [objects, setObjects] = useState({});
+    /** @type {[TheatreObjects, Function]} */
+    const [objects, setObjects] = useState({});
 
-		/** @type {[TheatreValues, Function]} */
-		const [theatreValues, setTheatreValues] = useState({});
+    /** @type {[TheatreValues, Function]} */
+    const [theatreValues, setTheatreValues] = useState({});
 
-		/**
-		 * Build the sheet once per HOC call
-		 */
-		const sheet = useMemo(() => {
-			const firstKey = Object.keys(theatreOptions)[0];
-			return appProject.sheet(firstKey);
-		}, [theatreOptions, appProject]);
+    /**
+     * Build the sheet once per HOC call
+     */
+    const sheet = useMemo(() => {
+      return appProject.sheet(sheetName);
+    }, [theatreOptions, appProject]);
 
-		// Seed objects + initial values
-		useEffect(() => {
-			if (!appProject.isReady) return;
+    // Seed objects + initial values
+    useEffect(() => {
+      if (!appProject.isReady) return;
 
-			const newObjects = {};
-			const newValues = {};
+      const newObjects = {};
+      const newValues = {};
 
-			for (const sheetName in theatreOptions) {
-				const sheetObjects = theatreOptions[sheetName];
-				newObjects[sheetName] = {};
-				newValues[sheetName] = {};
+      for (const objName in theatreOptions) {
+        if (!Object.hasOwn(theatreOptions, objName)) continue;
 
-				for (const objName in sheetObjects) {
-					if (!Object.hasOwn(sheetObjects, objName)) continue;
+        const { props, options } = theatreOptions[objName];
+        const obj = sheet.object(objName, props, options);
 
-					const { props, options } = sheetObjects[objName];
-					const obj = sheet.object(objName, props, options);
+        newObjects[objName] = obj;
+        newValues[objName] = obj.value; // ✅ seed initial
+      }
 
-					newObjects[sheetName][objName] = obj;
-					newValues[sheetName][objName] = obj.value; // ✅ seed initial
-				}
-			}
+      setObjects(newObjects);
+      setTheatreValues(newValues);
 
-			setObjects(newObjects);
-			setTheatreValues(newValues);
+      return () => {
+        for (const objName in newObjects) {
+          sheet.detachObject(objName);
+        }
+        setObjects({});
+      };
+    }, [appProject, theatreOptions, sheet]);
 
-			return () => {
-				for (const sheetName in newObjects) {
-					for (const objName in newObjects[sheetName]) {
-						sheet.detachObject(objName);
-					}
-				}
-				setObjects({});
-			};
-		}, [appProject, theatreOptions, sheet]);
+    // Subscribe to changes
+    useEffect(() => {
+      const unsubCallbacks = [];
 
-		// Subscribe to changes
-		useEffect(() => {
-			const unsubCallbacks = [];
+      for (const objName in objects) {
+        const obj = objects[objName];
+        if (!obj) continue;
 
-			for (const sheetName in objects) {
-				for (const objName in objects[sheetName]) {
-					const obj = objects[sheetName][objName];
-					if (!obj) continue;
+        const unsub = obj.onValuesChange((val) => {
+          setTheatreValues((prev) => ({
+            ...prev,
+            [objName]: val,
+          }));
+        });
 
-					const unsub = obj.onValuesChange((val) => {
-						setTheatreValues((prev) => ({
-							...prev,
-							[sheetName]: {
-								...prev[sheetName],
-								[objName]: val,
-							},
-						}));
-					});
+        unsubCallbacks.push(unsub);
+      }
 
-					unsubCallbacks.push(unsub);
-				}
-			}
+      return () => {
+        unsubCallbacks.forEach((fn) => fn());
+      };
+    }, [objects]);
 
-			return () => {
-				unsubCallbacks.forEach((fn) => fn());
-			};
-		}, [objects]);
-
-		return (
-			<SheetProvider sheet={sheet}>
-				<WrappedComponent {...props} theatre={theatreValues} />
-			</SheetProvider>
-		);
-	};
+    return (
+      <SheetProvider sheet={sheet}>
+        <WrappedComponent {...props} theatre={theatreValues} />
+      </SheetProvider>
+    );
+  };
 };
 
 export default withTheatreManagement;

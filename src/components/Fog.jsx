@@ -1,16 +1,21 @@
 import { EffectComposer } from "@react-three/postprocessing";
 import { FogEffect } from "@/components/effect/FogPostProcessing";
 
-export default function Fog({ focalRange }) {
-	return (
-		<EffectComposer>
-			<FogEffect
-				uniforms={{
-					focalRange,
-				}}
-			/>
-		</EffectComposer>
-	);
+/**
+ *
+ * @param {import('react').ComponentProps<import('three').Uniform>} uniforms
+ * @returns
+ */
+export default function Fog(uniforms) {
+  return (
+    <EffectComposer>
+      <FogEffect
+        uniforms={{
+          ...uniforms,
+        }}
+      />
+    </EffectComposer>
+  );
 }
 
 Fog.displayName = "Fog Postprocessing";

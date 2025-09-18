@@ -29,7 +29,7 @@ export default defineConfig([
       },
     },
     rules: {
-      "indent": ["error", 4], // Enforces 4-space indentation
+      "indent": ["error", 2], // Enforces 4-space indentation
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
       'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies

@@ -4,10 +4,10 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useGLTF, useAnimations, PerspectiveCamera } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { KTX2Loader } from "three-stdlib";
+import { GLTFLoader, KTX2Loader } from "three-stdlib";
 import withModelManagement from "@/components/hoc/ModelManagement";
 import Fog from "./Fog";
 import { types } from "@theatre/core";
@@ -16,12 +16,12 @@ import withTheatreManagement from "@/components/hoc/TheatreManagement";
 import { Color } from "three";
 
 useGLTF.setDecoderPath(
-	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
+  import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
 );
 
 const ktx2Loader = new KTX2Loader();
 ktx2Loader.setTranscoderPath(
-	import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_KTX_PATH
+  import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_KTX_PATH
 );
 
 const focalRangeDefault = 25.0;
@@ -34,119 +34,110 @@ const EditableCamera = editable(PerspectiveCamera, "perspectiveCamera");
  * @returns
  */
 function Model({
-	url,
-	useDraco,
-	useKTX2,
-	animationNames = [],
-	hideItems = [],
-	...rest
+  url,
+  useDraco,
+  useKTX2,
+  animationNames = [],
+  hideItems = [],
+  ...rest
 }) {
-	const ModelTheatre = rest.theatre;
-	const group = useRef();
-	const shader = useRef();
-	const { gl, scene, camera } = useThree();
+  const { Fog: FogTheatreJS } = rest.theatre;
+  const group = useRef();
+  const shader = useRef();
+  const { gl, scene, camera } = useThree();
 
-	const gltf = useGLTF(
-		url && url.length > 0 ? url : null,
-		useDraco,
-		true,
-		(loader) => {
-			if (useKTX2) {
-				loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
-			}
-		}
-	);
+  const gltf = useGLTF(url, useDraco, true, (loader) => {
+    loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
+  });
 
-	const animations = gltf?.animations ?? null;
-	const GLTFScenes = gltf?.scene ?? null;
+  const animations = gltf?.animations ?? null;
+  const GLTFScenes = gltf?.scene ?? null;
 
-	const { actions } = useAnimations(animations || [], group);
+  const { actions } = useAnimations(animations || [], group);
 
-	useEffect(() => {
-		if (actions && animationNames.length > 0) {
-			animationNames.forEach((name) => {
-				if (actions[name]) {
-					actions[name].play();
-				}
-			});
-		}
+  useEffect(() => {
+    if (actions && animationNames.length > 0) {
+      animationNames.forEach((name) => {
+        if (actions[name]) {
+          actions[name].play();
+        }
+      });
+    }
 
-		if (hideItems.length > 0) {
-			hideItems.forEach((item) => {
-				GLTFScenes.getObjectByName(item).visible = false;
-			});
-		}
+    if (hideItems.length > 0) {
+      hideItems.forEach((item) => {
+        GLTFScenes.getObjectByName(item).visible = false;
+      });
+    }
 
-		if (GLTFScenes) {
-			GLTFScenes.traverse((object) => {
-				if (object.type === "Mesh") {
-					// console.log(object);
-				}
-			});
-		}
-	}, [actions, GLTFScenes, animationNames, hideItems, rest.wireframe]);
+    if (GLTFScenes) {
+      GLTFScenes.traverse((object) => {
+        if (object.type === "Mesh") {
+          // console.log(object);
+        }
+      });
+    }
+  }, [actions, GLTFScenes, animationNames, hideItems, rest.wireframe]);
 
-	useEffect(() => {
-		if (url.length > 0) {
-			console.log("Running Preload");
-			useGLTF.preload(url);
-		}
-	}, [url]); // Run Once
+  useEffect(() => {
+    if (url.length > 0) {
+      console.log("Running Preload");
+      useGLTF.preload(url);
+    }
+  }, [url]); // Run Once
 
-	return (
-		<>
-			<EditableCamera
-				theatreKey="Camera"
-				makeDefault
-				position={[0, 0, 5]}
-				zoom={0.81}
-			/>
-			{GLTFScenes && (
-				<>
-					<primitive ref={group} object={GLTFScenes} dispose={null} />
-					{ModelTheatre && ModelTheatre.Model && (
-						<Fog
-							ref={shader}
-							focalRange={ModelTheatre.Model.Fog.focalRange}
-							fogColor={
-								new Color(
-									ModelTheatre.Model.Fog.fogColor.r,
-									ModelTheatre.Model.Fog.fogColor.g,
-									ModelTheatre.Model.Fog.fogColor.b
-								)
-							}
-						/>
-					)}
-				</>
-			)}
-		</>
-	);
+  return (
+    <>
+      <EditableCamera
+        theatreKey="Camera"
+        makeDefault
+        position={[0, 0, 5]}
+        zoom={0.81}
+      />
+      {gltf && (
+        <Suspense fallback={null}>
+          <primitive ref={group} object={GLTFScenes} dispose={null} />
+          {FogTheatreJS && (
+            <Fog
+              ref={shader}
+              focalRange={FogTheatreJS.focalRange}
+              fogColor={
+                new Color(
+                  FogTheatreJS.fogColor.r,
+                  FogTheatreJS.fogColor.g,
+                  FogTheatreJS.fogColor.b
+                )
+              }
+            />
+          )}
+        </Suspense>
+      )}
+    </>
+  );
 }
 
-const theatreJSModel = withTheatreManagement(Model, {
-	Model: {
-		Fog: {
-			props: {
-				focalRange: types.number(focalRangeDefault, {
-					range: [0, 100],
-				}),
-				fogColor: types.rgba(
-					{
-						r: 1,
-						g: 1,
-						b: 1,
-						a: 1,
-					},
-					{
-						label: "Fog Color",
-					}
-				),
-			},
-			options: {
-				reconfigure: import.meta.env.DEV ? true : false,
-			},
-		},
-	},
+const theatreJSModel = withTheatreManagement(Model, "Model", {
+  Fog: {
+    props: {
+      focalRange: types.number(focalRangeDefault, {
+        range: [0, 100],
+      }),
+      fogColor: types.rgba(
+        {
+          r: 1,
+          g: 1,
+          b: 1,
+          a: 1,
+        },
+        {
+          label: "Fog Color",
+        }
+      ),
+    },
+    options: {
+      reconfigure: import.meta.env.DEV ? true : false,
+    },
+  },
 });
 
 export default withModelManagement(theatreJSModel);
