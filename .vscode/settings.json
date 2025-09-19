@@ -10,10 +10,14 @@
         "strings": true // forces VS Code to trigger completions when editing "string" content
     },
     "tailwindCSS.experimental.classRegex": [
-        "tw`([^`]*)", // tw`...`
-        "tw\\.[^`]+`([^`]*)`", // tw.xxx<xxx>`...`
-        "tw\\(.*?\\).*?`([^`]*)", // tw(Component)<xxx>`...`
-        "{\\s*\\/\\* tailwindcss \\*\\/\\s*\\[{0,1}\\\"(.*?)\\\"\\]{0,1}.*\\s*}" // For JSX props to be enable when comment available like this { /* tailwind */ [] }
+        "tw`([^`]*)",
+        "tw\\.[^`]+`([^`]*)`",
+        "tw\\(.*?\\).*?`([^`]*)",
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\\"([^\\\"]*)\\\"",
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*'([^']*)'",
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[^`]*`([^`$]*)`",
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\$\\{[^}]*'([^']*)'[^}]*\\}",
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\$\\{[^}]*\\\"([^\\\"]*)\\\"[^}]*\\}"
     ],
     // For Vite Debug
     "debug.javascript.terminalOptions": {
@@ -31,5 +35,9 @@
     "[javascriptreact]": {
         "editor.insertSpaces": true,
         "editor.tabSize": 2
-    }
+    },
+    "i18nJsonEditor.supportedFolders": [
+        "lang",
+        "i18n"
+    ]
 }

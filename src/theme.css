@@ -2,6 +2,48 @@
 
 
 @theme {
+
+  /************************
+    Animations
+  ************************/
+  --animate-blur-appear: blur-appear 1s ease-out;
+
+  @keyframes blur-appear {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+      filter: blur(10px);
+    }
+
+    50%{
+      opacity: 50%;
+    }
+
+    100% {
+      opacity: 100%;
+      transform: scale(1);
+      filter: blur(0px);
+    }
+  }
+
+
+  @keyframes blur-dissapear {
+    0% {
+      opacity: 100%;
+      transform: scale(0.8);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(0.8);
+      filter: blur(10px);
+    }
+  }
+
+  /************************
+    Templates Styling
+  ************************/
   --font-*: initial;
   --font-regular: "3ds Regular", sans-serif;
   --font-italic: "3ds Italic", sans-serif;

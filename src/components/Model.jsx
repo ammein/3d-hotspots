@@ -4,34 +4,36 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useMemo, useRef } from "react";
-import { useGLTF, useAnimations, PerspectiveCamera } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
-import { GLTFLoader, KTX2Loader } from "three-stdlib";
-import withModelManagement from "@/components/hoc/ModelManagement";
-import Fog from "./Fog";
-import { types } from "@theatre/core";
-import { editable } from "@theatre/r3f";
-import withTheatreManagement from "@/components/hoc/TheatreManagement";
-import { Color } from "three";
-import { useDebounce } from "use-debounce";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
+import { GLTFLoader, KTX2Loader } from 'three-stdlib';
+import withModelManagement from '@/components/hoc/ModelManagement';
+import Fog from './Fog';
+import { types, val } from '@theatre/core';
+import { editable, useCurrentSheet } from '@theatre/r3f';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';
+import { Color } from 'three';
+import { useDebounce } from 'use-debounce';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 
 useGLTF.setDecoderPath(
-  import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_DRACO_PATH
+  import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
 );
 
 const ktx2Loader = new KTX2Loader();
 ktx2Loader.setTranscoderPath(
-  import.meta.env.VITE_BASE_URL + "/" + import.meta.env.VITE_LOCAL_KTX_PATH
+  import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_KTX_PATH
 );
 
 const focalRangeDefault = 25.0;
 
-const EditableCamera = editable(PerspectiveCamera, "perspectiveCamera");
+const EditableCamera = editable(PerspectiveCamera, 'perspectiveCamera');
 
 /**
  * Model Component
- * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [] } | { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues }} param0
+ * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [], wireframe: boolean } | { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues, ready: boolean }} param0
  * @returns
  */
 function Model({
@@ -42,9 +44,13 @@ function Model({
   hideItems = [],
   ...rest
 }) {
+  const sheet = useCurrentSheet();
   const { Fog: FogTheatreJS } = rest.theatre;
   const group = useRef();
   const shader = useRef();
+  const [tempFog, setTempFog] = useState({
+    value: 0.0,
+  });
   const { gl, scene, camera } = useThree();
   const [urlDebounced] = useDebounce(url, 1000);
 
@@ -78,6 +84,10 @@ function Model({
   const { actions } = useAnimations(animations || [], group);
 
   useEffect(() => {
+    if (rest.start && sheet) {
+      sheet.sequence.play();
+    }
+
     if (actions && animationNames.length > 0) {
       animationNames.forEach((name) => {
         if (actions[name]) {
@@ -96,31 +106,45 @@ function Model({
           if (obj) {
             obj.visible = false;
           } else {
-            console.warn("Couldn't find the object named: ", name, "\n");
+            console.warn("Couldn't find the object named: ", name, '\n');
           }
         });
     }
 
     if (gltf) {
       gltf.scene.traverse((object) => {
-        if (object.type === "Mesh") {
+        if (object.type === 'Mesh') {
           // console.log(object);
         }
 
-        if (hideItems.length === 0 && object.type === "Mesh") {
+        if (hideItems.length === 0 && object.type === 'Mesh') {
           // Default set all object to true.
           gltf.scene.getObjectByName(object.name).visible = true;
         }
       });
     }
-  }, [actions, gltf, animationNames, hideItems, rest.wireframe]);
+  }, [actions, gltf, animationNames, hideItems, rest.wireframe, rest.ready]);
 
+  // Preload GLTF
   useEffect(() => {
     if (url.length > 0 && gltf && gltf.scene) {
-      console.log("Running Preload");
       useGLTF.preload(url);
     }
   }, [url, gltf]); // Run Once
+
+  useGSAP(() => {
+    if (rest.loaded && FogTheatreJS.focalRange) {
+      let gsapRunnerVal = {
+        value: 0,
+      };
+      gsap.to(gsapRunnerVal, {
+        value: FogTheatreJS.focalRange,
+        duration: 1.0,
+        onUpdateParams: [gsapRunnerVal],
+        onUpdate: ({ value }) => setTempFog({ value }),
+      });
+    }
+  }, [rest.loaded, FogTheatreJS]);
 
   return (
     <>
@@ -136,7 +160,7 @@ function Model({
           {FogTheatreJS && (
             <Fog
               ref={shader}
-              focalRange={FogTheatreJS.focalRange}
+              focalRange={!rest.start ? tempFog.value : FogTheatreJS.focalRange}
               fogColor={
                 new Color(
                   FogTheatreJS.fogColor.r,
@@ -152,7 +176,7 @@ function Model({
   );
 }
 
-const theatreJSModel = withTheatreManagement(Model, "Model", {
+const theatreJSModel = withTheatreManagement(Model, 'Model', {
   Fog: {
     props: {
       focalRange: types.number(focalRangeDefault, {
@@ -166,7 +190,7 @@ const theatreJSModel = withTheatreManagement(Model, "Model", {
           a: 1,
         },
         {
-          label: "Fog Color",
+          label: 'Fog Color',
         }
       ),
     },

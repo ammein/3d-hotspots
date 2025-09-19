@@ -1,0 +1,93 @@
+{
+  "sheetsById": {
+    "Scene / Main": {
+      "staticOverrides": {
+        "byObject": {
+          "Main": {
+            "model": "/model/model-transformed.glb",
+            "animations": "Scene"
+          },
+          "Orbit Controls": {
+            "enableZoom": false,
+            "enableRotate": true
+          },
+          "Ambient Light": {
+            "intensity": 1.7007963267948945
+          },
+          "Point Light": {
+            "intensity": 3.9399999999999955
+          }
+        }
+      }
+    },
+    "Model": {
+      "staticOverrides": {
+        "byObject": {
+          "Fog": {
+            "focalRange": 3.481012658227854
+          },
+          "Camera": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 3.656349698997775
+            }
+          }
+        }
+      },
+      "sequence": {
+        "subUnitsPerUnit": 30,
+        "length": 10,
+        "type": "PositionalSequence",
+        "tracksByObject": {
+          "Fog": {
+            "trackData": {
+              "7SEG9XC-w_": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "Fog:[\"focalRange\"]",
+                "keyframes": [
+                  {
+                    "id": "Hwn2p3AHQI",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 1.8987341772151909
+                  },
+                  {
+                    "id": "8dy_XPJE2o",
+                    "position": 0.967,
+                    "connectedRight": true,
+                    "handles": [
+                      1,
+                      0.2730263157894737,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 100
+                  }
+                ]
+              }
+            },
+            "trackIdByPropPath": {
+              "[\"focalRange\"]": "7SEG9XC-w_"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": [
+    "s6g40nzccvwTVFgu",
+    "_gNpk5OGafds1vCg",
+    "yujzacGxIzPv8F9M",
+    "VaVncI4y-rec4t4z"
+  ]
+}

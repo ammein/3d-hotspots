@@ -1,15 +1,16 @@
-import { useFrame } from "@react-three/fiber";
-import withTheatreManagement from "../hoc/TheatreManagement";
-import { types } from "@theatre/core";
-import Model from "@/components/Model";
-import { OrbitControls } from "@react-three/drei";
-import { Suspense } from "react";
+import { useFrame } from '@react-three/fiber';
+import withTheatreManagement from '../hoc/TheatreManagement';
+import { types } from '@theatre/core';
+import Model from '@/components/Model';
+import { OrbitControls } from '@react-three/drei';
+import { Suspense } from 'react';
+import { editable as e } from '@theatre/r3f';
 
 const ambientLightIntensity = Math.PI / 2.0;
 
-const Main = (props) => {
-  const { ["Orbit Controls"]: OrbitControlsTheatreJS, Main: MainTheatreJS } =
-    props.theatre;
+const Main = ({ theatre, start, loaded }) => {
+  const { ['Orbit Controls']: OrbitControlsTheatreJS, Main: MainTheatreJS } =
+    theatre;
 
   useFrame(({ gl, scene, camera }) => {
     gl.render(scene, camera);
@@ -17,22 +18,31 @@ const Main = (props) => {
 
   return (
     <>
-      <ambientLight intensity={ambientLightIntensity} />
-      <pointLight intensity={10} position={[0, 3, 0]} />
+      <e.ambientLight
+        theatreKey="Ambient Light"
+        intensity={ambientLightIntensity}
+      />
+      <e.pointLight
+        theatreKey="Point Light"
+        intensity={10}
+        position={[0, 3, 0]}
+      />
       {MainTheatreJS && MainTheatreJS.model.length > 0 && (
         <Suspense fallback={null}>
           <Model
+            start={start}
+            loaded={loaded}
             url={MainTheatreJS.model}
             useDraco={MainTheatreJS.draco}
             useKTX2={MainTheatreJS.ktx2}
             animationNames={
               MainTheatreJS.animations.length > 0
-                ? MainTheatreJS.animations.split(",")
+                ? MainTheatreJS.animations.split(',')
                 : []
             }
             hideItems={
               MainTheatreJS.hideItems.length > 0
-                ? MainTheatreJS.hideItems.split(",")
+                ? MainTheatreJS.hideItems.split(',')
                 : []
             }
           />
@@ -50,39 +60,39 @@ const Main = (props) => {
   );
 };
 
-const MainScene = withTheatreManagement(Main, "Scene / Main", {
+const MainScene = withTheatreManagement(Main, 'Scene / Main', {
   Main: {
     props: {
       draco: types.boolean(true, {
-        label: "Use Draco Loader",
+        label: 'Use Draco Loader',
       }),
       ktx2: types.boolean(true, {
-        label: "Use KTX2 Loader",
+        label: 'Use KTX2 Loader',
       }),
-      model: types.string("", {
-        label: "Model Asset",
+      model: types.string('', {
+        label: 'Model Asset',
       }),
-      animations: types.string("", {
+      animations: types.string('', {
         label: "List of Animations (To activate multiple animations, use ',')",
       }),
-      hideItems: types.string("", {
+      hideItems: types.string('', {
         label: "Hide Items (Multiple items, use ',')",
       }),
     },
   },
-  "Orbit Controls": {
+  'Orbit Controls': {
     props: {
       autoRotate: types.boolean(true, {
-        label: "Auto Rotate Model",
+        label: 'Auto Rotate Model',
       }),
       enableZoom: types.boolean(false, {
-        label: "Enable Zoom",
+        label: 'Enable Zoom',
       }),
       enablePan: types.boolean(false, {
-        label: "Enable Pan",
+        label: 'Enable Pan',
       }),
       enableRotate: types.boolean(false, {
-        label: "Enable Rotate",
+        label: 'Enable Rotate',
       }),
     },
   },

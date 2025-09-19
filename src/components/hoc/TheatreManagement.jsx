@@ -1,6 +1,6 @@
-import { SheetProvider } from "@theatre/r3f";
-import { useApp } from "../context/AppManagement";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { SheetProvider } from '@theatre/r3f';
+import { useApp } from '../context/AppManagement';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 
 /**
  * @typedef {{
