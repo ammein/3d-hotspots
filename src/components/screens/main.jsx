@@ -3,8 +3,10 @@ import withTheatreManagement from '../hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import Model from '@/components/Model';
 import { OrbitControls } from '@react-three/drei';
-import { Suspense } from 'react';
 import { editable as e } from '@theatre/r3f';
+import Error from '@/components/ThreeJSError';
+import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
+import { Suspense } from 'react';
 
 const ambientLightIntensity = Math.PI / 2.0;
 
@@ -28,25 +30,27 @@ const Main = ({ theatre, start, loaded }) => {
         position={[0, 3, 0]}
       />
       {MainTheatreJS && MainTheatreJS.model.length > 0 && (
-        <Suspense fallback={null}>
-          <Model
-            start={start}
-            loaded={loaded}
-            url={MainTheatreJS.model}
-            useDraco={MainTheatreJS.draco}
-            useKTX2={MainTheatreJS.ktx2}
-            animationNames={
-              MainTheatreJS.animations.length > 0
-                ? MainTheatreJS.animations.split(',')
-                : []
-            }
-            hideItems={
-              MainTheatreJS.hideItems.length > 0
-                ? MainTheatreJS.hideItems.split(',')
-                : []
-            }
-          />
-        </Suspense>
+        <ErrorBoundary fallback={Error}>
+          <Suspense fallback={null}>
+            <Model
+              start={start}
+              loaded={loaded}
+              url={MainTheatreJS.model}
+              useDraco={MainTheatreJS.draco}
+              useKTX2={MainTheatreJS.ktx2}
+              animationNames={
+                MainTheatreJS.animations.length > 0
+                  ? MainTheatreJS.animations.split(',')
+                  : []
+              }
+              hideItems={
+                MainTheatreJS.hideItems.length > 0
+                  ? MainTheatreJS.hideItems.split(',')
+                  : []
+              }
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
       <OrbitControls
         autoRotate={OrbitControlsTheatreJS && OrbitControlsTheatreJS.autoRotate}

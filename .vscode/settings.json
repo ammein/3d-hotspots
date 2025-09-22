@@ -13,11 +13,25 @@
         "tw`([^`]*)",
         "tw\\.[^`]+`([^`]*)`",
         "tw\\(.*?\\).*?`([^`]*)",
-        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\\"([^\\\"]*)\\\"",
-        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*'([^']*)'",
-        "\\{\\s*\\/\\* tailwindcss \\*\\/[^`]*`([^`$]*)`",
-        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\$\\{[^}]*'([^']*)'[^}]*\\}",
-        "\\{\\s*\\/\\* tailwindcss \\*\\/[^}]*\\$\\{[^}]*\\\"([^\\\"]*)\\\"[^}]*\\}"
+        // wrapperClass with double quotes (multi-line safe)
+        "wrapperClass=\\{\\\"([\\s\\S]*?)\\\"\\}",
+        // wrapperClass with single quotes (multi-line safe)
+        "wrapperClass=\\{'([\\s\\S]*?)'\\}",
+        // wrapperClass with template literals (captures only static text, multi-line safe)
+        "wrapperClass=\\{`([\\s\\S]*?)`\\}",
+        // wrapperClass: also pick up quoted strings inside ${...} (multi-line safe)
+        "wrapperClass=\\{[\\s\\S]*?\\$\\{[\\s\\S]*?'([\\s\\S]*?)'[\\s\\S]*?\\}\\}",
+        "wrapperClass=\\{[\\s\\S]*?\\$\\{[\\s\\S]*?\\\"([\\s\\S]*?)\\\"[\\s\\S]*?\\}\\}",
+        // /* tailwindcss */ with double quotes (multi-line safe)
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[\\s\\S]*?\\\"([\\s\\S]*?)\\\"",
+        // /* tailwindcss */ with single quotes (multi-line safe)
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[\\s\\S]*?'([\\s\\S]*?)'",
+        // /* tailwindcss */ with template literals (multi-line safe, static only)
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[\\s\\S]*?`([\\s\\S]*?)`",
+        // /* tailwindcss */ with interpolation containing single quotes
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[\\s\\S]*?\\$\\{[\\s\\S]*?'([\\s\\S]*?)'[\\s\\S]*?\\}\\}",
+        // /* tailwindcss */ with interpolation containing double quotes
+        "\\{\\s*\\/\\* tailwindcss \\*\\/[\\s\\S]*?\\$\\{[\\s\\S]*?\\\"([\\s\\S]*?)\\\"[\\s\\S]*?\\}\\}"
     ],
     // For Vite Debug
     "debug.javascript.terminalOptions": {

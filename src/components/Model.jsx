@@ -70,14 +70,19 @@ function Model({
           loader.setKTX2Loader(ktx2Loader.detectSupport(gl));
         });
       }
-      console.warn(
-        "Looks like you trying to load an invalid model paths.\nMake sure you don't include `public` directory to your path...\n",
-        err
-      );
     }
 
     return gltf;
   }, [urlDebounced]);
+
+  if (!gltf) {
+    let error = new Error(
+      `Looks like you trying to load an invalid model paths. Make sure you don't include 'public' directory to your path...\n\nYour error model path URL: "${url}"`
+    );
+
+    error.status = 'Model Not Found';
+    throw error;
+  }
 
   const animations = gltf?.animations ?? null;
 
@@ -133,7 +138,7 @@ function Model({
   }, [url, gltf]); // Run Once
 
   useGSAP(() => {
-    if (rest.loaded && FogTheatreJS.focalRange) {
+    if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
       let gsapRunnerVal = {
         value: 0,
       };
