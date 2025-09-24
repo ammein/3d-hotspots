@@ -32,6 +32,7 @@ function InnerApp({ loaded }) {
       <Canvas
         gl={{
           preserveDrawingBuffer: import.meta.env.DEV,
+          antialias: true,
         }}
         style={{
           width: '100dvw',

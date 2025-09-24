@@ -36,7 +36,7 @@ function Error({ errorStatus, errorMessage, reset }) {
               $other={/* tailwindcss */ 'right-0'}
             >
               <CloseIcon />
-              <b className="!font-bold whitespace-nowrap">Click to reset</b>
+              <b className="!font-bold whitespace-nowrap">Reset</b>
             </Button>
           </div>
         </div>

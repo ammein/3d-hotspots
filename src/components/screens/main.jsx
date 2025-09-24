@@ -1,22 +1,47 @@
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import withTheatreManagement from '../hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import Model from '@/components/Model';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls } from 'three-stdlib';
 import { editable as e } from '@theatre/r3f';
 import Error from '@/components/ThreeJSError';
 import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
-import { Suspense } from 'react';
+import { useEffect } from 'react';
 
 const ambientLightIntensity = Math.PI / 2.0;
 
 const Main = ({ theatre, start, loaded }) => {
-  const { ['Orbit Controls']: OrbitControlsTheatreJS, Main: MainTheatreJS } =
+  const { ['Orbit Controls']: OrbitControlsTheatreJS, Model: ModelTheatreJS } =
     theatre;
 
+  const { camera, gl } = useThree();
+
+  /** @type {import('three-extras/controls/OrbitControls').OrbitControls} */
+  let myOrbit = new OrbitControls(camera, gl.domElement);
+
   useFrame(({ gl, scene, camera }) => {
+    myOrbit.update();
     gl.render(scene, camera);
   }, 1);
+
+  useEffect(() => {
+    if (
+      OrbitControlsTheatreJS &&
+      Object.keys(OrbitControlsTheatreJS).length > 0
+    ) {
+      myOrbit.dispose();
+
+      myOrbit = new OrbitControls(camera, gl.domElement);
+      myOrbit.autoRotate = OrbitControlsTheatreJS.autoRotate;
+      myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
+      myOrbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
+      myOrbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
+    }
+
+    return () => {
+      myOrbit.dispose();
+    };
+  }, [OrbitControlsTheatreJS, camera, gl]);
 
   return (
     <>
@@ -29,43 +54,33 @@ const Main = ({ theatre, start, loaded }) => {
         intensity={10}
         position={[0, 3, 0]}
       />
-      {MainTheatreJS && MainTheatreJS.model.length > 0 && (
+      {ModelTheatreJS && ModelTheatreJS.model.length > 0 && (
         <ErrorBoundary fallback={Error}>
-          <Suspense fallback={null}>
-            <Model
-              start={start}
-              loaded={loaded}
-              url={MainTheatreJS.model}
-              useDraco={MainTheatreJS.draco}
-              useKTX2={MainTheatreJS.ktx2}
-              animationNames={
-                MainTheatreJS.animations.length > 0
-                  ? MainTheatreJS.animations.split(',')
-                  : []
-              }
-              hideItems={
-                MainTheatreJS.hideItems.length > 0
-                  ? MainTheatreJS.hideItems.split(',')
-                  : []
-              }
-            />
-          </Suspense>
+          <Model
+            start={start}
+            loaded={loaded}
+            url={ModelTheatreJS.model}
+            useDraco={ModelTheatreJS.draco}
+            useKTX2={ModelTheatreJS.ktx2}
+            animationNames={
+              ModelTheatreJS.animations.length > 0
+                ? ModelTheatreJS.animations.split(',')
+                : []
+            }
+            hideItems={
+              ModelTheatreJS.hideItems.length > 0
+                ? ModelTheatreJS.hideItems.split(',')
+                : []
+            }
+          />
         </ErrorBoundary>
       )}
-      <OrbitControls
-        autoRotate={OrbitControlsTheatreJS && OrbitControlsTheatreJS.autoRotate}
-        enableZoom={OrbitControlsTheatreJS && OrbitControlsTheatreJS.enableZoom}
-        enablePan={OrbitControlsTheatreJS && OrbitControlsTheatreJS.enablePan}
-        enableRotate={
-          OrbitControlsTheatreJS && OrbitControlsTheatreJS.enableRotate
-        }
-      />
     </>
   );
 };
 
 const MainScene = withTheatreManagement(Main, 'Scene / Main', {
-  Main: {
+  Model: {
     props: {
       draco: types.boolean(true, {
         label: 'Use Draco Loader',

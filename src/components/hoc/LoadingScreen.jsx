@@ -6,7 +6,7 @@ import Button from '@/components/Button';
 import { useApp } from '../context/AppManagement';
 import { useProgress } from '@react-three/drei';
 
-const loadingDuration = 0.5;
+const loadingDuration = 0.35;
 
 /**
  * HOC for App Components
@@ -17,7 +17,11 @@ const withLoading = (WrappedComponent) => {
   return (props) => {
     const { ready, msg } = useApp();
     const buttonLoadRef = useRef();
-    const { progress: ThreeJSProgress } = useProgress();
+    const {
+      progress: ThreeJSProgress,
+      active: ThreeJSActive,
+      errors,
+    } = useProgress();
     const [loaded, setLoaded] = useState(false);
     const [assetName, setAssetName] = useState('');
     const [progress, setProgress] = useState(0);
@@ -26,145 +30,145 @@ const withLoading = (WrappedComponent) => {
       value: 0,
     });
 
-    const t = gsap.to(
-      {},
-      {
-        duration: 1.0,
-        ease: 'none',
-        paused: true,
-      }
-    );
+    const timeoutFont = 5000;
 
-    const isFontLoaded = useFontFaceObserver([
-      {
-        family: '3ds Bold',
-        weight: '700',
-      },
-      {
-        family: '3ds Bold Italic',
-        weight: '700',
-        style: 'italic',
-      },
-      {
-        family: '3ds Semibold',
-        weight: '600',
-      },
-      {
-        family: '3ds Semibold Italic',
-        weight: '600',
-        style: 'italic',
-      },
-      {
-        family: '3ds Regular',
-        weight: '400',
-      },
-      {
-        family: '3ds Italic',
-        weight: '400',
-        style: 'italic',
-      },
-      {
-        family: '3ds Light',
-        weight: '300',
-      },
-      {
-        family: '3ds Light Italic',
-        weight: '300',
-        style: 'italic',
-      },
-    ]);
+    const [isFontLoaded, setFontLoaded] = useState(
+      useFontFaceObserver(
+        [
+          {
+            family: '3ds Bold',
+            weight: '700',
+          },
+          {
+            family: '3ds Bold Italic',
+            weight: '700',
+            style: 'italic',
+          },
+          {
+            family: '3ds Semibold',
+            weight: '600',
+          },
+          {
+            family: '3ds Semibold Italic',
+            weight: '600',
+            style: 'italic',
+          },
+          {
+            family: '3ds Regular',
+            weight: '400',
+          },
+          {
+            family: '3ds Italic',
+            weight: '400',
+            style: 'italic',
+          },
+          {
+            family: '3ds Light',
+            weight: '300',
+          },
+          {
+            family: '3ds Light Italic',
+            weight: '300',
+            style: 'italic',
+          },
+        ],
+        {
+          timeout: timeoutFont,
+        }
+      )
+    );
 
     const [loadingTotal, setLoadingTotal] = useState([
       {
         type: 'Font',
-        value: isFontLoaded ? 100 : 0,
+        value: 0,
       },
       {
         type: 'Model',
-        value: ThreeJSProgress,
+        value: 0,
       },
     ]);
 
+    // Force font loaded status if internet connectivity is slow more than 5 seconds...
     useEffect(() => {
-      if (ready) {
-        setLoadingTotal((prev) => {
-          const loading = [
-            {
-              type: 'Font',
-              value: isFontLoaded ? 100 : 0,
-            },
-            {
-              type: 'Model',
-              value: ThreeJSProgress,
-            },
-          ];
-          return loading;
+      const timer = setTimeout(() => {
+        setFontLoaded(true);
+      }, timeoutFont);
+
+      return () => clearTimeout(timer);
+    }, [isFontLoaded]);
+
+    useEffect(() => {
+      setLoadingTotal((prev) => {
+        const loading = prev.map((val) => {
+          switch (val.type) {
+            case 'Font':
+              val.value = isFontLoaded ? 100 : 0;
+              break;
+
+            case 'Model':
+              val.value = ThreeJSProgress;
+              break;
+          }
+
+          return val;
         });
-      }
-    }, [ThreeJSProgress, isFontLoaded, ready]);
+        return loading;
+      });
+    }, [ThreeJSProgress, ThreeJSActive, isFontLoaded, ready]);
 
     useGSAP(
       () => {
-        if (ready) {
-          const loaded = loadingTotal.filter((val) => val.value === 100);
+        const loaded = loadingTotal.filter((val) => val.value === 100);
 
-          if (loaded.length > 0) {
-            gsap.to(progressRef.current, {
-              value: (loaded.length / loadingTotal.length) * 100,
-              duration: loadingDuration,
-              onStart: () =>
-                setAssetName(
-                  loaded[Math.floor(loaded.length / loadingTotal.length)].type
-                ),
-              onUpdate: ({ value }) => setProgress(value),
-              onUpdateParams: [progressRef.current],
-              onComplete: () => {
-                if (progressRef.current.value === 100) {
-                  gsap.to(buttonLoadRef.current, {
-                    delay: loadingDuration,
-                    opacity: 0,
-                    duration: loadingDuration,
-                    onComplete: () => setLoaded(true),
-                  });
-                }
-              },
-            });
-          }
+        if (loaded.length > 0) {
+          gsap.to(progressRef.current, {
+            value: (loaded.length / loadingTotal.length) * 100,
+            duration: loadingDuration,
+            onStart: () =>
+              setAssetName(
+                loaded[Math.floor(loaded.length / loadingTotal.length)].type
+              ),
+            onUpdate: ({ value }) => setProgress(value),
+            onUpdateParams: [progressRef.current],
+            onComplete: () => {
+              if (progressRef.current.value === 100) {
+                gsap.to(buttonLoadRef.current, {
+                  delay: loadingDuration,
+                  opacity: 0,
+                  duration: loadingDuration,
+                  onComplete: () => setLoaded(true),
+                });
+              }
+            },
+          });
         }
       },
       {
-        dependencies: [
-          ready,
-          loadingTotal,
-          progress,
-          progressRef.current,
-          ThreeJSProgress,
-          isFontLoaded,
-        ],
+        dependencies: [ready, loadingTotal, ThreeJSActive, progressRef.current],
       }
     );
 
-    const loadText =
-      ready && progressRef.current && progressRef.current.value !== 100
+    const loadText = ready
+      ? progress !== 100
         ? msg('Loading') + ' ' + assetName
-        : 'Asset Loaded';
+        : 'Asset Loaded'
+      : 'Loading...';
 
     return (
       <>
-        {ready && (
-          <Button
-            ref={buttonLoadRef}
-            disabled={true}
-            $buttonType="scream"
-            $size="large"
-            $weight="bold"
-            $other={
-              /* tailwindcss */ 'mx-auto fixed z-100 top-[50%] left-[50%] -translate-1/2'
-            }
-          >
-            {progress.toFixed(0) + '% ' + loadText}
-          </Button>
-        )}
+        <Button
+          ref={buttonLoadRef}
+          disabled={true}
+          $buttonType="scream"
+          $size="large"
+          $weight="bold"
+          $other={
+            /* tailwindcss */ 'mx-auto fixed z-100 top-[50%] left-[50%] -translate-1/2'
+          }
+        >
+          {progress.toFixed(0) + '% ' + loadText}
+        </Button>
         <WrappedComponent progress={progress} loaded={loaded} {...props} />
       </>
     );

@@ -1,4 +1,4 @@
-let translations = {};
+let responseJSON = {};
 
 /**
  * Fetch and load translations from a JSON file
@@ -6,14 +6,14 @@ let translations = {};
  * @param {string} [lang='en'] - Language code to load translations for
  * @returns {Promise<void>} Promise that resolves when translations are loaded
  */
-async function loadTranslationsFromJSON(url) {
+async function loadFromJSON(url) {
     try {
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        translations = await response.json();
-        return translations;
+        responseJSON = await response.json();
+        return responseJSON;
     } catch (error) {
         console.error('Error loading translations:', error);
         throw error;
@@ -37,5 +37,5 @@ function getLanguage() {
 
 export {
     getLanguage,
-    loadTranslationsFromJSON
+    loadFromJSON
 };

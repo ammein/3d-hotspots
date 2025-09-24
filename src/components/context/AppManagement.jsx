@@ -4,18 +4,30 @@ import {
   useCallback,
   useEffect,
   useContext,
+  useMemo,
 } from 'react';
-import { loadTranslationsFromJSON, getLanguage } from '@/helpers/i18n';
+import { loadFromJSON, getLanguage } from '@/helpers/i18n';
 import { getProject } from '@theatre/core';
 import states from '@/assets/theatre-project-state.json';
+
+/**
+ * @typedef AppContext
+ * @property {Function} msg
+ * @property {boolean} ready
+ * @property {import('@theatre/core').IProject} appProject
+ * @property {object} metadata
+ */
 
 const AppContext = createContext();
 
 export default ({ children }) => {
   const [ready, setReady] = useState(false);
   const [translations, setTranslations] = useState({});
+  const [metadataValue, setMetadataValue] = useState({});
   const [, setLanguageState] = useState('en');
-  const appProject = getProject('3D Hotspots', { state: states });
+  const appProject = useMemo(() => {
+    return getProject('3D Hotspots', { state: states });
+  }, [states]);
 
   const msg = useCallback(
     (key) => {
@@ -39,25 +51,45 @@ export default ({ children }) => {
     [ready, translations]
   );
 
+  const setMetadata = useCallback(async (filename) => {
+    const url = `${import.meta.env.VITE_BASE_URL}/${filename}.json`;
+
+    try {
+      const data = await loadFromJSON(url);
+      setMetadataValue(data);
+    } catch (err) {
+      setReady(false);
+      console.error('Failed to load metadata json', err);
+    }
+  });
+
   const setLanguage = useCallback(async (lang) => {
     setLanguageState(lang);
     const url = `${import.meta.env.VITE_BASE_URL}/lang/${lang}.json`;
 
     try {
-      const data = await loadTranslationsFromJSON(url);
+      const data = await loadFromJSON(url);
       setTranslations(data);
-      if (appProject.isReady) {
-        setReady(true);
-      }
     } catch (error) {
+      setReady(false);
       console.error('Failed to load translations:', error);
     }
-  }, []);
+  });
 
   useEffect(() => {
-    const initialLang = getLanguage();
-    setLanguage(initialLang);
-  }, [setLanguage]);
+    // Check if metadata & language is loaded
+    if (
+      appProject.isReady &&
+      Object.keys(translations).length > 0 &&
+      Object.keys(metadataValue).length > 0
+    ) {
+      setReady(true);
+    } else {
+      const initialLang = getLanguage();
+      setLanguage(initialLang);
+      setMetadata('metadata');
+    }
+  }, [metadataValue, translations]);
 
   return (
     <AppContext.Provider
@@ -65,6 +97,7 @@ export default ({ children }) => {
         msg,
         ready,
         appProject,
+        metadata: metadataValue,
       }}
     >
       {children}
@@ -73,7 +106,6 @@ export default ({ children }) => {
 };
 
 /**
- *
- * @returns {{ msg: function, ready: boolean, appProject: import('@theatre/core').IProject }}
+ * @returns {AppContext}
  */
 export const useApp = () => useContext(AppContext);

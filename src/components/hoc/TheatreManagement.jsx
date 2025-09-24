@@ -50,10 +50,10 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
   return (props) => {
     const { appProject } = useApp();
 
-    /** @type {[TheatreObjects, Function]} */
+    /** @type {[TheatreObject, Function]} */
     const [objects, setObjects] = useState({});
 
-    /** @type {[TheatreValues, Function]} */
+    /** @type {[TheatreOptionsValues, Function]} */
     const [theatreValues, setTheatreValues] = useState({});
 
     /**
@@ -61,7 +61,7 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
      */
     const sheet = useMemo(() => {
       return appProject.sheet(sheetName);
-    }, [theatreOptions, appProject]);
+    }, [sheetName]);
 
     // Seed objects + initial values
     useEffect(() => {
@@ -89,7 +89,7 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
         }
         setObjects({});
       };
-    }, [appProject, theatreOptions, sheet]);
+    }, [appProject.isReady, theatreOptions, sheet]);
 
     // Subscribe to changes
     useEffect(() => {

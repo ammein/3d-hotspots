@@ -9,7 +9,11 @@ class ThreeErrorBoundary extends Component {
 
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true, message: error?.message, status: error?.status };
+    return {
+      hasError: true,
+      message: error?.message,
+      status: error?.status,
+    };
   }
 
   componentDidCatch(error, errorInfo) {
@@ -34,7 +38,9 @@ class ThreeErrorBoundary extends Component {
     if (this.state.hasError) {
       return addExtraProps(this.props.fallback, {
         errorMessage: this.state.message,
-        errorStatus: this.state.status,
+        errorStatus: this.state.status
+          ? this.state.status
+          : 'Something is wrong!',
         reset: this.resetErrorBoundary,
       });
     }

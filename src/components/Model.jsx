@@ -4,19 +4,25 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
+import { useEffect, useMemo, useRef, useState, memo, Suspense } from 'react';
+import {
+  useGLTF,
+  useAnimations,
+  PerspectiveCamera,
+  Line,
+} from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { GLTFLoader, KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import Fog from './Fog';
-import { types, val } from '@theatre/core';
+import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color } from 'three';
+import { Color, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useApp } from './context/AppManagement';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -45,15 +51,26 @@ function Model({
   ...rest
 }) {
   const sheet = useCurrentSheet();
-  const { Fog: FogTheatreJS } = rest.theatre;
-  const group = useRef();
-  const shader = useRef();
+  const { metadata } = useApp();
+  const {
+    Fog: FogTheatreJS,
+    Canvas: CanvasTheatreJS,
+    Hotspot: HotspotTheatreJS,
+  } = rest.theatre;
+  const groupRef = useRef();
+  const shaderRef = useRef();
+  /** @type {import('react').Ref<import('@react-three/drei').PerspectiveCameraProps>} */
+  const cameraRef = useRef();
   const [tempFog, setTempFog] = useState({
     value: 0.0,
   });
+  const [hotspots, setHotspots] = useState([]);
   const { gl, scene, camera } = useThree();
   const [urlDebounced] = useDebounce(url, 1000);
 
+  /**
+   * @type {import('three-stdlib').GLTF & import('@react-three/fiber').ObjectMap}
+   */
   const gltf = useMemo(() => {
     let gltf;
 
@@ -77,16 +94,18 @@ function Model({
 
   if (!gltf) {
     let error = new Error(
-      `Looks like you trying to load an invalid model paths. Make sure you don't include 'public' directory to your path...\n\nYour error model path URL: "${url}"`
+      `Looks like you trying to load an invalid model paths. Make sure you don't include 'public' directory to your path.\nReadjust your url again and click button "reset" to initalize model again.\n\nYour error model path URL: "${url}"`
     );
 
     error.status = 'Model Not Found';
     throw error;
   }
 
+  const defaultCameraLocation = [0, 0, 5];
+
   const animations = gltf?.animations ?? null;
 
-  const { actions } = useAnimations(animations || [], group);
+  const { actions } = useAnimations(animations || [], groupRef);
 
   useEffect(() => {
     if (rest.start && sheet) {
@@ -116,10 +135,57 @@ function Model({
         });
     }
 
-    if (gltf) {
+    if (CanvasTheatreJS && CanvasTheatreJS.color) {
+      gl.domElement.style.backgroundColor = `${new Color(
+        CanvasTheatreJS.color.r,
+        CanvasTheatreJS.color.g,
+        CanvasTheatreJS.color.b
+      ).getStyle()}`;
+    }
+  }, [
+    actions,
+    gltf,
+    animationNames,
+    hideItems,
+    rest.wireframe,
+    rest.ready,
+    CanvasTheatreJS,
+  ]);
+
+  // Preload GLTF
+  useEffect(() => {
+    if (urlDebounced.length > 0 && gltf && gltf.scene) {
+      useGLTF.preload(urlDebounced);
+    }
+
+    if (gltf && metadata.screens) {
       gltf.scene.traverse((object) => {
-        if (object.type === 'Mesh') {
-          // console.log(object);
+        let findHotspot = metadata.screens.detail.hotspots.find(
+          (val) => val.name === object.name
+        );
+        if (
+          findHotspot &&
+          HotspotTheatreJS &&
+          object.type === 'Mesh' &&
+          findHotspot.name === object.name
+        ) {
+          setHotspots((prev) => {
+            let data = {};
+            let origin = object.position.clone();
+            let line = origin
+              .clone()
+              .normalize()
+              .multiplyScalar(HotspotTheatreJS.scalar);
+            let lineText = line
+              .clone()
+              .add(new Vector3(HotspotTheatreJS.distance, 0, 0));
+            data = {
+              name: findHotspot.name,
+              lines: [origin.toArray(), line.toArray(), lineText.toArray()],
+            };
+
+            return [data];
+          });
         }
 
         if (hideItems.length === 0 && object.type === 'Mesh') {
@@ -128,14 +194,7 @@ function Model({
         }
       });
     }
-  }, [actions, gltf, animationNames, hideItems, rest.wireframe, rest.ready]);
-
-  // Preload GLTF
-  useEffect(() => {
-    if (url.length > 0 && gltf && gltf.scene) {
-      useGLTF.preload(url);
-    }
-  }, [url, gltf]); // Run Once
+  }, [urlDebounced, gltf, metadata, HotspotTheatreJS]); // Run Once
 
   useGSAP(() => {
     if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
@@ -149,39 +208,77 @@ function Model({
         onUpdate: ({ value }) => setTempFog({ value }),
       });
     }
-  }, [rest.loaded, FogTheatreJS]);
+
+    if (gltf) {
+      gltf.scene.traverse((object) => {
+        if (rest.hotspotID && rest.hotspotID.length > 0) {
+          if (object.type === 'Mesh') {
+            let hotspot = metadata.detail.hotspots
+              .filter((val) => object.name === val.name)
+              .reduce((_, current) => (current.length > 0 ? curr[0] : {}), {});
+
+            if (Object.keys(hotspot).length > 0) {
+              // Go to camerea location
+              gsap.to(cameraRef.current, {
+                position: gltf.scene.getObjectByName(
+                  hotspot.pointer + '_Camera_Location'
+                ).position,
+                lookAt: gltf.scene.getObjectByName(hotspot.name).position,
+                duration: 1,
+              });
+            }
+          }
+        }
+      });
+    }
+  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID]);
 
   return (
     <>
       <EditableCamera
+        ref={cameraRef}
         theatreKey="Camera"
         makeDefault
-        position={[0, 0, 5]}
+        position={defaultCameraLocation}
         zoom={0.81}
       />
-      {gltf && gltf.scene && (
-        <>
-          <primitive ref={group} object={gltf.scene} dispose={null} />
-          {FogTheatreJS && (
-            <Fog
-              ref={shader}
-              focalRange={!rest.start ? tempFog.value : FogTheatreJS.focalRange}
-              fogColor={
-                new Color(
-                  FogTheatreJS.fogColor.r,
-                  FogTheatreJS.fogColor.g,
-                  FogTheatreJS.fogColor.b
-                )
-              }
-            />
-          )}
-        </>
-      )}
+      <Suspense fallback={null}>
+        {gltf && gltf.scene && (
+          <>
+            <primitive ref={groupRef} object={gltf.scene} dispose={null} />
+            {hotspots.length > 0 &&
+              HotspotTheatreJS &&
+              hotspots?.map((val, i) => (
+                <Line
+                  key={val.name}
+                  points={val.lines}
+                  lineWidth={HotspotTheatreJS.width}
+                  color={new Color('black')}
+                />
+              ))}
+            {FogTheatreJS && (
+              <Fog
+                ref={shaderRef}
+                focalRange={
+                  !rest.start ? tempFog.value : FogTheatreJS.focalRange
+                }
+                fogColor={
+                  new Color(
+                    FogTheatreJS.fogColor.r,
+                    FogTheatreJS.fogColor.g,
+                    FogTheatreJS.fogColor.b
+                  )
+                }
+              />
+            )}
+          </>
+        )}
+      </Suspense>
     </>
   );
 }
 
-const theatreJSModel = withTheatreManagement(Model, 'Model', {
+const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
   Fog: {
     props: {
       focalRange: types.number(focalRangeDefault, {
@@ -201,6 +298,40 @@ const theatreJSModel = withTheatreManagement(Model, 'Model', {
     },
     options: {
       reconfigure: import.meta.env.DEV ? true : false,
+    },
+  },
+  Hotspot: {
+    props: {
+      scalar: types.number(1.5, {
+        range: [1, 10],
+        nudgeMultiplier: 0.1,
+        label: 'Length',
+      }),
+      distance: types.number(1.0, {
+        range: [0, 10],
+        nudgeMultiplier: 0.1,
+        label: 'Distance',
+      }),
+      width: types.number(1.0, {
+        range: [0, 10],
+        nudgeMultiplier: 0.1,
+        label: 'Width',
+      }),
+    },
+  },
+  Canvas: {
+    props: {
+      color: types.rgba(
+        {
+          r: 1,
+          g: 1,
+          b: 1,
+          a: 1,
+        },
+        {
+          label: 'Canvas Color',
+        }
+      ),
     },
   },
 });
