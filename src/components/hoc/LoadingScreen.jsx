@@ -32,51 +32,7 @@ const withLoading = (WrappedComponent) => {
 
     const timeoutFont = 5000;
 
-    const [isFontLoaded, setFontLoaded] = useState(
-      useFontFaceObserver(
-        [
-          {
-            family: '3ds Bold',
-            weight: '700',
-          },
-          {
-            family: '3ds Bold Italic',
-            weight: '700',
-            style: 'italic',
-          },
-          {
-            family: '3ds Semibold',
-            weight: '600',
-          },
-          {
-            family: '3ds Semibold Italic',
-            weight: '600',
-            style: 'italic',
-          },
-          {
-            family: '3ds Regular',
-            weight: '400',
-          },
-          {
-            family: '3ds Italic',
-            weight: '400',
-            style: 'italic',
-          },
-          {
-            family: '3ds Light',
-            weight: '300',
-          },
-          {
-            family: '3ds Light Italic',
-            weight: '300',
-            style: 'italic',
-          },
-        ],
-        {
-          timeout: timeoutFont,
-        }
-      )
-    );
+    const [isFontLoaded, setFontLoaded] = useState(false);
 
     const [loadingTotal, setLoadingTotal] = useState([
       {
@@ -89,14 +45,62 @@ const withLoading = (WrappedComponent) => {
       },
     ]);
 
-    // Force font loaded status if internet connectivity is slow more than 5 seconds...
+    const fontObserve = useFontFaceObserver(
+      [
+        {
+          family: '3ds Bold',
+          weight: '700',
+        },
+        {
+          family: '3ds Bold Italic',
+          weight: '700',
+          style: 'italic',
+        },
+        {
+          family: '3ds Semibold',
+          weight: '600',
+        },
+        {
+          family: '3ds Semibold Italic',
+          weight: '600',
+          style: 'italic',
+        },
+        {
+          family: '3ds Regular',
+          weight: '400',
+        },
+        {
+          family: '3ds Italic',
+          weight: '400',
+          style: 'italic',
+        },
+        {
+          family: '3ds Light',
+          weight: '300',
+        },
+        {
+          family: '3ds Light Italic',
+          weight: '300',
+          style: 'italic',
+        },
+      ],
+      {
+        timeout: timeoutFont,
+      }
+    );
+
+    // Force font loaded status if internet connectivity is slow more than 5 seconds.
+    // If not, font loading is always return false due to timeout exception
     useEffect(() => {
+      if (fontObserve) setFontLoaded(fontObserve);
       const timer = setTimeout(() => {
-        setFontLoaded(true);
+        if (!isFontLoaded) {
+          setFontLoaded(true);
+        }
       }, timeoutFont);
 
       return () => clearTimeout(timer);
-    }, [isFontLoaded]);
+    }, [isFontLoaded, fontObserve]);
 
     useEffect(() => {
       setLoadingTotal((prev) => {

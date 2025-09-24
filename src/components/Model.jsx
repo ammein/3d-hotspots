@@ -4,7 +4,15 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useMemo, useRef, useState, memo, Suspense } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  memo,
+  Suspense,
+  useCallback,
+} from 'react';
 import {
   useGLTF,
   useAnimations,
@@ -23,6 +31,7 @@ import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useApp } from './context/AppManagement';
+import Orbit from '@/components/Orbit';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -59,13 +68,12 @@ function Model({
   } = rest.theatre;
   const groupRef = useRef();
   const shaderRef = useRef();
-  /** @type {import('react').Ref<import('@react-three/drei').PerspectiveCameraProps>} */
-  const cameraRef = useRef();
   const [tempFog, setTempFog] = useState({
     value: 0.0,
   });
   const [hotspots, setHotspots] = useState([]);
-  const { gl, scene, camera } = useThree();
+  const { gl, camera } = useThree();
+  const [pointer, setPointer] = useState('');
   const [urlDebounced] = useDebounce(url, 1000);
 
   /**
@@ -106,6 +114,24 @@ function Model({
   const animations = gltf?.animations ?? null;
 
   const { actions } = useAnimations(animations || [], groupRef);
+
+  const objectClick = useCallback(
+    (e) => {
+      /** @type {import('three').Intersection[]} */
+      const intersections = e.intersections;
+
+      if (intersections.length > 0) {
+        let intersect = hotspots.find(({ pointer }) =>
+          intersections.some(({ object }) => object.name.indexOf(pointer) >= 0)
+        );
+
+        if (intersect) {
+          setPointer(intersect.pointer);
+        }
+      }
+    },
+    [hotspots]
+  );
 
   useEffect(() => {
     if (rest.start && sheet) {
@@ -163,6 +189,7 @@ function Model({
         let findHotspot = metadata.screens.detail.hotspots.find(
           (val) => val.name === object.name
         );
+
         if (
           findHotspot &&
           HotspotTheatreJS &&
@@ -181,6 +208,7 @@ function Model({
               .add(new Vector3(HotspotTheatreJS.distance, 0, 0));
             data = {
               name: findHotspot.name,
+              pointer: findHotspot.pointer,
               lines: [origin.toArray(), line.toArray(), lineText.toArray()],
             };
 
@@ -209,34 +237,53 @@ function Model({
       });
     }
 
-    if (gltf) {
-      gltf.scene.traverse((object) => {
-        if (rest.hotspotID && rest.hotspotID.length > 0) {
-          if (object.type === 'Mesh') {
-            let hotspot = metadata.detail.hotspots
-              .filter((val) => object.name === val.name)
-              .reduce((_, current) => (current.length > 0 ? curr[0] : {}), {});
+    if (pointer.length > 0 && gltf) {
+      // Go to camerea location
+      let cameraLocation = gltf.scene.getObjectByName(
+        pointer + '_Camera_Location'
+      );
 
-            if (Object.keys(hotspot).length > 0) {
-              // Go to camerea location
-              gsap.to(cameraRef.current, {
-                position: gltf.scene.getObjectByName(
-                  hotspot.pointer + '_Camera_Location'
-                ).position,
-                lookAt: gltf.scene.getObjectByName(hotspot.name).position,
-                duration: 1,
-              });
-            }
-          }
-        }
+      // Copy Location
+      gsap.to(camera.position, {
+        x: cameraLocation.position.x,
+        y: cameraLocation.position.y,
+        z: cameraLocation.position.z,
+        onUpdate: () => {
+          let description = gltf.scene.getObjectByName(
+            pointer + '_Description'
+          ).position;
+          camera.lookAt(description.x, description.y, description.z);
+        },
+        duration: 1,
       });
+
+      // Copy Rotation
+      gsap.to(camera.rotation, {
+        x: cameraLocation.rotation.x,
+        y: cameraLocation.rotation.y,
+        z: cameraLocation.rotation.z,
+        duration: 1,
+      });
+    } else if (
+      pointer.length === 0 &&
+      !camera.position.equals(defaultCameraLocation)
+    ) {
+      // TODO: Reset Camera Position when exit
+      // gsap.to(camera.position, {
+      //   x: defaultCameraLocation[0],
+      //   y: defaultCameraLocation[1],
+      //   z: defaultCameraLocation[2],
+      //   onUpdate: () => {
+      //     camera.lookAt(0, 0, 0);
+      //   },
+      //   duration: 1,
+      // });
     }
-  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID]);
+  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID, pointer]);
 
   return (
     <>
       <EditableCamera
-        ref={cameraRef}
         theatreKey="Camera"
         makeDefault
         position={defaultCameraLocation}
@@ -245,7 +292,12 @@ function Model({
       <Suspense fallback={null}>
         {gltf && gltf.scene && (
           <>
-            <primitive ref={groupRef} object={gltf.scene} dispose={null} />
+            <primitive
+              ref={groupRef}
+              onClick={(e) => objectClick(e)}
+              object={gltf.scene}
+              dispose={null}
+            />
             {hotspots.length > 0 &&
               HotspotTheatreJS &&
               hotspots?.map((val, i) => (
@@ -274,6 +326,7 @@ function Model({
           </>
         )}
       </Suspense>
+      <Orbit rotate={pointer.length > 0 ? false : true} />
     </>
   );
 }

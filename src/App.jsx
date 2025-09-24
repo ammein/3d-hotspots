@@ -3,7 +3,7 @@ import './App.css';
 import { Canvas } from '@react-three/fiber';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import AppProvider, { useApp } from '@/components/context/AppManagement';
+import AppProvider from '@/components/context/AppManagement';
 import Splash from '@/components/screens/splash';
 import Main from '@/components/screens/main';
 import withLoading from './components/hoc/LoadingScreen';
