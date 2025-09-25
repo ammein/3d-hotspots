@@ -3,9 +3,9 @@ import { OrbitControls } from 'three-stdlib';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useImperativeHandle, useMemo } from 'react';
 
-const Orbit = ({ theatre, rotate }) => {
+const Orbit = ({ theatre, rotate, ref }) => {
   const { ['Orbit Controls']: OrbitControlsTheatreJS } = theatre;
 
   const { camera, gl } = useThree();
@@ -50,6 +50,8 @@ const Orbit = ({ theatre, rotate }) => {
       myOrbit.dispose();
     };
   }, [OrbitControlsTheatreJS, camera, gl, rotate]);
+
+  useImperativeHandle(ref, () => myOrbit, [myOrbit]);
 };
 
 const TheatreOrbit = withTheatreManagement(Orbit, 'Model', {

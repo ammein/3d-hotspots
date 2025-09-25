@@ -19,7 +19,7 @@ import {
   PerspectiveCamera,
   Line,
 } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { GLTFLoader, KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import Fog from './Fog';
@@ -68,12 +68,16 @@ function Model({
   } = rest.theatre;
   const groupRef = useRef();
   const shaderRef = useRef();
+  const orbitRef = useRef();
+  /** @type {{current: import('three').Line[]}} */
+  const linesRef = useRef([]);
   const [tempFog, setTempFog] = useState({
     value: 0.0,
   });
   const [hotspots, setHotspots] = useState([]);
-  const { gl, camera } = useThree();
+  const { gl, camera, controls } = useThree();
   const [pointer, setPointer] = useState('');
+  const [storeCamereLocation, setStoreCameraLocation] = useState([0, 0, 0]);
   const [urlDebounced] = useDebounce(url, 1000);
 
   /**
@@ -109,8 +113,6 @@ function Model({
     throw error;
   }
 
-  const defaultCameraLocation = [0, 0, 5];
-
   const animations = gltf?.animations ?? null;
 
   const { actions } = useAnimations(animations || [], groupRef);
@@ -132,6 +134,10 @@ function Model({
     },
     [hotspots]
   );
+
+  const setLinesRef = (line, index) => {
+    linesRef.current[index] = line;
+  };
 
   useEffect(() => {
     if (rest.start && sheet) {
@@ -178,6 +184,14 @@ function Model({
     CanvasTheatreJS,
   ]);
 
+  useFrame(({ camera }) => {
+    linesRef.current.forEach((line) => {
+      const opac = line.position.dot(camera.position);
+
+      line.material.opacity = opac;
+    });
+  });
+
   // Preload GLTF
   useEffect(() => {
     if (urlDebounced.length > 0 && gltf && gltf.scene) {
@@ -205,10 +219,10 @@ function Model({
               .multiplyScalar(HotspotTheatreJS.scalar);
             let lineText = line
               .clone()
-              .add(new Vector3(HotspotTheatreJS.distance, 0, 0));
+              .add(new Vector3(0, 0, -HotspotTheatreJS.distance));
             data = {
               name: findHotspot.name,
-              pointer: findHotspot.pointer,
+              pointer: findHotspot.pointer ? findHotspot.pointer : null,
               lines: [origin.toArray(), line.toArray(), lineText.toArray()],
             };
 
@@ -239,62 +253,57 @@ function Model({
 
     if (pointer.length > 0 && gltf) {
       // Go to camerea location
-      let cameraLocation = gltf.scene.getObjectByName(
+      let nextCameraLocation = gltf.scene.getObjectByName(
         pointer + '_Camera_Location'
       );
 
+      setStoreCameraLocation(camera.position.toArray());
+
       // Copy Location
       gsap.to(camera.position, {
-        x: cameraLocation.position.x,
-        y: cameraLocation.position.y,
-        z: cameraLocation.position.z,
+        x: nextCameraLocation.position.x,
+        y: nextCameraLocation.position.y,
+        z: nextCameraLocation.position.z,
         onUpdate: () => {
+          console.log(controls);
           let description = gltf.scene.getObjectByName(
             pointer + '_Description'
           ).position;
-          camera.lookAt(description.x, description.y, description.z);
+          orbitRef.current.target = new Vector3(
+            description.x,
+            description.y,
+            description.z
+          );
         },
         duration: 1,
       });
-
-      // Copy Rotation
-      gsap.to(camera.rotation, {
-        x: cameraLocation.rotation.x,
-        y: cameraLocation.rotation.y,
-        z: cameraLocation.rotation.z,
-        duration: 1,
-      });
-    } else if (
-      pointer.length === 0 &&
-      !camera.position.equals(defaultCameraLocation)
-    ) {
-      // TODO: Reset Camera Position when exit
-      // gsap.to(camera.position, {
-      //   x: defaultCameraLocation[0],
-      //   y: defaultCameraLocation[1],
-      //   z: defaultCameraLocation[2],
-      //   onUpdate: () => {
-      //     camera.lookAt(0, 0, 0);
-      //   },
-      //   duration: 1,
-      // });
     }
-  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID, pointer]);
+    // else if (
+    //   pointer.length === 0 &&
+    //   !camera.position.equals(cameraLocation)
+    // ) {
+    // TODO: Reset Camera Position when exit
+    // gsap.to(camera.position, {
+    //   x: defaultCameraLocation[0],
+    //   y: defaultCameraLocation[1],
+    //   z: defaultCameraLocation[2],
+    //   onUpdate: () => {
+    //     camera.lookAt(0, 0, 0);
+    //   },
+    //   duration: 1,
+    // });
+    // }
+  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID, pointer, orbitRef]);
 
   return (
     <>
-      <EditableCamera
-        theatreKey="Camera"
-        makeDefault
-        position={defaultCameraLocation}
-        zoom={0.81}
-      />
+      <EditableCamera theatreKey="Camera" makeDefault />
       <Suspense fallback={null}>
         {gltf && gltf.scene && (
           <>
             <primitive
               ref={groupRef}
-              onClick={(e) => objectClick(e)}
+              onClick={objectClick}
               object={gltf.scene}
               dispose={null}
             />
@@ -302,6 +311,7 @@ function Model({
               HotspotTheatreJS &&
               hotspots?.map((val, i) => (
                 <Line
+                  ref={(line) => setLinesRef(line, i)}
                   key={val.name}
                   points={val.lines}
                   lineWidth={HotspotTheatreJS.width}
@@ -326,7 +336,7 @@ function Model({
           </>
         )}
       </Suspense>
-      <Orbit rotate={pointer.length > 0 ? false : true} />
+      <Orbit ref={orbitRef} rotate={pointer.length > 0 ? false : true} />
     </>
   );
 }
