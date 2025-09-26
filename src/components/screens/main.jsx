@@ -5,11 +5,14 @@ import Model from '@/components/Model';
 import { editable as e } from '@theatre/r3f';
 import Error from '@/components/ThreeJSError';
 import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
+import { useApp } from '../context/AppManagement';
 
 const ambientLightIntensity = Math.PI / 2.0;
 
 const Main = ({ theatre, start, loaded }) => {
   const { Model: ModelTheatreJS } = theatre;
+
+  const { appProject } = useApp();
 
   useFrame(({ gl, scene, camera }) => {
     gl.render(scene, camera);
@@ -17,21 +20,23 @@ const Main = ({ theatre, start, loaded }) => {
 
   return (
     <>
-      <e.ambientLight
-        theatreKey="Ambient Light"
-        intensity={ambientLightIntensity}
-      />
-      <e.pointLight
-        theatreKey="Point Light"
-        intensity={10}
-        position={[0, 3, 0]}
-      />
-      {ModelTheatreJS && ModelTheatreJS.model.length > 0 && (
+      {ModelTheatreJS && ModelTheatreJS.model.id && (
         <ErrorBoundary fallback={Error}>
+          {/* Important to set Editable Ambient Light & Point Light to here. 
+          Since everything under this will be controlled by TheatreJS in snapshot */}
+          <e.ambientLight
+            theatreKey="Ambient Light"
+            intensity={ambientLightIntensity}
+          />
+          <e.pointLight
+            theatreKey="Point Light"
+            intensity={10}
+            position={[0, 3, 0]}
+          />
           <Model
             start={start}
             loaded={loaded}
-            url={ModelTheatreJS.model}
+            url={appProject.getAssetUrl(ModelTheatreJS.model)}
             useDraco={ModelTheatreJS.draco}
             useKTX2={ModelTheatreJS.ktx2}
             animationNames={
@@ -60,7 +65,7 @@ const MainScene = withTheatreManagement(Main, 'Scene / Main', {
       ktx2: types.boolean(true, {
         label: 'Use KTX2 Loader',
       }),
-      model: types.string('', {
+      model: types.file(undefined, {
         label: 'Model Asset',
       }),
       animations: types.string('', {

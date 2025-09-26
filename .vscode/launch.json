@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:9222",
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*", // Adjust based on your project structure
+                "@/*": "${webRoot}/src/*" // Crucial for alias resolution
+            },
+            "skipFiles": [
+                "<node_internals>/**",
+                "node_modules/**"
+            ],
+            "runtimeArgs": [
+                "--remote-debugging-port=9222"
+            ],
+            // To silent sourcemap errors. Not to include node_modules files but include current workspace folder
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "sourceMaps": true
+        }
+    ]
+}

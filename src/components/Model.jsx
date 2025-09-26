@@ -24,7 +24,7 @@ import { GLTFLoader, KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import Fog from './Fog';
 import { types } from '@theatre/core';
-import { editable, useCurrentSheet } from '@theatre/r3f';
+import { editable, refreshSnapshot, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
 import { Color, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
@@ -61,17 +61,20 @@ function Model({
 }) {
   const sheet = useCurrentSheet();
   const { metadata } = useApp();
+
   const {
     Fog: FogTheatreJS,
     Canvas: CanvasTheatreJS,
-    Hotspot: HotspotTheatreJS,
+    HotspotLines: HotspotLinesTheatreJS,
+    HotspotCamera: HotspotCameraTheatreJS,
   } = rest.theatre;
+
   const groupRef = useRef();
   const shaderRef = useRef();
   const orbitRef = useRef();
   /** @type {{current: import('three').Line[]}} */
   const linesRef = useRef([]);
-  const [tempFog, setTempFog] = useState({
+  const [initialFog, setinitialFog] = useState({
     value: 0.0,
   });
   const [hotspots, setHotspots] = useState([]);
@@ -128,7 +131,7 @@ function Model({
         );
 
         if (intersect) {
-          setPointer(intersect.pointer);
+          setPointer(intersect.name);
         }
       }
     },
@@ -184,13 +187,13 @@ function Model({
     CanvasTheatreJS,
   ]);
 
-  useFrame(({ camera }) => {
-    linesRef.current.forEach((line) => {
-      const opac = line.position.dot(camera.position);
+  // useFrame(({ camera }) => {
+  //   linesRef.current.forEach((line) => {
+  //     const opac = line.position.dot(camera.position);
 
-      line.material.opacity = opac;
-    });
-  });
+  //     line.material.opacity = opac;
+  //   });
+  // });
 
   // Preload GLTF
   useEffect(() => {
@@ -198,7 +201,7 @@ function Model({
       useGLTF.preload(urlDebounced);
     }
 
-    if (gltf && metadata.screens) {
+    if (gltf && gltf.scene && metadata.screens) {
       gltf.scene.traverse((object) => {
         let findHotspot = metadata.screens.detail.hotspots.find(
           (val) => val.name === object.name
@@ -206,7 +209,7 @@ function Model({
 
         if (
           findHotspot &&
-          HotspotTheatreJS &&
+          HotspotLinesTheatreJS &&
           object.type === 'Mesh' &&
           findHotspot.name === object.name
         ) {
@@ -216,10 +219,10 @@ function Model({
             let line = origin
               .clone()
               .normalize()
-              .multiplyScalar(HotspotTheatreJS.scalar);
+              .multiplyScalar(HotspotLinesTheatreJS.scalar);
             let lineText = line
               .clone()
-              .add(new Vector3(0, 0, -HotspotTheatreJS.distance));
+              .add(new Vector3(0, 0, -HotspotLinesTheatreJS.distance));
             data = {
               name: findHotspot.name,
               pointer: findHotspot.pointer ? findHotspot.pointer : null,
@@ -236,7 +239,7 @@ function Model({
         }
       });
     }
-  }, [urlDebounced, gltf, metadata, HotspotTheatreJS]); // Run Once
+  }, [urlDebounced, gltf, metadata, HotspotLinesTheatreJS]); // Run Once
 
   useGSAP(() => {
     if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
@@ -247,28 +250,30 @@ function Model({
         value: FogTheatreJS.focalRange,
         duration: 1.0,
         onUpdateParams: [gsapRunnerVal],
-        onUpdate: ({ value }) => setTempFog({ value }),
+        onUpdate: ({ value }) => setinitialFog({ value }),
       });
     }
 
-    if (pointer.length > 0 && gltf) {
+    if (HotspotCameraTheatreJS && pointer.length > 0 && gltf) {
       // Go to camerea location
-      let nextCameraLocation = gltf.scene.getObjectByName(
-        pointer + '_Camera_Location'
-      );
+      let nextCameraLocation = gltf.scene.getObjectByName(pointer);
+
+      let positionDistance = nextCameraLocation.position
+        .clone()
+        .normalize()
+        .multiplyScalar(HotspotCameraTheatreJS.distance);
 
       setStoreCameraLocation(camera.position.toArray());
 
+      console.log(positionDistance);
+
       // Copy Location
       gsap.to(camera.position, {
-        x: nextCameraLocation.position.x,
-        y: nextCameraLocation.position.y,
-        z: nextCameraLocation.position.z,
+        x: positionDistance.x,
+        y: positionDistance.y,
+        z: positionDistance.z,
         onUpdate: () => {
-          console.log(controls);
-          let description = gltf.scene.getObjectByName(
-            pointer + '_Description'
-          ).position;
+          let description = gltf.scene.getObjectByName(pointer).position;
           orbitRef.current.target = new Vector3(
             description.x,
             description.y,
@@ -293,7 +298,14 @@ function Model({
     //   duration: 1,
     // });
     // }
-  }, [rest.loaded, FogTheatreJS, gltf, rest.hotspotID, pointer, orbitRef]);
+  }, [
+    rest.loaded,
+    FogTheatreJS,
+    gltf,
+    rest.hotspotID,
+    pointer,
+    HotspotCameraTheatreJS,
+  ]);
 
   return (
     <>
@@ -305,16 +317,15 @@ function Model({
               ref={groupRef}
               onClick={objectClick}
               object={gltf.scene}
-              dispose={null}
             />
             {hotspots.length > 0 &&
-              HotspotTheatreJS &&
+              HotspotLinesTheatreJS &&
               hotspots?.map((val, i) => (
                 <Line
                   ref={(line) => setLinesRef(line, i)}
                   key={val.name}
                   points={val.lines}
-                  lineWidth={HotspotTheatreJS.width}
+                  lineWidth={HotspotLinesTheatreJS.width}
                   color={new Color('black')}
                 />
               ))}
@@ -322,7 +333,7 @@ function Model({
               <Fog
                 ref={shaderRef}
                 focalRange={
-                  !rest.start ? tempFog.value : FogTheatreJS.focalRange
+                  !rest.start ? initialFog.value : FogTheatreJS.focalRange
                 }
                 fogColor={
                   new Color(
@@ -359,11 +370,8 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         }
       ),
     },
-    options: {
-      reconfigure: import.meta.env.DEV ? true : false,
-    },
   },
-  Hotspot: {
+  HotspotLines: {
     props: {
       scalar: types.number(1.5, {
         range: [1, 10],
@@ -379,6 +387,15 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         range: [0, 10],
         nudgeMultiplier: 0.1,
         label: 'Width',
+      }),
+    },
+  },
+  HotspotCamera: {
+    props: {
+      distance: types.number(0, {
+        range: [0, 100],
+        label: 'Scalar Distance',
+        nudgeMultiplier: 0.1,
       }),
     },
   },

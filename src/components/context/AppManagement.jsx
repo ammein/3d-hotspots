@@ -26,7 +26,12 @@ export default ({ children }) => {
   const [metadataValue, setMetadataValue] = useState({});
   const [, setLanguageState] = useState('en');
   const appProject = useMemo(() => {
-    return getProject('3D Hotspots', { state: states });
+    return getProject('3D Hotspots', {
+      state: states,
+      assets: {
+        baseUrl: '/theatrejs-assets',
+      },
+    });
   }, [states]);
 
   const msg = useCallback(

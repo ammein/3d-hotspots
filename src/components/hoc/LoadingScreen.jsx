@@ -34,6 +34,7 @@ const withLoading = (WrappedComponent) => {
 
     const [isFontLoaded, setFontLoaded] = useState(false);
 
+    // List of possible loading assets
     const [loadingTotal, setLoadingTotal] = useState([
       {
         type: 'Font',
@@ -102,6 +103,7 @@ const withLoading = (WrappedComponent) => {
       return () => clearTimeout(timer);
     }, [isFontLoaded, fontObserve]);
 
+    // Set Loading Total based on loading value
     useEffect(() => {
       setLoadingTotal((prev) => {
         const loading = prev.map((val) => {
@@ -121,6 +123,7 @@ const withLoading = (WrappedComponent) => {
       });
     }, [ThreeJSProgress, ThreeJSActive, isFontLoaded, ready]);
 
+    // Dynamic loading calculator happen here
     useGSAP(
       () => {
         const loaded = loadingTotal.filter((val) => val.value === 100);
@@ -141,7 +144,9 @@ const withLoading = (WrappedComponent) => {
                   delay: loadingDuration,
                   opacity: 0,
                   duration: loadingDuration,
-                  onComplete: () => setLoaded(true),
+                  onComplete: () => {
+                    setLoaded(true);
+                  },
                 });
               }
             },

@@ -17,6 +17,8 @@ const Orbit = ({ theatre, rotate, ref }) => {
       OrbitControlsTheatreJS &&
       Object.keys(OrbitControlsTheatreJS).length > 0
     ) {
+      orbit.minPolarAngle = Math.PI / 2;
+      orbit.maxPolarAngle = Math.PI / 2;
       orbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
       orbit.enablePan = OrbitControlsTheatreJS.enablePan;
       orbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
@@ -39,6 +41,8 @@ const Orbit = ({ theatre, rotate, ref }) => {
     ) {
       myOrbit.dispose();
 
+      myOrbit.minPolarAngle = Math.PI / 2;
+      myOrbit.maxPolarAngle = Math.PI / 2;
       myOrbit = new OrbitControls(camera, gl.domElement);
       myOrbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
       myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
