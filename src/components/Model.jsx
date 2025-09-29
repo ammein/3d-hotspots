@@ -13,18 +13,13 @@ import {
   Suspense,
   useCallback,
 } from 'react';
-import {
-  useGLTF,
-  useAnimations,
-  PerspectiveCamera,
-  Line,
-} from '@react-three/drei';
+import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { GLTFLoader, KTX2Loader } from 'three-stdlib';
+import { KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import Fog from './Fog';
 import { types } from '@theatre/core';
-import { editable, refreshSnapshot, useCurrentSheet } from '@theatre/r3f';
+import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
 import { Color, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
@@ -32,6 +27,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useApp } from './context/AppManagement';
 import Orbit from '@/components/Orbit';
+import { spherical_lerp } from '@/helpers/interpolate';
+import Hotspot from '@/components/Hotspot';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -71,9 +68,8 @@ function Model({
 
   const groupRef = useRef();
   const shaderRef = useRef();
+  /** @type {{current: import('three-stdlib').OrbitControls}} */
   const orbitRef = useRef();
-  /** @type {{current: import('three').Line[]}} */
-  const linesRef = useRef([]);
   const [initialFog, setinitialFog] = useState({
     value: 0.0,
   });
@@ -81,6 +77,7 @@ function Model({
   const { gl, camera, controls } = useThree();
   const [pointer, setPointer] = useState('');
   const [storeCamereLocation, setStoreCameraLocation] = useState([0, 0, 0]);
+  const [focus, setFocus] = useState(false);
   const [urlDebounced] = useDebounce(url, 1000);
 
   /**
@@ -138,10 +135,6 @@ function Model({
     [hotspots]
   );
 
-  const setLinesRef = (line, index) => {
-    linesRef.current[index] = line;
-  };
-
   useEffect(() => {
     if (rest.start && sheet) {
       sheet.sequence.play();
@@ -186,14 +179,6 @@ function Model({
     rest.ready,
     CanvasTheatreJS,
   ]);
-
-  // useFrame(({ camera }) => {
-  //   linesRef.current.forEach((line) => {
-  //     const opac = line.position.dot(camera.position);
-
-  //     line.material.opacity = opac;
-  //   });
-  // });
 
   // Preload GLTF
   useEffect(() => {
@@ -254,34 +239,48 @@ function Model({
       });
     }
 
-    if (HotspotCameraTheatreJS && pointer.length > 0 && gltf) {
-      // Go to camerea location
+    if (HotspotCameraTheatreJS && pointer.length > 0 && gltf && !focus) {
+      console.log('Running Hotspot');
+      // Go to camera location
       let nextCameraLocation = gltf.scene.getObjectByName(pointer);
 
       let positionDistance = nextCameraLocation.position
         .clone()
-        .normalize()
         .multiplyScalar(HotspotCameraTheatreJS.distance);
 
       setStoreCameraLocation(camera.position.toArray());
 
-      console.log(positionDistance);
-
       // Copy Location
-      gsap.to(camera.position, {
-        x: positionDistance.x,
-        y: positionDistance.y,
-        z: positionDistance.z,
-        onUpdate: () => {
-          let description = gltf.scene.getObjectByName(pointer).position;
-          orbitRef.current.target = new Vector3(
-            description.x,
-            description.y,
-            description.z
-          );
-        },
-        duration: 1,
-      });
+      const locationTween = gsap.to(
+        {},
+        {
+          onUpdate: () => {
+            const progress = locationTween.progress();
+            let newLocation = spherical_lerp(
+              camera.position,
+              positionDistance,
+              HotspotCameraTheatreJS.orbitDistance,
+              progress
+            );
+
+            camera.position.set(newLocation.x, newLocation.y, newLocation.z);
+            const description = gltf.scene.getObjectByName(pointer).position;
+            if (orbitRef.current) {
+              orbitRef.current.target = new Vector3(
+                description.x,
+                description.y,
+                description.z
+              );
+            }
+          },
+          onComplete: () => {
+            orbitRef.current.enableRotate = false;
+            setFocus(true);
+          },
+          duration: 1,
+          ease: 'sine.in',
+        }
+      );
     }
     // else if (
     //   pointer.length === 0 &&
@@ -321,9 +320,8 @@ function Model({
             {hotspots.length > 0 &&
               HotspotLinesTheatreJS &&
               hotspots?.map((val, i) => (
-                <Line
-                  ref={(line) => setLinesRef(line, i)}
-                  key={val.name}
+                <Hotspot
+                  key={val.name + i}
                   points={val.lines}
                   lineWidth={HotspotLinesTheatreJS.width}
                   color={new Color('black')}
@@ -381,7 +379,7 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
       distance: types.number(1.0, {
         range: [0, 10],
         nudgeMultiplier: 0.1,
-        label: 'Distance',
+        label: 'Text Distance',
       }),
       width: types.number(1.0, {
         range: [0, 10],
@@ -395,6 +393,11 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
       distance: types.number(0, {
         range: [0, 100],
         label: 'Scalar Distance',
+        nudgeMultiplier: 0.1,
+      }),
+      orbitDistance: types.number(1, {
+        range: [1, 100],
+        label: 'Orbit Distance',
         nudgeMultiplier: 0.1,
       }),
     },

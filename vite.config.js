@@ -18,7 +18,8 @@ export default defineConfig({
   plugins: [react(), svgr(), tailwindcss(), glsl()],
   resolve: {
     alias: {
-      '@': path.resolve(dirname, './src')
+      '@': path.resolve(dirname, './src'),
+      '@three-math': path.resolve(dirname, './node_modules/three/src/math')
     },
   },
   assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],

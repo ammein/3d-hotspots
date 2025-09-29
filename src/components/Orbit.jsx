@@ -12,20 +12,29 @@ const Orbit = ({ theatre, rotate, ref }) => {
 
   /** @typedef {import('three-extras/controls/OrbitControls').OrbitControls} */
   let myOrbit = useMemo(() => {
-    let orbit = new OrbitControls(camera, gl.domElement);
+    let myOrbit = new OrbitControls(camera, gl.domElement);
     if (
       OrbitControlsTheatreJS &&
       Object.keys(OrbitControlsTheatreJS).length > 0
     ) {
-      orbit.minPolarAngle = Math.PI / 2;
-      orbit.maxPolarAngle = Math.PI / 2;
-      orbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
-      orbit.enablePan = OrbitControlsTheatreJS.enablePan;
-      orbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
-      orbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
+      if (OrbitControlsTheatreJS.horizontalOnly) {
+        camera.up.set(0, 1, 0);
+        myOrbit.minPolarAngle = Math.PI / 2;
+        myOrbit.maxPolarAngle = Math.PI / 2;
+      } else if (OrbitControlsTheatreJS.verticalOnly) {
+        camera.up.set(1, 0, 0);
+        myOrbit.minPolarAngle = 0;
+        myOrbit.maxPolarAngle = Math.PI;
+        myOrbit.minAzimuthAngle = 0;
+        myOrbit.maxAzimuthAngle = 0;
+      }
+      myOrbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
+      myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
+      myOrbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
+      myOrbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
     }
 
-    return orbit;
+    return myOrbit;
   }, [OrbitControlsTheatreJS, camera, gl, rotate]);
 
   useFrame(({ gl, scene, camera }) => {
@@ -40,9 +49,18 @@ const Orbit = ({ theatre, rotate, ref }) => {
       Object.keys(OrbitControlsTheatreJS).length > 0
     ) {
       myOrbit.dispose();
+      if (OrbitControlsTheatreJS.horizontalOnly) {
+        camera.up.set(0, 1, 0);
+        myOrbit.minPolarAngle = Math.PI / 2;
+        myOrbit.maxPolarAngle = Math.PI / 2;
+      } else if (OrbitControlsTheatreJS.verticalOnly) {
+        camera.up.set(1, 0, 0);
+        myOrbit.minPolarAngle = 0;
+        myOrbit.maxPolarAngle = Math.PI;
+        myOrbit.minAzimuthAngle = 0;
+        myOrbit.maxAzimuthAngle = 0;
+      }
 
-      myOrbit.minPolarAngle = Math.PI / 2;
-      myOrbit.maxPolarAngle = Math.PI / 2;
       myOrbit = new OrbitControls(camera, gl.domElement);
       myOrbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
       myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
@@ -73,6 +91,14 @@ const TheatreOrbit = withTheatreManagement(Orbit, 'Model', {
       enableRotate: types.boolean(false, {
         label: 'Enable Rotate',
       }),
+      maxPolarAngle: types.number(Math.PI, {
+        range: [0, Math.PI],
+      }),
+      minPolarAngle: types.number(0, {
+        range: [0, Math.PI],
+      }),
+      horizontalOnly: types.boolean(false),
+      verticalOnly: types.boolean(false),
     },
   },
 });

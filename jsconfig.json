@@ -10,6 +10,9 @@
         "paths": {
             "@/*": [
                 "src/*"
+            ],
+            "@three-math/*": [
+                "./node_modules/three/src/math/*"
             ]
         },
         /* Vite Environment Types, This is a key addition. It loads Vite's specific type definitions, giving you autocompletion for environment variables like import.meta.env. */
