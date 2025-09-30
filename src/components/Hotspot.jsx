@@ -5,7 +5,7 @@ import { Vector3 } from 'three';
 
 /**
  * Hotspot Line component
- * @param { import('@react-three/drei').LineProps } 0
+ * @param { import('@react-three/drei').LineProps & { start: boolean } } 0
  * @returns
  */
 const Hotspot = ({ ...props }) => {
@@ -13,12 +13,18 @@ const Hotspot = ({ ...props }) => {
   const lineRef = useRef();
 
   useFrame(({ camera }) => {
-    const opac = new Vector3(
-      props.points[0][0],
-      props.points[0][1],
-      props.points[0][2]
-    ).dot(camera.position);
-    lineRef.current.material.opacity = opac;
+    if (props.start) {
+      if (!lineRef.current.material.visible)
+        lineRef.current.material.visible = true;
+      const opac = new Vector3(
+        props.points[0][0],
+        props.points[0][1],
+        props.points[0][2]
+      ).dot(camera.position);
+      lineRef.current.material.opacity = opac;
+    } else {
+      lineRef.current.material.visible = false;
+    }
   });
 
   return <Line ref={lineRef} {...props} />;

@@ -5,10 +5,10 @@ import { types } from '@theatre/core';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useImperativeHandle, useMemo } from 'react';
 
-const Orbit = ({ theatre, rotate, ref }) => {
+const Orbit = ({ theatre, ref, makeDefault }) => {
   const { ['Orbit Controls']: OrbitControlsTheatreJS } = theatre;
 
-  const { camera, gl } = useThree();
+  const { camera, gl, get, set, controls } = useThree();
 
   /** @typedef {import('three-extras/controls/OrbitControls').OrbitControls} */
   let myOrbit = useMemo(() => {
@@ -28,52 +28,36 @@ const Orbit = ({ theatre, rotate, ref }) => {
         myOrbit.minAzimuthAngle = 0;
         myOrbit.maxAzimuthAngle = 0;
       }
-      myOrbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
+      myOrbit.enabled = controls.enabled;
+      myOrbit.autoRotate = controls.enabled
+        ? OrbitControlsTheatreJS.autoRotate
+        : false;
       myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
-      myOrbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
+      myOrbit.enableRotate = controls.enabled
+        ? OrbitControlsTheatreJS.enableRotate
+        : false;
       myOrbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
+      myOrbit.target = controls.target;
     }
 
     return myOrbit;
-  }, [OrbitControlsTheatreJS, camera, gl, rotate]);
+  }, [OrbitControlsTheatreJS, camera, gl]);
 
   useFrame(({ gl, scene, camera }) => {
-    myOrbit.update();
-    gl.render(scene, camera);
-  });
+    if (controls.enabled) myOrbit.update();
+  }, -1);
 
-  // Reinitialize Orbit Controls so that Orbit Controls does not back to default orientation/position/rotation
   useEffect(() => {
-    if (
-      OrbitControlsTheatreJS &&
-      Object.keys(OrbitControlsTheatreJS).length > 0
-    ) {
-      myOrbit.dispose();
-      if (OrbitControlsTheatreJS.horizontalOnly) {
-        camera.up.set(0, 1, 0);
-        myOrbit.minPolarAngle = Math.PI / 2;
-        myOrbit.maxPolarAngle = Math.PI / 2;
-      } else if (OrbitControlsTheatreJS.verticalOnly) {
-        camera.up.set(1, 0, 0);
-        myOrbit.minPolarAngle = 0;
-        myOrbit.maxPolarAngle = Math.PI;
-        myOrbit.minAzimuthAngle = 0;
-        myOrbit.maxAzimuthAngle = 0;
-      }
-
-      myOrbit = new OrbitControls(camera, gl.domElement);
-      myOrbit.autoRotate = rotate && OrbitControlsTheatreJS.autoRotate;
-      myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
-      myOrbit.enableRotate = OrbitControlsTheatreJS.enableRotate;
-      myOrbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
+    if (makeDefault) {
+      const old = get().controls;
+      set({ controls: myOrbit });
+      return () => set({ controls: old });
     }
-
-    return () => {
-      myOrbit.dispose();
-    };
-  }, [OrbitControlsTheatreJS, camera, gl, rotate]);
+  }, [makeDefault, myOrbit]);
 
   useImperativeHandle(ref, () => myOrbit, [myOrbit]);
+
+  return <primitive ref={ref} object={myOrbit} />;
 };
 
 const TheatreOrbit = withTheatreManagement(Orbit, 'Model', {

@@ -14,10 +14,6 @@ const Main = ({ theatre, start, loaded }) => {
 
   const { appProject } = useApp();
 
-  useFrame(({ gl, scene, camera }) => {
-    gl.render(scene, camera);
-  }, 1);
-
   return (
     <>
       {ModelTheatreJS && ModelTheatreJS.model.id && (

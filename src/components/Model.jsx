@@ -14,14 +14,14 @@ import {
   useCallback,
 } from 'react';
 import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import { KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import Fog from './Fog';
 import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color, Vector3 } from 'three';
+import { Color, Spherical, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -29,6 +29,7 @@ import { useApp } from './context/AppManagement';
 import Orbit from '@/components/Orbit';
 import { spherical_lerp } from '@/helpers/interpolate';
 import Hotspot from '@/components/Hotspot';
+import { DEG2RAD } from '@three-math/MathUtils';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -74,6 +75,7 @@ function Model({
     value: 0.0,
   });
   const [hotspots, setHotspots] = useState([]);
+  /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('three-stdlib').OrbitControls }} */
   const { gl, camera, controls } = useThree();
   const [pointer, setPointer] = useState('');
   const [storeCamereLocation, setStoreCameraLocation] = useState([0, 0, 0]);
@@ -265,16 +267,49 @@ function Model({
 
             camera.position.set(newLocation.x, newLocation.y, newLocation.z);
             const description = gltf.scene.getObjectByName(pointer).position;
-            if (orbitRef.current) {
-              orbitRef.current.target = new Vector3(
-                description.x,
-                description.y,
-                description.z
-              );
-            }
+            camera.lookAt(
+              new Vector3(description.x, description.y, description.z)
+            );
+
+            controls.target.set(description.x, description.y, description.z);
           },
           onComplete: () => {
-            orbitRef.current.enableRotate = false;
+            controls.autoRotate = false;
+
+            // Get Spherical Coordinate to get azimuth & polar
+            const spherical = new Spherical();
+
+            spherical.setFromVector3(
+              controls.object.position.clone().sub(controls.target) // camera - target
+            );
+
+            const currentAzimuth = spherical.theta; // azimuth (around Y)
+            const currentPolar = spherical.phi; // polar (down from Y)
+
+            if (camera.up.x === 1) {
+              controls.minPolarAngle = Math.max(
+                0,
+                currentPolar -
+                  HotspotCameraTheatreJS.focusVerticalAngle * DEG2RAD
+              );
+              controls.maxPolarAngle = Math.min(
+                Math.PI,
+                currentPolar +
+                  HotspotCameraTheatreJS.focusVerticalAngle * DEG2RAD
+              );
+            }
+
+            if (camera.up.y === 1) {
+              // Enable only certain angle rotation
+              controls.minAzimuthAngle =
+                currentAzimuth -
+                HotspotCameraTheatreJS.focusHorizontalAngle * DEG2RAD;
+              controls.maxAzimuthAngle =
+                currentAzimuth +
+                HotspotCameraTheatreJS.focusHorizontalAngle * DEG2RAD;
+            }
+
+            // controls.enabled = false;
             setFocus(true);
           },
           duration: 1,
@@ -321,9 +356,11 @@ function Model({
               HotspotLinesTheatreJS &&
               hotspots?.map((val, i) => (
                 <Hotspot
+                  start={rest.start}
                   key={val.name + i}
                   points={val.lines}
                   lineWidth={HotspotLinesTheatreJS.width}
+                  transparent={true}
                   color={new Color('black')}
                 />
               ))}
@@ -345,7 +382,11 @@ function Model({
           </>
         )}
       </Suspense>
-      <Orbit ref={orbitRef} rotate={pointer.length > 0 ? false : true} />
+      <Orbit
+        ref={orbitRef}
+        makeDefault
+        rotate={pointer.length > 0 ? false : true}
+      />
     </>
   );
 }
@@ -399,6 +440,16 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         range: [1, 100],
         label: 'Orbit Distance',
         nudgeMultiplier: 0.1,
+      }),
+      focusHorizontalAngle: types.number(30, {
+        range: [0, 360],
+        label: 'Lock Horizontal Angle',
+        nudgeMultiplier: 1,
+      }),
+      focusVerticalAngle: types.number(30, {
+        range: [0, 360],
+        label: 'Lock Vertical Angle',
+        nudgeMultiplier: 1,
       }),
     },
   },
