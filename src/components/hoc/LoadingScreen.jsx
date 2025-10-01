@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 import Button from '@/components/Button';
 import { useApp } from '../context/AppManagement';
 import { useProgress } from '@react-three/drei';
+import { useTranslations } from 'use-intl';
 
 const loadingDuration = 0.35;
 
@@ -15,7 +16,8 @@ const loadingDuration = 0.35;
  */
 const withLoading = (WrappedComponent) => {
   return (props) => {
-    const { ready, msg } = useApp();
+    const { ready } = useApp();
+    const t = useTranslations('Loading');
     const buttonLoadRef = useRef();
     const {
       progress: ThreeJSProgress,
@@ -134,7 +136,11 @@ const withLoading = (WrappedComponent) => {
             duration: loadingDuration,
             onStart: () =>
               setAssetName(
-                loaded[Math.floor(loaded.length / loadingTotal.length)].type
+                t(
+                  loaded[
+                    Math.floor(loaded.length / loadingTotal.length)
+                  ].type.toLowerCase()
+                )
               ),
             onUpdate: ({ value }) => setProgress(value),
             onUpdateParams: [progressRef.current],
@@ -160,9 +166,9 @@ const withLoading = (WrappedComponent) => {
 
     const loadText = ready
       ? progress !== 100
-        ? msg('Loading') + ' ' + assetName
+        ? t('text') + ' ' + assetName
         : 'Asset Loaded'
-      : 'Loading...';
+      : t('text') + '...';
 
     return (
       <>

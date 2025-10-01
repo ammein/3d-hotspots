@@ -13,6 +13,9 @@
             ],
             "@three-math/*": [
                 "./node_modules/three/src/math/*"
+            ],
+            "@three-extras/*": [
+                "./node_modules/three/examples/jsm/*"
             ]
         },
         /* Vite Environment Types, This is a key addition. It loads Vite's specific type definitions, giving you autocompletion for environment variables like import.meta.env. */

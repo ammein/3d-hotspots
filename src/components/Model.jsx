@@ -21,7 +21,7 @@ import Fog from './Fog';
 import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color, Spherical, Vector3 } from 'three';
+import { Color, Spherical, Vector3, Fog as ThreeFog } from 'three';
 import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -69,14 +69,14 @@ function Model({
 
   const groupRef = useRef();
   const shaderRef = useRef();
-  /** @type {{current: import('three-stdlib').OrbitControls}} */
+  /** @type {{current: import('./Orbit').PowerOrbitControls}} */
   const orbitRef = useRef();
   const [initialFog, setinitialFog] = useState({
     value: 0.0,
   });
   const [hotspots, setHotspots] = useState([]);
-  /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('three-stdlib').OrbitControls }} */
-  const { gl, camera, controls } = useThree();
+  /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('./Orbit').PowerOrbitControls, scene: import('three').Scene }} */
+  const { gl, camera, controls, scene } = useThree();
   const [pointer, setPointer] = useState('');
   const [storeCamereLocation, setStoreCameraLocation] = useState([0, 0, 0]);
   const [focus, setFocus] = useState(false);
@@ -124,7 +124,7 @@ function Model({
       /** @type {import('three').Intersection[]} */
       const intersections = e.intersections;
 
-      if (intersections.length > 0) {
+      if (intersections.length > 0 && rest.start) {
         let intersect = hotspots.find(({ pointer }) =>
           intersections.some(({ object }) => object.name.indexOf(pointer) >= 0)
         );
@@ -134,7 +134,7 @@ function Model({
         }
       }
     },
-    [hotspots]
+    [hotspots, rest]
   );
 
   useEffect(() => {
@@ -194,6 +194,11 @@ function Model({
           (val) => val.name === object.name
         );
 
+        if (object.type === 'Mesh') {
+          // Set transparent to true on Mesh Material object so that it can be adjust the opacity later
+          object.material.transparent = true;
+        }
+
         if (
           findHotspot &&
           HotspotLinesTheatreJS &&
@@ -241,6 +246,38 @@ function Model({
       });
     }
 
+    if (focus && FogTheatreJS && HotspotCameraTheatreJS) {
+      gltf.scene.traverse((object) => {
+        let findObject = hotspots.find(
+          ({ pointer }) => object.name.indexOf(pointer) >= 0
+        );
+
+        if (object && findObject && focus && object.type === 'Mesh') {
+          /** @type {import('three').Material} */
+          let material = object.material;
+          material.opacity = 0.0;
+        }
+      });
+
+      // const fogColor = new Color(
+      //   FogTheatreJS.fogColor.r,
+      //   FogTheatreJS.fogColor.g,
+      //   FogTheatreJS.fogColor.b
+      // );
+
+      // const maxDistance =
+      //   camera.position.distanceTo(
+      //     gltf.scene.getObjectByName(pointer).position
+      //   ) + 0.7;
+      // console.log('Distance: ', maxDistance);
+      // const fogInit = new ThreeFog(fogColor, 1, 1000);
+      // scene.fog = fogInit;
+      // gsap.to(fogInit, {
+      //   far: maxDistance,
+      //   duration: 1,
+      // });
+    }
+
     if (HotspotCameraTheatreJS && pointer.length > 0 && gltf && !focus) {
       console.log('Running Hotspot');
       // Go to camera location
@@ -256,6 +293,9 @@ function Model({
       const locationTween = gsap.to(
         {},
         {
+          onStart: () => {
+            controls.saveState();
+          },
           onUpdate: () => {
             const progress = locationTween.progress();
             let newLocation = spherical_lerp(
@@ -286,7 +326,7 @@ function Model({
             const currentAzimuth = spherical.theta; // azimuth (around Y)
             const currentPolar = spherical.phi; // polar (down from Y)
 
-            if (camera.up.x === 1) {
+            if (controls.orientation === 'vertical') {
               controls.minPolarAngle = Math.max(
                 0,
                 currentPolar -
@@ -299,7 +339,7 @@ function Model({
               );
             }
 
-            if (camera.up.y === 1) {
+            if (controls.orientation === 'horizontal') {
               // Enable only certain angle rotation
               controls.minAzimuthAngle =
                 currentAzimuth -
@@ -339,6 +379,7 @@ function Model({
     rest.hotspotID,
     pointer,
     HotspotCameraTheatreJS,
+    focus,
   ]);
 
   return (
@@ -358,7 +399,9 @@ function Model({
                 <Hotspot
                   start={rest.start}
                   key={val.name + i}
+                  focus={focus}
                   points={val.lines}
+                  hotspotName={val.name}
                   lineWidth={HotspotLinesTheatreJS.width}
                   transparent={true}
                   color={new Color('black')}

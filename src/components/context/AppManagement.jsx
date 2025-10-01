@@ -9,10 +9,10 @@ import {
 import { loadFromJSON, getLanguage } from '@/helpers/i18n';
 import { getProject } from '@theatre/core';
 import states from '@/assets/theatre-project-state.json';
+import { IntlProvider, useTranslations } from 'use-intl';
 
 /**
  * @typedef AppContext
- * @property {Function} msg
  * @property {boolean} ready
  * @property {import('@theatre/core').IProject} appProject
  * @property {object} metadata
@@ -34,24 +34,11 @@ export default ({ children }) => {
     });
   }, [states]);
 
-  const msg = useCallback(
-    (key) => {
-      if (!ready || key === undefined || key === null || key == '') return;
-
-      if (!translations[key]) {
-        if (import.meta.env.DEV) {
-          if (!window.missingI18nKeys) {
-            window.missingI18nKeys = {};
-            console.warn(
-              'I18N: Missing translation keys are being collected. Run `downloadMissingKeys()` in the browser console to download them as a JSON file.'
-            );
-          }
-          window.missingI18nKeys[key] = key;
-        }
-        console.warn(`Missing translation for key: ${key}`);
-        return key;
+  const errorTranslations = useCallback(
+    (error) => {
+      if (import.meta.env.DEV) {
+        console.warn(error.message);
       }
-      return translations[key];
     },
     [ready, translations]
   );
@@ -96,16 +83,23 @@ export default ({ children }) => {
     }
   }, [metadataValue, translations]);
 
+  if (Object.keys(translations).length === 0) return <p>Loading...</p>;
+
   return (
     <AppContext.Provider
       value={{
-        msg,
         ready,
         appProject,
         metadata: metadataValue,
       }}
     >
-      {children}
+      <IntlProvider
+        messages={translations}
+        locale={getLanguage()}
+        onError={errorTranslations}
+      >
+        {children}
+      </IntlProvider>
     </AppContext.Provider>
   );
 };

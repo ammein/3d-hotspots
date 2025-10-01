@@ -7,6 +7,7 @@ import { Paragraph } from '@/stories/Paragraph';
 import Button from '@/components/Button';
 import { useGSAP } from '@gsap/react';
 import { useRef, useState, useCallback, useEffect } from 'react';
+import { useTranslations } from 'use-intl';
 
 const SplashStyles = styled.div`
   height: auto;
@@ -20,7 +21,7 @@ const SplashContainer = tw(SplashStyles)`${({ $show = false }) =>
 				pt-[20px] pb-[20px]`;
 
 function Splash({ callback, loaded }) {
-  const { msg } = useApp();
+  const t = useTranslations('Splash');
   const [visibility, setVisibility] = useState(false);
   const headline = useRef();
   const container = useRef();
@@ -45,20 +46,16 @@ function Splash({ callback, loaded }) {
         type="h1"
         color={/* tailwindcss */ 'text-corporateblue'}
       >
-        {msg('3D Real World Problem')}
+        {t('title')}
       </Headline>
-      <Paragraph ref={paragraph}>
-        {msg(
-          'Lorem ipsum dolor sit amet consectetur. Turpis mi pretium sit eu orci amet nulla pellentesque. Elit nunc pellentesque ultrices eget malesuada. Fusce.'
-        )}
-      </Paragraph>
+      <Paragraph ref={paragraph}>{t('description')}</Paragraph>
       <Button
         $buttonType="scream"
         $size="large"
         $weight="bold"
         onClick={buttonClick}
       >
-        {msg('Click Me To Explore')}
+        {t('button')}
       </Button>
     </SplashContainer>
   );

@@ -19,7 +19,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(dirname, './src'),
-      '@three-math': path.resolve(dirname, './node_modules/three/src/math')
+      '@three-math': path.resolve(dirname, './node_modules/three/src/math'),
+      '@three-extras': path.resolve(dirname, './node_modules/three/examples/jsm')
     },
   },
   assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
