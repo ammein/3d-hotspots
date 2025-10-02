@@ -30,6 +30,7 @@ import Orbit from '@/components/Orbit';
 import { spherical_lerp } from '@/helpers/interpolate';
 import Hotspot from '@/components/Hotspot';
 import { DEG2RAD } from '@three-math/MathUtils';
+import { DepthOfField, EffectComposer } from '@react-three/postprocessing';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -74,6 +75,8 @@ function Model({
   const [initialFog, setinitialFog] = useState({
     value: 0.0,
   });
+
+  const dofRef = useRef();
   const [hotspots, setHotspots] = useState([]);
   /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('./Orbit').PowerOrbitControls, scene: import('three').Scene }} */
   const { gl, camera, controls, scene } = useThree();
@@ -247,35 +250,27 @@ function Model({
     }
 
     if (focus && FogTheatreJS && HotspotCameraTheatreJS) {
-      gltf.scene.traverse((object) => {
-        let findObject = hotspots.find(
-          ({ pointer }) => object.name.indexOf(pointer) >= 0
-        );
+      const camPos = new Vector3();
+      const objPos = new Vector3();
 
-        if (object && findObject && focus && object.type === 'Mesh') {
-          /** @type {import('three').Material} */
-          let material = object.material;
-          material.opacity = 0.0;
-        }
+      camera.getWorldPosition(camPos);
+      gltf.scene.getObjectByName(pointer).getWorldPosition(objPos);
+
+      const dist = camPos.distanceTo(objPos);
+
+      // DepthOfField expects a normalized [0,1] focus distance
+      // Convert world distance into camera space depth
+      const ndc = objPos.clone().project(camera);
+      const depth = (ndc.z + 1) / 2;
+
+      console.log(depth);
+
+      const dofTween = gsap.to(dofRef.current, {
+        focusDistance: depth,
+        target: objPos,
+        focalLength: 0,
+        bokehScale: 20,
       });
-
-      // const fogColor = new Color(
-      //   FogTheatreJS.fogColor.r,
-      //   FogTheatreJS.fogColor.g,
-      //   FogTheatreJS.fogColor.b
-      // );
-
-      // const maxDistance =
-      //   camera.position.distanceTo(
-      //     gltf.scene.getObjectByName(pointer).position
-      //   ) + 0.7;
-      // console.log('Distance: ', maxDistance);
-      // const fogInit = new ThreeFog(fogColor, 1, 1000);
-      // scene.fog = fogInit;
-      // gsap.to(fogInit, {
-      //   far: maxDistance,
-      //   duration: 1,
-      // });
     }
 
     if (HotspotCameraTheatreJS && pointer.length > 0 && gltf && !focus) {
@@ -374,6 +369,7 @@ function Model({
     // }
   }, [
     rest.loaded,
+    dofRef,
     FogTheatreJS,
     gltf,
     rest.hotspotID,
@@ -410,17 +406,26 @@ function Model({
             {FogTheatreJS && (
               <Fog
                 ref={shaderRef}
-                focalRange={
-                  !rest.start ? initialFog.value : FogTheatreJS.focalRange
-                }
-                fogColor={
-                  new Color(
+                uniforms={{
+                  focalRange: !rest.start
+                    ? initialFog.value
+                    : FogTheatreJS.focalRange,
+                  fogColor: new Color(
                     FogTheatreJS.fogColor.r,
                     FogTheatreJS.fogColor.g,
                     FogTheatreJS.fogColor.b
-                  )
-                }
-              />
+                  ),
+                }}
+              >
+                <DepthOfField
+                  ref={dofRef}
+                  target={new Vector3(0, 0, 0)}
+                  focusDistance={1}
+                  focalLength={0.02} // blur intensity
+                  bokehScale={2} // bokeh size
+                  height={480}
+                />
+              </Fog>
             )}
           </>
         )}

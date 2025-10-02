@@ -1,14 +1,15 @@
-import { EffectComposer } from "@react-three/postprocessing";
-import { FogEffect } from "@/components/effect/FogPostProcessing";
+import { EffectComposer } from '@react-three/postprocessing';
+import { FogEffect } from '@/components/effect/FogPostProcessing';
 
 /**
  *
- * @param {import('react').ComponentProps<import('three').Uniform>} uniforms
+ * @param {import('react').ComponentProps<{ uniforms: import('three').Uniform, children}>} uniforms
  * @returns
  */
-export default function Fog(uniforms) {
+export default function Fog({ uniforms, children }) {
   return (
     <EffectComposer>
+      {children}
       <FogEffect
         uniforms={{
           ...uniforms,
@@ -18,4 +19,4 @@ export default function Fog(uniforms) {
   );
 }
 
-Fog.displayName = "Fog Postprocessing";
+Fog.displayName = 'Fog Postprocessing';
