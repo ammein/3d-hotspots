@@ -17,20 +17,21 @@ import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { KTX2Loader } from 'three-stdlib';
 import withModelManagement from '@/components/hoc/ModelManagement';
-import Fog from './Fog';
+import Effects from '@/components/Effects';
 import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color, Spherical, Vector3, Fog as ThreeFog } from 'three';
+import { Color, Spherical, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useApp } from './context/AppManagement';
-import Orbit from '@/components/Orbit';
+import Orbit, { STATE, useScreenToWorld } from '@/components/Orbit';
 import { spherical_lerp } from '@/helpers/interpolate';
 import Hotspot from '@/components/Hotspot';
 import { DEG2RAD } from '@three-math/MathUtils';
-import { DepthOfField, EffectComposer } from '@react-three/postprocessing';
+import { getDepthFromObject } from '@/helpers/utils';
+import { useMediaQuery } from 'react-responsive';
 
 useGLTF.setDecoderPath(
   import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH
@@ -47,7 +48,7 @@ const EditableCamera = editable(PerspectiveCamera, 'perspectiveCamera');
 
 /**
  * Model Component
- * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [], wireframe: boolean } | { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues, ready: boolean }} param0
+ * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [] } & { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues, ready: boolean } & import('@/components/hoc/ModelManagement').ModelManagement} param0
  * @returns
  */
 function Model({
@@ -76,12 +77,16 @@ function Model({
     value: 0.0,
   });
 
+  const screenToWorld = useScreenToWorld();
+
+  const isLandscape = useMediaQuery({
+    minAspectRatio: '4 / 3',
+  });
+
   const dofRef = useRef();
   const [hotspots, setHotspots] = useState([]);
   /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('./Orbit').PowerOrbitControls, scene: import('three').Scene }} */
-  const { gl, camera, controls, scene } = useThree();
-  const [pointer, setPointer] = useState('');
-  const [storeCamereLocation, setStoreCameraLocation] = useState([0, 0, 0]);
+  const { gl, camera, controls, size } = useThree();
   const [focus, setFocus] = useState(false);
   const [urlDebounced] = useDebounce(url, 1000);
 
@@ -106,6 +111,13 @@ function Model({
       }
     }
 
+    /*
+      Fixes on every react refresh onClick bind issue.
+
+      When you hot-save a file (React Fast Refresh), your model or primitive loses its React event bindings (like onClick). This happens because <primitive /> does not go through R3F’s JSX reconciliation layer, so event handlers aren’t re-attached after refresh.
+    */
+    if (gltf) gltf.scene = gltf.scene.clone();
+
     return gltf;
   }, [urlDebounced]);
 
@@ -127,13 +139,23 @@ function Model({
       /** @type {import('three').Intersection[]} */
       const intersections = e.intersections;
 
-      if (intersections.length > 0 && rest.start) {
+      if (
+        intersections.length > 0 &&
+        rest.start &&
+        orbitRef.current.state === STATE.NONE
+      ) {
         let intersect = hotspots.find(({ pointer }) =>
           intersections.some(({ object }) => object.name.indexOf(pointer) >= 0)
         );
 
         if (intersect) {
-          setPointer(intersect.name);
+          // Cancel Intersect if the hotspot is not towards camera position
+          if (
+            new Vector3().fromArray(intersect.lines[0]).dot(camera.position) < 0
+          ) {
+            return;
+          }
+          rest.modelCallback('hotspot', intersect.name);
         }
       }
     },
@@ -254,35 +276,33 @@ function Model({
       const objPos = new Vector3();
 
       camera.getWorldPosition(camPos);
-      gltf.scene.getObjectByName(pointer).getWorldPosition(objPos);
+      gltf.scene.getObjectByName(rest.hotspotID).getWorldPosition(objPos);
 
       const dist = camPos.distanceTo(objPos);
 
       // DepthOfField expects a normalized [0,1] focus distance
       // Convert world distance into camera space depth
-      const ndc = objPos.clone().project(camera);
-      const depth = (ndc.z + 1) / 2;
-
-      console.log(depth);
+      const depth = getDepthFromObject(
+        gltf.scene.getObjectByName(rest.hotspotID),
+        camera
+      );
 
       const dofTween = gsap.to(dofRef.current, {
         focusDistance: depth,
         target: objPos,
-        focalLength: 0,
+        focalLength: dist,
         bokehScale: 20,
       });
     }
 
-    if (HotspotCameraTheatreJS && pointer.length > 0 && gltf && !focus) {
+    if (HotspotCameraTheatreJS && rest.hotspotID.length > 0 && gltf && !focus) {
       console.log('Running Hotspot');
       // Go to camera location
-      let nextCameraLocation = gltf.scene.getObjectByName(pointer);
+      const nextCameraLocation = gltf.scene.getObjectByName(rest.hotspotID);
 
-      let positionDistance = nextCameraLocation.position
+      const positionDistance = nextCameraLocation.position
         .clone()
         .multiplyScalar(HotspotCameraTheatreJS.distance);
-
-      setStoreCameraLocation(camera.position.toArray());
 
       // Copy Location
       const locationTween = gsap.to(
@@ -293,20 +313,48 @@ function Model({
           },
           onUpdate: () => {
             const progress = locationTween.progress();
-            let newLocation = spherical_lerp(
-              camera.position,
-              positionDistance,
-              HotspotCameraTheatreJS.orbitDistance,
+            let newLocation;
+
+            if (HotspotCameraTheatreJS.lerp === 'orbit') {
+              newLocation = spherical_lerp(
+                camera.position,
+                positionDistance,
+                HotspotCameraTheatreJS.orbitDistance,
+                progress
+              );
+            } else if (HotspotCameraTheatreJS.lerp === 'linear') {
+              newLocation = gsap.utils.interpolate(
+                camera.position,
+                positionDistance,
+                progress
+              );
+            }
+
+            const getDepth = getDepthFromObject(nextCameraLocation, camera);
+
+            const worldLeft = screenToWorld(size.width * 0.85, 0, getDepth);
+
+            const x = gsap.utils.interpolate(
+              nextCameraLocation.position.x,
+              worldLeft.x,
               progress
             );
 
-            camera.position.set(newLocation.x, newLocation.y, newLocation.z);
-            const description = gltf.scene.getObjectByName(pointer).position;
-            camera.lookAt(
-              new Vector3(description.x, description.y, description.z)
-            );
+            if (isLandscape) {
+              camera.position.set(newLocation.x, newLocation.y, newLocation.z);
+            } else {
+              camera.position.set(
+                newLocation.x - x,
+                newLocation.y,
+                newLocation.z
+              );
+            }
 
-            controls.target.set(description.x, description.y, description.z);
+            controls.target.set(
+              x,
+              nextCameraLocation.position.y,
+              nextCameraLocation.position.z
+            );
           },
           onComplete: () => {
             controls.autoRotate = false;
@@ -344,7 +392,6 @@ function Model({
                 HotspotCameraTheatreJS.focusHorizontalAngle * DEG2RAD;
             }
 
-            // controls.enabled = false;
             setFocus(true);
           },
           duration: 1,
@@ -353,7 +400,7 @@ function Model({
       );
     }
     // else if (
-    //   pointer.length === 0 &&
+    //   rest.hotspotID.length === 0 &&
     //   !camera.position.equals(cameraLocation)
     // ) {
     // TODO: Reset Camera Position when exit
@@ -371,9 +418,10 @@ function Model({
     rest.loaded,
     dofRef,
     FogTheatreJS,
+    controls,
+    size,
     gltf,
     rest.hotspotID,
-    pointer,
     HotspotCameraTheatreJS,
     focus,
   ]);
@@ -386,8 +434,9 @@ function Model({
           <>
             <primitive
               ref={groupRef}
-              onClick={objectClick}
+              onClick={(e) => objectClick(e)}
               object={gltf.scene}
+              dispose={null}
             />
             {hotspots.length > 0 &&
               HotspotLinesTheatreJS &&
@@ -403,10 +452,17 @@ function Model({
                   color={new Color('black')}
                 />
               ))}
+
             {FogTheatreJS && (
-              <Fog
-                ref={shaderRef}
-                uniforms={{
+              <Effects
+                depthProps={{
+                  target: new Vector3(0, 0, 0),
+                  focusDistance: 0,
+                  focalLength: 0.0, // blur intensity
+                  bokehScale: 0, // bokeh size
+                  height: 480,
+                }}
+                uniformsFog={{
                   focalRange: !rest.start
                     ? initialFog.value
                     : FogTheatreJS.focalRange,
@@ -416,16 +472,9 @@ function Model({
                     FogTheatreJS.fogColor.b
                   ),
                 }}
-              >
-                <DepthOfField
-                  ref={dofRef}
-                  target={new Vector3(0, 0, 0)}
-                  focusDistance={1}
-                  focalLength={0.02} // blur intensity
-                  bokehScale={2} // bokeh size
-                  height={480}
-                />
-              </Fog>
+                fogRef={shaderRef}
+                depthRef={dofRef}
+              />
             )}
           </>
         )}
@@ -433,7 +482,7 @@ function Model({
       <Orbit
         ref={orbitRef}
         makeDefault
-        rotate={pointer.length > 0 ? false : true}
+        rotate={rest.hotspotID.length > 0 ? false : true}
       />
     </>
   );
@@ -481,8 +530,12 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
     props: {
       distance: types.number(0, {
         range: [0, 100],
-        label: 'Scalar Distance',
+        label: 'Focus Distance',
         nudgeMultiplier: 0.1,
+      }),
+      lerp: types.stringLiteral('orbit', {
+        orbit: 'orbit',
+        linear: 'linear',
       }),
       orbitDistance: types.number(1, {
         range: [1, 100],

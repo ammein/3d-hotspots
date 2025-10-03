@@ -1,10 +1,30 @@
 import { useState } from 'react';
 
+/**
+ * @callback ModelCallback
+ * @param {"mode" | "hotspot" | "rotation"} type
+ * @param {any} value
+ * @returns {void}
+ */
+
+/**
+ * @typedef {Object} ModelManagement
+ * @property {boolean} wireframe
+ * @property {boolean} hotspotID
+ * @property {number} rotationDegree
+ * @property {ModelCallback} modelCallback
+ * @returns
+ */
+
 const withModelManagement = (WrappedComponent) => {
   return (props) => {
     const [wireframe, setWireframe] = useState(false);
-    const [hotspotID, setHotspotID] = useState(null);
+    const [hotspotID, setHotspotID] = useState('');
     const [rotationDegree, setRotationDegree] = useState(0);
+
+    /**
+     * @type {ModelCallback} modelCallback
+     */
     const callback = (type, value) => {
       switch (type) {
         case 'mode':

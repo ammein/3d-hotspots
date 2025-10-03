@@ -7,6 +7,7 @@ import { useTranslations } from 'use-intl';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
+import { getTextScale } from '@/helpers/utils';
 
 /**
  * Hotspot Line component
@@ -19,9 +20,9 @@ const Hotspot = ({ start = false, hotspotName, focus, ...props }) => {
   /** @type {{ current: import('@react-three/drei').Text3DProps }} */
   const textRef = useRef();
 
-  const { Text: TextTheatreJS } = props.theatre;
+  const textSizeRef = useRef(0.05);
 
-  const { camera } = useThree();
+  const { Text: TextTheatreJS } = props.theatre;
 
   const initialLookAt = new Vector3()
     .subVectors(
@@ -37,7 +38,7 @@ const Hotspot = ({ start = false, hotspotName, focus, ...props }) => {
 
   const t = useTranslations(`Hotspots.${hotspotName}`);
 
-  useFrame(({ camera }) => {
+  useFrame(({ camera, gl }) => {
     if (start) {
       if (!lineRef.current.material.visible)
         lineRef.current.material.visible = true;
@@ -54,6 +55,15 @@ const Hotspot = ({ start = false, hotspotName, focus, ...props }) => {
       }
     } else {
       lineRef.current.material.visible = false;
+    }
+
+    if (lineRef.current) {
+      // Text Scale
+      const worldPos = lineRef.current.getWorldPosition(new Vector3());
+
+      const textSize = getTextScale(worldPos, camera, gl, 14.742);
+
+      textSizeRef.current = textSize;
     }
   });
 
@@ -85,7 +95,12 @@ const Hotspot = ({ start = false, hotspotName, focus, ...props }) => {
           )
         }
       >
-        <DassaultText3D ref={textRef} size={0.09} weight="bold" height={0.04}>
+        <DassaultText3D
+          ref={textRef}
+          size={textSizeRef.current}
+          weight="bold"
+          height={0.04}
+        >
           {t('label')}
           <meshStandardMaterial color="black" />
         </DassaultText3D>

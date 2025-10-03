@@ -18,7 +18,8 @@
             "hotspots": [
                 {
                     "name": "Robot_ArmPart2",
-                    "pointer": "Robot_Arm"
+                    "pointer": "Robot_Arm",
+                    "focus": "left"
                 }
             ]
         }

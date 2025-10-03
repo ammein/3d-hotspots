@@ -5,8 +5,9 @@ import { types } from '@theatre/core';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useImperativeHandle, useMemo } from 'react';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
+import { Vector3, Plane } from 'three';
 
-const _STATE = {
+export const STATE = {
   NONE: -1,
   ROTATE: 0,
   DOLLY: 1,
@@ -15,6 +16,19 @@ const _STATE = {
   TOUCH_PAN: 4,
   TOUCH_DOLLY_PAN: 5,
   TOUCH_DOLLY_ROTATE: 6,
+};
+
+export const useScreenToWorld = () => {
+  const { camera, size, raycaster } = useThree();
+
+  return (x, y, depth = 0.5) => {
+    const ndc = new Vector3(
+      (x / size.width) * 2 - 1,
+      -(y / size.height) * 2 + 1,
+      depth * 2 - 1
+    );
+    return ndc.unproject(camera);
+  };
 };
 
 export class PowerOrbitControls extends OrbitControls {
@@ -27,7 +41,7 @@ export class PowerOrbitControls extends OrbitControls {
     super.update(deltaTime);
     if (
       this.autoRotate &&
-      this.state === _STATE.NONE &&
+      this.state === STATE.NONE &&
       this.orientation === 'vertical'
     ) {
       this._spherical.phi = this._spherical.phi;
