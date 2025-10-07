@@ -16,7 +16,19 @@ import { useState } from 'react';
  * @returns
  */
 
+/**
+ * A higher-order component that adds a `loading` prop to the wrapped component.
+ * @template P - The props of the wrapped component.
+ * @param {React.ComponentType<P>} WrappedComponent - The component to be wrapped.
+ * @returns {function(React.ComponentType): React.ComponentType} A function that takes a React component and returns a new component with model management state.
+ */
 const withModelManagement = (WrappedComponent) => {
+  /**
+   * The wrapped component with added loading functionality.
+   * @template P - The props of the wrapped component.
+   * @param {React.ComponentType<P>} WrappedComponent - The component to be wrapped.
+   * @returns {React.ComponentType<P & ModelManagement>} The new component with added model management props
+   */
   return (props) => {
     const [wireframe, setWireframe] = useState(false);
     const [hotspotID, setHotspotID] = useState('');

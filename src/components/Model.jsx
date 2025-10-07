@@ -243,7 +243,7 @@ function Model({
             data = {
               name: findHotspot.name,
               pointer: findHotspot.pointer ? findHotspot.pointer : null,
-              lines: [origin.toArray(), line.toArray(), lineText.toArray()],
+              lines: [origin, line, lineText],
             };
 
             return [data];
@@ -268,30 +268,6 @@ function Model({
         duration: 1.0,
         onUpdateParams: [gsapRunnerVal],
         onUpdate: ({ value }) => setinitialFog({ value }),
-      });
-    }
-
-    if (focus && FogTheatreJS && HotspotCameraTheatreJS) {
-      const camPos = new Vector3();
-      const objPos = new Vector3();
-
-      camera.getWorldPosition(camPos);
-      gltf.scene.getObjectByName(rest.hotspotID).getWorldPosition(objPos);
-
-      const dist = camPos.distanceTo(objPos);
-
-      // DepthOfField expects a normalized [0,1] focus distance
-      // Convert world distance into camera space depth
-      const depth = getDepthFromObject(
-        gltf.scene.getObjectByName(rest.hotspotID),
-        camera
-      );
-
-      const dofTween = gsap.to(dofRef.current, {
-        focusDistance: depth,
-        target: objPos,
-        focalLength: dist,
-        bokehScale: 20,
       });
     }
 
@@ -445,23 +421,23 @@ function Model({
                   start={rest.start}
                   key={val.name + i}
                   focus={focus}
-                  points={val.lines}
                   hotspotName={val.name}
-                  lineWidth={HotspotLinesTheatreJS.width}
-                  transparent={true}
-                  color={new Color('black')}
+                  geometry={{
+                    points: val.lines,
+                  }}
+                  material={{
+                    lineWidth: HotspotLinesTheatreJS.width,
+                    color: new Color().setRGB(
+                      HotspotLinesTheatreJS.color.r,
+                      HotspotLinesTheatreJS.color.g,
+                      HotspotLinesTheatreJS.color.b
+                    ),
+                  }}
                 />
               ))}
 
             {FogTheatreJS && (
               <Effects
-                depthProps={{
-                  target: new Vector3(0, 0, 0),
-                  focusDistance: 0,
-                  focalLength: 0.0, // blur intensity
-                  bokehScale: 0, // bokeh size
-                  height: 480,
-                }}
                 uniformsFog={{
                   focalRange: !rest.start
                     ? initialFog.value
@@ -473,7 +449,6 @@ function Model({
                   ),
                 }}
                 fogRef={shaderRef}
-                depthRef={dofRef}
               />
             )}
           </>
@@ -520,10 +495,21 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         label: 'Text Distance',
       }),
       width: types.number(1.0, {
-        range: [0, 10],
-        nudgeMultiplier: 0.1,
+        range: [0, 1],
+        nudgeMultiplier: 0.01,
         label: 'Width',
       }),
+      color: types.rgba(
+        {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        },
+        {
+          label: 'Line Color',
+        }
+      ),
     },
   },
   HotspotCamera: {

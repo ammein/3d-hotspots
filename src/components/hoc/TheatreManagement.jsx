@@ -34,6 +34,10 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
  */
 
 /**
+ * @typedef {{ theatre: Record<string, any> }} TheatreReturnValue
+ */
+
+/**
  * @callback ReferenceStateSetter
  * @param {ReferenceState} state
  * @returns {void}
@@ -46,7 +50,22 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
  * @param {TheatreOptionsValues} theatreOptions
  * @returns
  */
+
+/**
+ * A higher-order component that adds a `loading` prop to the wrapped component.
+ * @template P - The props of the wrapped component.
+ * @param {React.ComponentType<P>} WrappedComponent - The component to be wrapped.
+ * @param {string} sheetName Name of TheatreJS Sheet
+ * @param {TheatreOptionsValues} theatreOptions
+ * @returns {function(React.ComponentType): React.ComponentType} A function that takes a React component and returns a new component with model management state.
+ */
 const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
+  /**
+   * The wrapped component with added loading functionality.
+   * @template P - The props of the wrapped component.
+   * @param {React.ComponentType<P>} WrappedComponent - The component to be wrapped.
+   * @returns {React.ComponentType<P & { theatre: TheatreReturnValue }>} The new component with added model management props
+   */
   return (props) => {
     const { appProject } = useApp();
 
@@ -77,7 +96,7 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
         const obj = sheet.object(objName, props, options);
 
         newObjects[objName] = obj;
-        newValues[objName] = obj.value; // ✅ seed initial
+        newValues[objName] = obj.value; // seed initial
       }
 
       setObjects(newObjects);
