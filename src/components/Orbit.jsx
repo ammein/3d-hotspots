@@ -3,9 +3,9 @@ import { OrbitControls } from '@three-extras/controls/OrbitControls';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useImperativeHandle, useMemo } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
-import { Vector3, Plane } from 'three';
+import { Vector3 } from 'three';
 
 export const STATE = {
   NONE: -1,
@@ -19,12 +19,12 @@ export const STATE = {
 };
 
 export const useScreenToWorld = () => {
-  const { camera, size, raycaster } = useThree();
+  const { camera, size } = useThree();
 
   return (x, y, depth = 0.5) => {
     const ndc = new Vector3(
-      (x / size.width) * 2 - 1,
-      -(y / size.height) * 2 + 1,
+      ((x - size.left) / size.width) * 2 - 1,
+      -((y - size.top) / size.height) * 2 + 1,
       depth * 2 - 1
     );
     return ndc.unproject(camera);
@@ -51,65 +51,148 @@ export class PowerOrbitControls extends OrbitControls {
 }
 
 const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
+  const { camera, gl, get, set } = useThree();
   const { ['Orbit Controls']: OrbitControlsTheatreJS } = theatre;
 
-  const { camera, gl, get, set } = useThree();
+  const controlsRef = useRef();
 
-  /** @typedef {PowerOrbitControls} */
-  let myOrbit = useMemo(() => {
-    let myOrbit = new PowerOrbitControls(
+  // Create and update controls when dependencies change
+  useEffect(() => {
+    const propsToCheck = [
+      'minPolarAngle',
+      'maxPolarAngle',
+      'minAzimuthAngle',
+      'maxAzimuthAngle',
+      'enabled',
+      'autoRotate',
+      'enablePan',
+      'enableRotate',
+      'enableZoom',
+    ];
+
+    // Helper to update properties if different and track changes
+    const updateIfDifferent = (oldCtrl, newCtrl, props) => {
+      let changed = false;
+      props.forEach((prop) => {
+        if (oldCtrl[prop] !== newCtrl[prop]) {
+          oldCtrl[prop] = newCtrl[prop];
+          changed = true;
+        }
+      });
+      return changed;
+    };
+
+    // Create new controls instance (but don't set it yet)
+    const newControls = new PowerOrbitControls(
       camera,
       gl.domElement,
       OrbitControlsTheatreJS ? OrbitControlsTheatreJS.orientation : 'horizontal'
     );
-    if (
-      OrbitControlsTheatreJS &&
-      Object.keys(OrbitControlsTheatreJS).length > 0
-    ) {
+
+    // Apply TheatreJS props to newControls
+    if (OrbitControlsTheatreJS) {
       if (OrbitControlsTheatreJS.orientation === 'horizontal') {
-        myOrbit.minAzimuthAngle = -Infinity;
-        myOrbit.maxAzimuthAngle = Infinity;
-        myOrbit.minPolarAngle = OrbitControlsTheatreJS.minPolarAngle * DEG2RAD;
-        myOrbit.maxPolarAngle = OrbitControlsTheatreJS.maxPolarAngle * DEG2RAD;
+        newControls.minAzimuthAngle = -Infinity;
+        newControls.maxAzimuthAngle = Infinity;
+        newControls.minPolarAngle =
+          OrbitControlsTheatreJS.minPolarAngle * DEG2RAD;
+        newControls.maxPolarAngle =
+          OrbitControlsTheatreJS.maxPolarAngle * DEG2RAD;
       } else if (OrbitControlsTheatreJS.orientation === 'vertical') {
-        console.log('Vertical');
-        myOrbit.minPolarAngle = -Infinity;
-        myOrbit.maxPolarAngle = Infinity;
-        myOrbit.minAzimuthAngle = 0;
-        myOrbit.maxAzimuthAngle = 0;
+        newControls.minPolarAngle = -Infinity;
+        newControls.maxPolarAngle = Infinity;
+        newControls.minAzimuthAngle = 0;
+        newControls.maxAzimuthAngle = 0;
       }
-      myOrbit.enabled = enabled;
-      myOrbit.autoRotate = enabled ? OrbitControlsTheatreJS.autoRotate : false;
-      myOrbit.enablePan = OrbitControlsTheatreJS.enablePan;
-      myOrbit.enableRotate = enabled
+
+      newControls.enabled = enabled;
+      newControls.autoRotate = enabled
+        ? OrbitControlsTheatreJS.autoRotate
+        : false;
+      newControls.enablePan = OrbitControlsTheatreJS.enablePan;
+      newControls.enableRotate = enabled
         ? OrbitControlsTheatreJS.enableRotate
         : false;
-      myOrbit.enableZoom = OrbitControlsTheatreJS.enableZoom;
+      newControls.enableZoom = OrbitControlsTheatreJS.enableZoom;
 
-      // Must manually set target to my custom power control, buggy happens when setting the controls directly if `makeDefault` happens
       if (makeDefault) {
-        myOrbit.target = get().controls.target;
+        const currentControls = get().controls;
+        if (currentControls && currentControls.target) {
+          newControls.target.copy(currentControls.target);
+        }
       }
     }
 
-    return myOrbit;
-  }, [OrbitControlsTheatreJS, camera, gl, enabled]);
+    const oldControls = get().controls;
 
+    if (makeDefault && oldControls) {
+      // Update old controls with new props if different
+      let changed = updateIfDifferent(oldControls, newControls, propsToCheck);
+
+      // Also update target if different
+      if (
+        newControls.target &&
+        oldControls.target &&
+        !newControls.target.equals(oldControls.target)
+      ) {
+        oldControls.target.copy(newControls.target);
+        changed = true;
+      }
+
+      if (changed) {
+        oldControls.update();
+      }
+
+      // Dispose the newControls since we won't use it
+      newControls.dispose();
+
+      controlsRef.current = oldControls;
+      set({ controls: oldControls });
+
+      // Cleanup: dispose old controls on unmount
+      return () => {
+        if (oldControls) {
+          oldControls.dispose();
+          set({ controls: null });
+          controlsRef.current = null;
+        }
+      };
+    } else {
+      // No old controls or not makeDefault: use newControls directly
+      controlsRef.current = newControls;
+      set({ controls: newControls });
+
+      // Cleanup: dispose newControls on unmount
+      return () => {
+        if (controlsRef.current) {
+          controlsRef.current.dispose();
+          set({ controls: null });
+          controlsRef.current = null;
+        }
+      };
+    }
+  }, [
+    OrbitControlsTheatreJS,
+    camera,
+    gl.domElement,
+    enabled,
+    makeDefault,
+    get,
+    set,
+  ]);
+
+  // Update controls every frame
   useFrame(() => {
-    if (enabled) myOrbit.update();
+    if (enabled && controlsRef.current) {
+      controlsRef.current.update();
+    }
   }, -1);
 
-  useEffect(() => {
-    if (makeDefault) {
-      const old = get().controls;
-      set({ controls: myOrbit });
-      return () => set({ controls: old });
-    }
-  }, [makeDefault, myOrbit]);
+  useImperativeHandle(ref, () => controlsRef.current, [controlsRef.current]);
 
-  useImperativeHandle(ref, () => myOrbit, [myOrbit]);
-
-  return <primitive ref={ref} object={myOrbit} />;
+  return controlsRef.current ? (
+    <primitive ref={ref} object={controlsRef.current} dispose={null} />
+  ) : null;
 };
 
 const TheatreOrbit = withTheatreManagement(Orbit, 'Model', {

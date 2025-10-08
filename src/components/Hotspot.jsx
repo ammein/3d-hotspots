@@ -1,18 +1,23 @@
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
-import { Color, Vector2, Vector3 } from 'three';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { Color, Vector3 } from 'three';
 import { DassaultText3D } from '@/design-system/components/text3d';
 import { useTranslations } from 'use-intl';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
-import { getTextScale, worldToScreen } from '@/helpers/utils';
+import {
+  getDepthFromObject,
+  getTextScale,
+  stableLookAt,
+} from '@/helpers/utils';
 import withModelManagement from '@/components/hoc/ModelManagement';
 import { useScreenToWorld } from '@/components/Orbit';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { MeshLineGeometry, MeshLineMaterial, raycast } from 'meshline';
 import { Html } from '@react-three/drei';
+import { useMediaQuery } from 'react-responsive';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
@@ -52,8 +57,14 @@ const Hotspot = ({
 
   const screenToWorld = useScreenToWorld();
 
+  const [textBoundingBox, setTextBoundingBox] = useState(null);
+
   /** @type {import('@react-three/fiber').RootState & { controls: import('@/components/Orbit').PowerOrbitControls }} */
   const { camera, gl, controls } = useThree();
+
+  const isDesktop = useMediaQuery({
+    minWidth: '1280px',
+  });
 
   const initialLookAt = new Vector3()
     .subVectors(
@@ -77,30 +88,17 @@ const Hotspot = ({
       )
     );
 
+  const widthText = () => {
+    if (isDesktop) {
+      htmlRef.current.style.width = '327.907px';
+    }
+  };
+
   const [lookAtDirection, setLookAtDirection] = useState(initialLookAt);
 
   const [hidden, setHidden] = useState(true);
 
   const t = useTranslations(`Hotspots.${hotspotName}`);
-
-  /**
-   *
-   * @param {import('three').Object3D} el
-   * @param {import('three').Camera} camera
-   * @param {{ width: number, height: number }} size
-   * @returns {number[]}
-   */
-  // const calculateHTMLPosition = (el, camera, size) => {
-  //   if (focus) {
-  //     const screenPos = worldToScreen(
-  //       textRef.current.getWorldPosition(new Vector3()),
-  //       camera,
-  //       gl
-  //     );
-
-  //     return screenPos;
-  //   }
-  // };
 
   /**
    * Line To Center Viewport
@@ -112,40 +110,19 @@ const Hotspot = ({
    * @param {import('@/components/Orbit').PowerOrbitControls | null} lookAtTarget
    */
   const moveToViewport = (x, y, obj, camera, gl, lookAtTarget = null) => {
-    const hotspotWorld = obj.getWorldPosition(new Vector3());
+    const depth = getDepthFromObject(obj, camera);
 
-    // --- CASE B: use camera lookAt target if provided ---
-    if (lookAtTarget) {
-      return lookAtTarget.clone().sub(hotspotWorld);
-    }
-
-    // --- CASE A: otherwise, use literal screen center ---
-
-    // Project hotspot into screen space
-    const hotspotScreen = hotspotWorld.clone().project(camera);
-
-    // Convert to pixel coordinates
-    const width = gl.domElement.width;
-    const height = gl.domElement.height;
-    const hotspotPx = new Vector2(
-      (hotspotScreen.x + 1) * 0.0 * width,
-      (1 - hotspotScreen.y) * 0.0 * height
+    const centerW = screenToWorld(
+      x * gl.domElement.width,
+      y * gl.domElement.height,
+      depth
     );
 
-    // Screen center in pixels
-    const centerPx = new Vector2(width * x, height * y);
-
-    // Get depth of hotspot in [0,1] range
-    const depth = (hotspotScreen.z + 1) / 2;
-
-    const hotspotW = screenToWorld(hotspotPx.x, hotspotPx.y, depth);
-    const centerW = screenToWorld(centerPx.x, centerPx.y, depth);
-
     // Vector from hotspot → center
-    return centerW.sub(hotspotW);
+    return centerW;
   };
 
-  useFrame(({ camera, gl }) => {
+  useFrame(({ camera, gl, controls }) => {
     if (start && textRef.current) {
       if (!lineRef.current.material.visible)
         lineRef.current.material.visible = true;
@@ -185,7 +162,8 @@ const Hotspot = ({
 
         textRef.current.material.opacity = gsap.utils.clamp(0, 1, opac);
       } else if (focus) {
-        textRef.current.lookAt(camera.position);
+        stableLookAt(textRef.current, camera.position);
+        // textRef.current.lookAt(camera.position);
       }
     } else {
       lineRef.current.material.visible = false;
@@ -206,15 +184,6 @@ const Hotspot = ({
   useGSAP(
     () => {
       if (focus) {
-        const newPoints = moveToViewport(
-          0.2,
-          0.2,
-          lineRef.current,
-          camera,
-          gl,
-          controls.target
-        );
-
         const textSize = getTextScale(
           lineRef.current.getWorldPosition(new Vector3()),
           camera,
@@ -222,35 +191,19 @@ const Hotspot = ({
           33.57
         );
 
+        widthText();
+
         const lineAnimate = gsap.to(
           {},
           {
             onUpdate: () => {
               const progress = lineAnimate.progress();
-              const look = gsap.utils.interpolate(
-                new Vector3(
-                  geometry.points[2].x,
-                  geometry.points[2].y,
-                  geometry.points[2].z
-                ),
-                newPoints,
-                progress
-              );
 
               const size = gsap.utils.interpolate(
                 textSizeRef.current,
                 textSize,
                 progress
               );
-
-              // Move Line to Text
-              lineRef.current.geometry.setPoints([
-                geometry.points[0],
-                geometry.points[2],
-                new Vector3(look.x, look.y, look.z),
-              ]);
-
-              textRef.current.position.set(look.x, look.y, look.z);
               textSizeRef.current = size;
             },
             onComplete: () => {
@@ -306,18 +259,18 @@ const Hotspot = ({
               )}
               transparent
             />
+            <Html
+              ref={htmlRef}
+              as="div"
+              style={{
+                padding: '5px 0 5px 5px',
+                display: hidden ? 'none' : 'block',
+                backgroundColor: 'var(--color-white-48)',
+              }}
+            >
+              <p>{t('description')}</p>
+            </Html>
           </DassaultText3D>
-          <Html
-            ref={htmlRef}
-            as="div"
-            occlude
-            onOcclude={setHidden}
-            style={{
-              display: hidden ? 'none' : 'block',
-            }}
-          >
-            {t('description')}
-          </Html>
         </>
       )}
     </>

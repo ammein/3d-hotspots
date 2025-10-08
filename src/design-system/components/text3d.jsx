@@ -3,9 +3,16 @@ import { Text3D } from '@react-three/drei';
 const fontPath = '/fonts/json/';
 
 /**
- * @param {{ weight: 'light' | 'light-italic' | 'regular' | 'italic' | 'semibold' | 'semibold-italic' | 'bold' | 'bold-italic' } & import('@react-three/drei').Text3DProps} param0
+ * @typedef {Object} DassaultText3DProps
+ * @property {'light' | 'light-italic' | 'regular' | 'italic' | 'semibold' | 'semibold-italic' | 'bold' | 'bold-italic'} weight
+ * @property {import('react').Ref} ref
  */
-const DassaultText3D = ({ children, weight, ...rest }) => {
+
+/**
+ * Dassault Text 3D Component
+ * @param {DassaultText3DProps & import('@react-three/drei').Text3DProps} param0
+ */
+const DassaultText3D = ({ children, weight, ref, ...rest }) => {
   let fontUrl;
 
   switch (weight) {
@@ -42,7 +49,7 @@ const DassaultText3D = ({ children, weight, ...rest }) => {
   }
 
   return (
-    <Text3D font={fontUrl} {...rest}>
+    <Text3D ref={ref} font={fontUrl} {...rest}>
       {children}
     </Text3D>
   );

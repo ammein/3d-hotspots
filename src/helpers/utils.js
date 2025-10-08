@@ -1,5 +1,5 @@
 import { degToRad } from 'three/src/math/MathUtils.js'
-import { Vector3 } from 'three'
+import { Vector3, Matrix4, Quaternion } from 'three'
 
 /**
  * Random Hash Generator
@@ -110,3 +110,44 @@ export const getTextScale = (worldPos, camera, renderer, desiredPxHeight = 20) =
     // scale so that text's height matches desiredPxHeight
     return desiredPxHeight / pixelsPerUnit
 }
+
+const worldUp = new Vector3(0, 1, 0);
+const fallbackUp = new Vector3(0, 0, 1);
+
+const lookDir = new Vector3();
+const right = new Vector3();
+const up = new Vector3();
+
+/**
+ * Stable Look At
+ * @param {import('three').Object3D} object 
+ * @param {import('three').Vector3} cameraPosition 
+ */
+export const stableLookAt = (object, cameraPosition) => {
+    // 1. Calculate look direction from object to camera
+    lookDir.subVectors(cameraPosition, object.position).normalize();
+
+    // 2. Check if lookDir is collinear with worldUp (dot close to ±1)
+    if (Math.abs(lookDir.dot(worldUp)) > 0.999) {
+        // Use fallback up vector to avoid gimbal lock
+        up.copy(fallbackUp);
+    } else {
+        up.copy(worldUp);
+    }
+
+    // 3. Calculate right vector
+    right.crossVectors(up, lookDir).normalize();
+
+    // 4. Recalculate true up vector to ensure orthogonality
+    up.crossVectors(lookDir, right).normalize();
+
+    // 5. Build rotation matrix from right, up, and forward (lookDir)
+    const m = new Matrix4();
+    m.makeBasis(right, up, lookDir);
+
+    // 6. Set object's quaternion from rotation matrix
+    const q = new Quaternion();
+    q.setFromRotationMatrix(m);
+    object.quaternion.copy(q);
+}
+

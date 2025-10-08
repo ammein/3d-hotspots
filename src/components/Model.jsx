@@ -21,7 +21,7 @@ import Effects from '@/components/Effects';
 import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color, Spherical, Vector3 } from 'three';
+import { Color, Spherical, Vector2, Vector3 } from 'three';
 import { useDebounce } from 'use-debounce';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -272,7 +272,7 @@ function Model({
     }
 
     if (HotspotCameraTheatreJS && rest.hotspotID.length > 0 && gltf && !focus) {
-      console.log('Running Hotspot');
+      const tempRotate = controls.enableRotate;
       // Go to camera location
       const nextCameraLocation = gltf.scene.getObjectByName(rest.hotspotID);
 
@@ -288,6 +288,7 @@ function Model({
             controls.saveState();
           },
           onUpdate: () => {
+            controls.enableRotate = false;
             const progress = locationTween.progress();
             let newLocation;
 
@@ -327,46 +328,14 @@ function Model({
             }
 
             controls.target.set(
-              x,
+              nextCameraLocation.position.x,
               nextCameraLocation.position.y,
               nextCameraLocation.position.z
             );
           },
           onComplete: () => {
+            controls.enableRotate = tempRotate;
             controls.autoRotate = false;
-
-            // Get Spherical Coordinate to get azimuth & polar
-            const spherical = new Spherical();
-
-            spherical.setFromVector3(
-              controls.object.position.clone().sub(controls.target) // camera - target
-            );
-
-            const currentAzimuth = spherical.theta; // azimuth (around Y)
-            const currentPolar = spherical.phi; // polar (down from Y)
-
-            if (controls.orientation === 'vertical') {
-              controls.minPolarAngle = Math.max(
-                0,
-                currentPolar -
-                  HotspotCameraTheatreJS.focusVerticalAngle * DEG2RAD
-              );
-              controls.maxPolarAngle = Math.min(
-                Math.PI,
-                currentPolar +
-                  HotspotCameraTheatreJS.focusVerticalAngle * DEG2RAD
-              );
-            }
-
-            if (controls.orientation === 'horizontal') {
-              // Enable only certain angle rotation
-              controls.minAzimuthAngle =
-                currentAzimuth -
-                HotspotCameraTheatreJS.focusHorizontalAngle * DEG2RAD;
-              controls.maxAzimuthAngle =
-                currentAzimuth +
-                HotspotCameraTheatreJS.focusHorizontalAngle * DEG2RAD;
-            }
 
             setFocus(true);
           },
@@ -401,6 +370,38 @@ function Model({
     HotspotCameraTheatreJS,
     focus,
   ]);
+
+  // Controls Update
+  useEffect(() => {
+    if (focus) {
+      // Get Spherical Coordinate to get azimuth & polar
+      const spherical = new Spherical();
+
+      spherical.setFromVector3(
+        controls.object.position.clone().sub(controls.target) // camera - target
+      );
+
+      const currentAzimuth = spherical.theta; // azimuth (around Y)
+      const currentPolar = spherical.phi; // polar (down from Y)
+
+      controls.minPolarAngle = Math.max(
+        0,
+        currentPolar - HotspotCameraTheatreJS.focusVerticalMinAngle * DEG2RAD
+      );
+      controls.maxPolarAngle = Math.min(
+        Math.PI,
+        currentPolar + HotspotCameraTheatreJS.focusVerticalMaxAngle * DEG2RAD
+      );
+
+      // Enable only certain angle rotation
+      controls.minAzimuthAngle =
+        currentAzimuth -
+        HotspotCameraTheatreJS.focusHorizontalMinAngle * DEG2RAD;
+      controls.maxAzimuthAngle =
+        currentAzimuth +
+        HotspotCameraTheatreJS.focusHorizontalMaxAngle * DEG2RAD;
+    }
+  }, [focus, controls, HotspotCameraTheatreJS]);
 
   return (
     <>
@@ -528,14 +529,24 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         label: 'Orbit Distance',
         nudgeMultiplier: 0.1,
       }),
-      focusHorizontalAngle: types.number(30, {
+      focusHorizontalMinAngle: types.number(30, {
         range: [0, 360],
-        label: 'Lock Horizontal Angle',
+        label: 'Max Focus Horizontal Angle',
         nudgeMultiplier: 1,
       }),
-      focusVerticalAngle: types.number(30, {
+      focusHorizontalMaxAngle: types.number(30, {
         range: [0, 360],
-        label: 'Lock Vertical Angle',
+        label: 'Max Focus Horizontal Angle',
+        nudgeMultiplier: 1,
+      }),
+      focusVerticalMinAngle: types.number(30, {
+        range: [0, 360],
+        label: 'Max Focus Vertical Angle',
+        nudgeMultiplier: 1,
+      }),
+      focusVerticalMaxAngle: types.number(30, {
+        range: [0, 360],
+        label: 'Max Focus Vertical Angle',
         nudgeMultiplier: 1,
       }),
     },
