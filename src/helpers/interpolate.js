@@ -20,13 +20,13 @@ function spherical_lerp(pos, target, distance, t) {
   let phiA = Math.acos(pos.y / rA)
   let phiB = Math.acos(target.y / rB)
 
-  let r_lerp = gsap.utils.interpolate(rA, rB);
+  let r_lerp = gsap.utils.interpolate(rA, rB, t) + distance * Math.sin(Math.PI * t);
   let theta_lerp = gsap.utils.interpolate(thetaA, thetaB);
   let phi_lerp = gsap.utils.interpolate(phiA, phiB);
 
-  let x = (r_lerp(t) + distance * Math.sin(Math.PI * t)) * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
-  let y = (r_lerp(t) + distance * Math.sin(Math.PI * t)) * Math.cos(phi_lerp(t));
-  let z = (r_lerp(t) + distance * Math.sin(Math.PI * t)) * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
+  let x = r_lerp * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
+  let y = r_lerp * Math.cos(phi_lerp(t));
+  let z = r_lerp * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
 
   return new Vector3(x, y, z)
 }

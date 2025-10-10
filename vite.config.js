@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr'
 import glsl from 'vite-plugin-glsl'
@@ -14,51 +14,58 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
-export default defineConfig({
-  plugins: [react(), svgr(), tailwindcss(), glsl()],
-  resolve: {
-    alias: {
-      '@': path.resolve(dirname, './src'),
-      '@three-math': path.resolve(dirname, './node_modules/three/src/math'),
-      '@three-extras': path.resolve(dirname, './node_modules/three/examples/jsm')
+export default defineConfig(({ mode }) => {
+  const env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  return {
+    plugins: [react(), svgr(), tailwindcss(), glsl()],
+    resolve: {
+      alias: {
+        '@': path.resolve(dirname, './src'),
+        '@three-math': path.resolve(dirname, './node_modules/three/src/math'),
+        '@three-extras': path.resolve(dirname, './node_modules/three/examples/jsm')
+      },
     },
-  },
-  assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
-  build: {
-    rollupOptions: {
-      output: {
-        entryFileNames: (chunkInfo) => {
-          return `[name]-${randomHash()}.js`;
+    assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
+    build: {
+      rollupOptions: {
+        output: {
+          entryFileNames: (chunkInfo) => {
+            return `[name]-${randomHash()}.js`;
+          }
         }
-      }
-    }
-  },
-  test: {
-    server: {
-      deps: {
-        inline: ['vuetify']
-      }
+      },
+      sourcemap: env.SOURCEMAP === 'true' ? true : false
     },
-    projects: [{
-      extends: true,
-      plugins: [
-        // The plugin will run tests for the stories defined in your Storybook config
-        // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-        storybookTest({
-          configDir: path.join(dirname, '.storybook')
-        })],
-      test: {
-        name: 'storybook',
-        browser: {
-          enabled: true,
-          headless: true,
-          provider: 'playwright',
-          instances: [{
-            browser: 'chromium'
-          }]
-        },
-        setupFiles: ['.storybook/vitest.setup.js']
-      }
-    }]
+    preview: {
+      port: env.VITE_BASE_URL.match(/:(\d+)/) ? env.VITE_BASE_URL.match(/:(\d+)/)[1] : 4173
+    },
+    test: {
+      server: {
+        deps: {
+          inline: ['vuetify']
+        }
+      },
+      projects: [{
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook')
+          })],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: 'playwright',
+            instances: [{
+              browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.js']
+        }
+      }]
+    }
   }
 });

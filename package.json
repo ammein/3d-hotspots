@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite --port 9222 --host",
     "build": "vite build",
+    "clean-build": "rm -rf ./dist",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
