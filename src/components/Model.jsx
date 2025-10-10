@@ -128,7 +128,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
 
         if (intersect) {
           // Cancel Intersect if the hotspot is not towards camera position
-          if (intersect.lines[0].dot(camera.position) > 1) {
+          if (intersect.lines[0].dot(camera.position) > 1 && !focus) {
             controls.saveState();
             rest.modelCallback('hotspot', intersect.name);
             setPosition(controls.position0.clone());
@@ -223,6 +223,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
                 name: findHotspot.name,
                 pointer: findHotspot.pointer ? findHotspot.pointer : null,
                 lines: [origin, line, lineText],
+                focus: findHotspot.focus,
               };
 
               // Check if a similar hotspot already exists
@@ -272,13 +273,28 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     }
 
     if (HotspotCameraTheatreJS && rest.hotspotID.length > 0 && gltf && !focus) {
-      // Go to camera location
+      const getHotspot = hotspots.find((val) => val.name === rest.hotspotID);
+
       const nextCameraLocation = gltf.scene.getObjectByName(rest.hotspotID);
 
-      const positionDistance = nextCameraLocation.position
-        .clone()
-        .normalize()
-        .multiplyScalar(HotspotCameraTheatreJS.distance);
+      let cameraPos = nextCameraLocation.position,
+        cameraLookAt = nextCameraLocation.position;
+
+      if (getHotspot && getHotspot.focus) {
+        if (Array.isArray(getHotspot.focus.position)) {
+          cameraPos = new Vector3().fromArray(getHotspot.focus.position);
+        } else if (typeof getHotspot.focus.position === 'string') {
+          cameraPos = gltf.scene.getObjectByName(getHotspot.focus.position).position;
+        }
+
+        if (Array.isArray(getHotspot.focus.lookAt)) {
+          cameraLookAt = new Vector3().fromArray(getHotspot.focus.lookAt);
+        } else if (getHotspot.focus.lookAt) {
+          cameraLookAt = gltf.scene.getObjectByName(getHotspot.focus.lookAt).position;
+        }
+      }
+
+      const positionDistance = cameraPos.clone().normalize().multiplyScalar(HotspotCameraTheatreJS.distance);
 
       const currentCameraPosition = camera.position.clone();
 
@@ -304,11 +320,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
 
             camera.position.set(newLocation.x, newLocation.y, newLocation.z);
 
-            controls.target.set(
-              nextCameraLocation.position.x,
-              nextCameraLocation.position.y,
-              nextCameraLocation.position.z
-            );
+            controls.target.set(cameraLookAt.x, cameraLookAt.y, cameraLookAt.z);
           },
           onComplete: () => {
             controls.autoRotate = orbitSettings.autoRotate;
@@ -376,7 +388,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
       const spherical = new Spherical();
 
       spherical.setFromVector3(
-        controls.object.position.clone().sub(controls.target) // camera - target
+        controls.object.position.clone().sub(controls.target.clone()) // camera - target
       );
 
       const currentAzimuth = spherical.theta; // azimuth (around Y)

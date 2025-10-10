@@ -33,7 +33,7 @@
             "position": {
               "x": 0,
               "y": 0,
-              "z": 3.4628005584968413
+              "z": 3.612800558496817
             }
           },
           "Orbit Controls": {
@@ -117,63 +117,30 @@
         }
       }
     },
-    "Text": {
-      "staticOverrides": {
-        "byObject": {
-          "Text": {
-            "direction": 300,
-            "weight": "bold",
-            "color": {
-              "r": 0.28627450980392155,
-              "g": 0.3333333333333333,
-              "b": 1,
-              "a": 1
-            },
-            "thickness": 0.01,
-            "size": 46.69769620253159,
-            "focusSize": 24.18354430379749
-          },
-          "Content": {
-            "color": {
-              "r": 1,
-              "g": 1,
-              "b": 1,
-              "a": 0.79
-            },
-            "blur": 22,
-            "gap": 22,
-            "padding": {
-              "left": 25,
-              "bottom": 25,
-              "right": 25,
-              "top": 25
-            },
-            "radius": 7.594936708860764
-          },
-          "Button": {
-            "type": "scream"
-          },
-          "Close Button": {
-            "position": {
-              "top": -2.5316455696202746,
-              "left": -11.392405063291129
-            }
-          },
-          "CTA Button": {
-            "type": "scream"
-          }
-        }
-      }
-    },
     "Text Hotspot": {
       "staticOverrides": {
         "byObject": {
           "Text": {
             "color": {
-              "r": 0,
-              "g": 0.2196078431372549,
+              "r": 0.28627450980392155,
+              "g": 0.3333333333333333,
               "b": 1,
               "a": 1
+            }
+          },
+          "Content": {
+            "radius": 9.493670886075954,
+            "padding": {
+              "top": 25,
+              "left": 25,
+              "bottom": 25
+            },
+            "blur": 7
+          },
+          "Close Button": {
+            "position": {
+              "left": -11.936708860759486,
+              "top": -1.4050632911392378
             }
           }
         }
@@ -182,6 +149,8 @@
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "FzyAIWQMxPuEHoCF",
+    "L7CBUW5rjWRS5zTB",
     "Hr1eocLzYj2Zj3aF",
     "7gmIUr4vRY7C8uow",
     "qh1Ka9MP_XvxSuLD",

@@ -6,9 +6,13 @@ import { useGSAP } from '@gsap/react';
 import AppProvider from '@/components/context/AppManagement';
 import Splash from '@/components/screens/splash';
 import Main from '@/components/screens/main';
-import withLoading from './components/hoc/LoadingScreen';
+import withLoading from '@/components/hoc/LoadingScreen';
+import TextPlugin from 'gsap/TextPlugin';
+import ScrambleTextPlugin from 'gsap/ScrambleTextPlugin';
 
 gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(TextPlugin);
+gsap.registerPlugin(ScrambleTextPlugin);
 
 function InnerApp({ loaded }) {
   const [start, setStart] = useState(false);
@@ -34,6 +38,7 @@ function InnerApp({ loaded }) {
           preserveDrawingBuffer: import.meta.env.DEV,
           antialias: true,
         }}
+        dpr={[1, 2]}
         style={{
           width: '100dvw',
           height: '100dvh',

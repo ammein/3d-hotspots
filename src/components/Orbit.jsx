@@ -6,6 +6,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useImperativeHandle, useRef } from 'react';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
 import { Vector3 } from 'three';
+import withModelManagement from './hoc/ModelManagement';
 
 export const STATE = {
   NONE: -1,
@@ -39,21 +40,23 @@ export class PowerOrbitControls extends OrbitControls {
 
   update(deltaTime = null) {
     super.update(deltaTime);
-    if (
-      this.autoRotate &&
-      this.state === STATE.NONE &&
-      this.orientation === 'vertical'
-    ) {
+    if (this.autoRotate && this.state === STATE.NONE && this.orientation === 'vertical') {
       this._spherical.phi = this._spherical.phi;
       super._rotateUp(super._getAutoRotationAngle(deltaTime));
     }
   }
 }
 
-const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
+/**
+ *
+ * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & import('@/components/hoc/ModelManagement').ModelManagement & { enabled: boolean, makeDefault: boolean, ref: import('react').Ref }} param0
+ * @returns
+ */
+const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
   const { camera, gl, get, set } = useThree();
-  const { ['Orbit Controls']: OrbitControlsTheatreJS } = theatre;
+  const { ['Orbit Controls']: OrbitControlsTheatreJS } = rest.theatre;
 
+  /** @type {{ current: PowerOrbitControls }} */
   const controlsRef = useRef();
 
   // Create and update controls when dependencies change
@@ -94,10 +97,8 @@ const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
       if (OrbitControlsTheatreJS.orientation === 'horizontal') {
         newControls.minAzimuthAngle = -Infinity;
         newControls.maxAzimuthAngle = Infinity;
-        newControls.minPolarAngle =
-          OrbitControlsTheatreJS.minPolarAngle * DEG2RAD;
-        newControls.maxPolarAngle =
-          OrbitControlsTheatreJS.maxPolarAngle * DEG2RAD;
+        newControls.minPolarAngle = OrbitControlsTheatreJS.minPolarAngle * DEG2RAD;
+        newControls.maxPolarAngle = OrbitControlsTheatreJS.maxPolarAngle * DEG2RAD;
       } else if (OrbitControlsTheatreJS.orientation === 'vertical') {
         newControls.minPolarAngle = -Infinity;
         newControls.maxPolarAngle = Infinity;
@@ -106,13 +107,9 @@ const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
       }
 
       newControls.enabled = enabled;
-      newControls.autoRotate = enabled
-        ? OrbitControlsTheatreJS.autoRotate
-        : false;
+      newControls.autoRotate = enabled ? OrbitControlsTheatreJS.autoRotate : false;
       newControls.enablePan = OrbitControlsTheatreJS.enablePan;
-      newControls.enableRotate = enabled
-        ? OrbitControlsTheatreJS.enableRotate
-        : false;
+      newControls.enableRotate = enabled ? OrbitControlsTheatreJS.enableRotate : false;
       newControls.enableZoom = OrbitControlsTheatreJS.enableZoom;
 
       if (makeDefault) {
@@ -130,11 +127,7 @@ const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
       let changed = updateIfDifferent(oldControls, newControls, propsToCheck);
 
       // Also update target if different
-      if (
-        newControls.target &&
-        oldControls.target &&
-        !newControls.target.equals(oldControls.target)
-      ) {
+      if (newControls.target && oldControls.target && !newControls.target.equals(oldControls.target)) {
         oldControls.target.copy(newControls.target);
         changed = true;
       }
@@ -171,31 +164,29 @@ const Orbit = ({ theatre, ref, makeDefault, enabled = true }) => {
         }
       };
     }
-  }, [
-    OrbitControlsTheatreJS,
-    camera,
-    gl.domElement,
-    enabled,
-    makeDefault,
-    get,
-    set,
-  ]);
+  }, [OrbitControlsTheatreJS, camera, gl.domElement, enabled, makeDefault, get, set]);
 
   // Update controls every frame
   useFrame(() => {
     if (enabled && controlsRef.current) {
       controlsRef.current.update();
+
+      const getDegreeRotation = Number((controlsRef.current.getAzimuthalAngle() * RAD2DEG).toFixed(0));
+
+      if (rest.rotationDegree !== getDegreeRotation) {
+        rest.modelCallback('rotation', getDegreeRotation);
+      }
     }
   }, -1);
 
   useImperativeHandle(ref, () => controlsRef.current, [controlsRef.current]);
 
-  return controlsRef.current ? (
-    <primitive ref={ref} object={controlsRef.current} dispose={null} />
-  ) : null;
+  return controlsRef.current ? <primitive ref={ref} object={controlsRef.current} dispose={null} /> : null;
 };
 
-const TheatreOrbit = withTheatreManagement(Orbit, 'Model', {
+const OrbitController = withModelManagement(Orbit);
+
+const TheatreOrbit = withTheatreManagement(OrbitController, 'Model', {
   'Orbit Controls': {
     props: {
       autoRotate: types.boolean(true, {

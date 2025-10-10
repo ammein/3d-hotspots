@@ -59,10 +59,6 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
   /** @type {import('@react-three/fiber').RootState & { controls: import('@/components/Orbit').PowerOrbitControls }} */
   const { camera, gl } = useThree();
 
-  const isDesktop = useMediaQuery({
-    minWidth: '1280px',
-  });
-
   const initialLookAt = new Vector3()
     .subVectors(
       new Vector3(geometry.points[2].x, geometry.points[2].y, geometry.points[2].z),
@@ -261,7 +257,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
   );
 };
 
-const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text', {
+const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
   Text: {
     props: {
       direction: types.number(2 * Math.PI * RAD2DEG, {

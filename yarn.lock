@@ -1535,6 +1535,11 @@
     "@typescript-eslint/types" "8.41.0"
     eslint-visitor-keys "^4.2.1"
 
+"@uidotdev/usehooks@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@uidotdev/usehooks/-/usehooks-2.4.1.tgz#4b733eaeae09a7be143c6c9ca158b56cc1ea75bf"
+  integrity sha512-1I+RwWyS+kdv3Mv0Vmc+p0dPYH0DTRAo04HLyXReYBL9AeseDWUJyi4THuksBJcu9F0Pih69Ak150VDnqbVnXg==
+
 "@use-gesture/core@10.3.1":
   version "10.3.1"
   resolved "https://registry.yarnpkg.com/@use-gesture/core/-/core-10.3.1.tgz#976c9421e905f0079d49822cfd5c2e56b808fc56"
@@ -3521,6 +3526,11 @@ react-is@^17.0.1:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
+
+react-native-ruler-picker@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-ruler-picker/-/react-native-ruler-picker-0.2.2.tgz#8ff65f57f128a5d4b15dbde4c7129bb1f28eb3ac"
+  integrity sha512-xxdFw/gBcedy1Wzw1vZQ9TEijuIYpSykW7oz7SR86rxmH5QkUuMdmKIKpFXyrQW835TvKInqy5QRAI1st12Crg==
 
 react-reconciler@^0.31.0:
   version "0.31.0"

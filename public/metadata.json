@@ -19,7 +19,15 @@
                 {
                     "name": "Robot_ArmPart2",
                     "pointer": "Robot_Arm",
-                    "link": "https://en.wikipedia.org/wiki/Robotic_arm"
+                    "link": "https://en.wikipedia.org/wiki/Robotic_arm",
+                    "focus": {
+                        "position": [
+                            0.20, 1.92, 1.35
+                        ],
+                        "lookAt": [
+                            0.07, 0.89, -0.66
+                        ]
+                    }
                 },
                 {
                     "name": "Tree_Low_Poly_-_Folliage_3004",
