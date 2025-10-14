@@ -5,7 +5,7 @@
 
 # Flexible Values that suits to your needs...
 lygia_folder_name="lygia"
-default_lygia_path="./src/shader"
+default_lygia_path="./src/glsl"
 prune_file="prune.py"
 path=$1
 
