@@ -7,7 +7,7 @@ import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
 import { getTextScale, stableLookAt } from '@/helpers/utils';
-import withModelManagement from '@/components/hoc/ModelManagement';
+import withModelManagement from '@/components/context/ModelManagement';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { MeshLineGeometry, MeshLineMaterial, raycast } from 'meshline';
@@ -33,7 +33,7 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 
 /**
  * Hotspot Line component
- * @param { Hotspot & import('@/components/hoc/ModelManagement').ModelManagement & import('@/components/hoc/TheatreManagement').TheatreReturnValue } 0
+ * @param { Hotspot & import('@/components/context/ModelManagement').ModelManagement & import('@/components/hoc/TheatreManagement').TheatreReturnValue } 0
  * @returns
  */
 const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ...props }) => {
@@ -304,6 +304,9 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
         range: [1, 100],
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
   Content: {
     props: {
@@ -329,6 +332,9 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
         range: [0, 100],
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
   'CTA Button': {
     props: {
@@ -353,6 +359,9 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
         italic: 'Italic',
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
   'Close Button': {
     props: {
@@ -367,9 +376,10 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
         }),
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
 });
 
-const HotspotManagement = withModelManagement(HotspotTheatreJS);
-
-export default HotspotManagement;
+export default HotspotTheatreJS;

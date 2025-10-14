@@ -38,7 +38,7 @@
           },
           "Orbit Controls": {
             "enableRotate": true,
-            "autoRotate": true,
+            "autoRotate": false,
             "maxPolarAngle": 360,
             "horizontalOnly": false,
             "verticalOnly": true,
@@ -126,7 +126,8 @@
               "g": 0.3333333333333333,
               "b": 1,
               "a": 1
-            }
+            },
+            "size": 34.16605063291139
           },
           "Content": {
             "radius": 9.493670886075954,
@@ -145,10 +146,114 @@
           }
         }
       }
+    },
+    "Main Scene": {
+      "staticOverrides": {
+        "byObject": {
+          "Model": {
+            "model": {
+              "type": "file",
+              "id": "model-transformed.glb"
+            },
+            "animations": "Scene"
+          },
+          "Point Light": {
+            "intensity": 2.9500000000000135
+          }
+        }
+      }
+    },
+    "Model Controller": {
+      "staticOverrides": {
+        "byObject": {
+          "Camera": {
+            "position": {
+              "z": 3.1699999999999955
+            }
+          },
+          "HotspotLines": {
+            "width": 0.02,
+            "distance": 0.1,
+            "scalar": 1.5,
+            "color": {
+              "r": 0.28627450980392155,
+              "g": 0.3333333333333333,
+              "b": 1,
+              "a": 1
+            }
+          },
+          "HotspotCamera": {
+            "distance": 4
+          }
+        }
+      },
+      "sequence": {
+        "subUnitsPerUnit": 30,
+        "length": 10,
+        "type": "PositionalSequence",
+        "tracksByObject": {
+          "Fog": {
+            "trackData": {
+              "BBKmSMhOA2": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "Fog:[\"focalRange\"]",
+                "keyframes": [
+                  {
+                    "id": "syrVtWS8cF",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 1.2658227848101267
+                  },
+                  {
+                    "id": "3pdFXF8RBi",
+                    "position": 1,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 100
+                  }
+                ]
+              }
+            },
+            "trackIdByPropPath": {
+              "[\"focalRange\"]": "BBKmSMhOA2"
+            }
+          }
+        }
+      }
+    },
+    "Orbit Controller": {
+      "staticOverrides": {
+        "byObject": {
+          "Orbit Controls": {
+            "enableZoom": true,
+            "enableRotate": true,
+            "autoRotate": true
+          }
+        }
+      }
     }
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "xQHcO8NdJHNC7NOH",
+    "si-kjZ8rK25Uu-vX",
+    "4aMEs_Kq2Ly7rph9",
+    "qgVRS3T4uH9rxBen",
+    "G2YUcA8lpayWo1c-",
+    "RgStyEAHICdi_yG7",
     "FzyAIWQMxPuEHoCF",
     "L7CBUW5rjWRS5zTB",
     "Hr1eocLzYj2Zj3aF",

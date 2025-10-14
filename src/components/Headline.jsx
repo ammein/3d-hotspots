@@ -7,7 +7,7 @@ import { Heading } from '@/design-system/atoms/typography';
  */
 export const Headline = ({ type = 'h1', weight, color, ref, ...props }) => {
   // 3. Render the selected component
-  return <Heading ref={ref} as={type !== 'h1' && type} weight={weight} color={color} type={type} {...props} />;
+  return <Heading ref={ref} as={type !== 'h1' && type} $weight={weight} color={color} type={type} {...props} />;
 };
 
 Headline.displayName = 'Headline';

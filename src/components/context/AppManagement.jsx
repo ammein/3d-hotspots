@@ -1,15 +1,8 @@
-import {
-  createContext,
-  useState,
-  useCallback,
-  useEffect,
-  useContext,
-  useMemo,
-} from 'react';
+import { createContext, useState, useCallback, useEffect, useContext, useMemo } from 'react';
 import { loadFromJSON, getLanguage } from '@/helpers/i18n';
 import { getProject } from '@theatre/core';
 import states from '@/assets/theatre-project-state.json';
-import { IntlProvider, useTranslations } from 'use-intl';
+import { IntlProvider } from 'use-intl';
 
 /**
  * @typedef AppContext
@@ -20,18 +13,24 @@ import { IntlProvider, useTranslations } from 'use-intl';
 
 const AppContext = createContext();
 
+const stateProject = {
+  state: states,
+  assets: {
+    baseUrl: '/theatrejs-assets',
+  },
+};
+
 export default ({ children }) => {
   const [ready, setReady] = useState(false);
   const [translations, setTranslations] = useState({});
   const [metadataValue, setMetadataValue] = useState({});
   const [, setLanguageState] = useState('en');
   const appProject = useMemo(() => {
-    return getProject('3D Hotspots', {
-      state: states,
-      assets: {
-        baseUrl: '/theatrejs-assets',
-      },
-    });
+    try {
+      return getProject('3D Hotspots', stateProject);
+    } catch (err) {
+      window.location.reload(false);
+    }
   }, [states]);
 
   const errorTranslations = useCallback(
@@ -70,11 +69,7 @@ export default ({ children }) => {
 
   useEffect(() => {
     // Check if metadata & language is loaded
-    if (
-      appProject.isReady &&
-      Object.keys(translations).length > 0 &&
-      Object.keys(metadataValue).length > 0
-    ) {
+    if (appProject.isReady && Object.keys(translations).length > 0 && Object.keys(metadataValue).length > 0) {
       setReady(true);
     } else {
       const initialLang = getLanguage();
@@ -93,11 +88,7 @@ export default ({ children }) => {
         metadata: metadataValue,
       }}
     >
-      <IntlProvider
-        messages={translations}
-        locale={getLanguage()}
-        onError={errorTranslations}
-      >
+      <IntlProvider messages={translations} locale={getLanguage()} onError={errorTranslations}>
         {children}
       </IntlProvider>
     </AppContext.Provider>

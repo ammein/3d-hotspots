@@ -8,22 +8,34 @@ import { useEffect, useMemo, useRef, useState, memo, Suspense, useCallback } fro
 import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { KTX2Loader } from 'three-stdlib';
-import withModelManagement from '@/components/hoc/ModelManagement';
+import { useModelDispatch, useModelState } from '@/components/context/ModelManagement';
 import Effects from '@/components/Effects';
 import { types } from '@theatre/core';
 import { editable, useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
-import { Color, Spherical, Vector2, Vector3 } from 'three';
-import { useDebounce } from 'use-debounce';
+import { Color, Spherical, Vector3 } from 'three';
+import { useDebounce } from '@uidotdev/usehooks';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useApp } from './context/AppManagement';
-import Orbit, { STATE, useScreenToWorld } from '@/components/Orbit';
+import Orbit, { STATE } from '@/components/Orbit';
 import { spherical_lerp } from '@/helpers/interpolate';
 import Hotspot from '@/components/Hotspot';
 import { DEG2RAD } from '@three-math/MathUtils';
-import { getDepthFromObject } from '@/helpers/utils';
-import { useMediaQuery } from 'react-responsive';
+
+/**
+ * @typedef {Object} FocusMetadata
+ * @property {Array<number> | string} position
+ * @property {Array<number> | string} lookAt
+ */
+
+/**
+ * @typedef {Object} Hotspots
+ * @property {string} name
+ * @property {string} pointer
+ * @property {import('three').Vector3[]} lines
+ * @property {FocusMetadata | undefined} focus
+ */
 
 useGLTF.setDecoderPath(import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH);
 
@@ -36,11 +48,14 @@ const EditableCamera = editable(PerspectiveCamera, 'perspectiveCamera');
 
 /**
  * Model Component
- * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [] } & { theatre: import('@/components/hoc/TheatreManagement').TheatreOptionsValues, ready: boolean } & import('@/components/hoc/ModelManagement').ModelManagement} param0
+ * @param {{ url: string, useDraco: boolean, useKTX2: boolean, animationNames: string[], hideItems: [] } & import('@/components/hoc/TheatreManagement').TheatreReturnValue & { ready: boolean }} param0
  * @returns
  */
 function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ...rest }) {
   const sheet = useCurrentSheet();
+
+  const dispatch = useModelDispatch();
+  const state = useModelState();
   const { metadata } = useApp();
 
   const {
@@ -50,10 +65,15 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     HotspotCamera: HotspotCameraTheatreJS,
   } = rest.theatre;
 
+  /** @type {{current: import('three').Group}} */
   const groupRef = useRef();
+
+  /** @type {{current: import('three').ShaderMaterial}} */
   const shaderRef = useRef();
   /** @type {{current: import('./Orbit').PowerOrbitControls}} */
   const orbitRef = useRef();
+
+  /** @type {[{ value: number}, Function]} */
   const [initialFog, setinitialFog] = useState({
     value: 0.0,
   });
@@ -64,11 +84,16 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
   /** @type {[import('three').Vector3, Function]} */
   const [savedPosition, setPosition] = useState(new Vector3(0, 0, 0));
 
+  /** @type {[Hotspots[], Function]} */
   const [hotspots, setHotspots] = useState([]);
   /** @type {{ gl: import('@react-three/fiber').GLProps, camera: import('three').Camera, controls: import('./Orbit').PowerOrbitControls, scene: import('three').Scene }} */
   const { gl, camera, controls, size } = useThree();
+
+  /** @type {[boolean, Function]} */
   const [focus, setFocus] = useState(false);
-  const [urlDebounced] = useDebounce(url, 1000);
+
+  /** @type {[string]} */
+  const urlDebounced = useDebounce(url, 1000);
 
   /**
    * @type {import('three-stdlib').GLTF & import('@react-three/fiber').ObjectMap}
@@ -101,6 +126,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     return gltf;
   }, [urlDebounced]);
 
+  // Error Handling
   if (!gltf) {
     let error = new Error(
       `Looks like you trying to load an invalid model paths. Make sure you don't include 'public' directory to your path.\nReadjust your url again and click button "reset" to initalize model again.\n\nYour error model path URL: "${url}"`
@@ -110,16 +136,23 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     throw error;
   }
 
+  /** @type {import('three').AnimationClip[] | null} */
   const animations = gltf?.animations ?? null;
 
+  /** @type {typeof useAnimations} */
   const { actions } = useAnimations(animations || [], groupRef);
 
   const objectClick = useCallback(
+    /**
+     * Callback
+     * @param {import('@react-three/fiber').ThreeEvent<MouseEvent>} e
+     * @returns {void}
+     */
     (e) => {
-      /** @type {import('three').Intersection[]} */
       const intersections = e.intersections;
 
-      if (intersections.length > 0 && rest.start && orbitRef.current.state === STATE.NONE) {
+      if (intersections.length > 0 && rest.start && orbitRef.current.state === STATE.NONE && !focus) {
+        /** @type {Hotspots} */
         let intersect = hotspots.find(({ pointer, name }) =>
           intersections.some(({ object }) =>
             pointer ? object.name.indexOf(pointer) >= 0 : object.name.indexOf(name) >= 0
@@ -128,29 +161,28 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
 
         if (intersect) {
           // Cancel Intersect if the hotspot is not towards camera position
-          if (intersect.lines[0].dot(camera.position) > 1 && !focus) {
+          if (intersect.lines[0].dot(camera.position) > 1) {
             controls.saveState();
-            rest.modelCallback('hotspot', intersect.name);
+            setOrbitSettings({
+              autoRotate: controls.autoRotate,
+              enableRotate: controls.enableRotate,
+              enablePan: controls.enablePan,
+              enableZoom: controls.enableZoom,
+            });
+            dispatch({
+              type: 'hotspot',
+              hotspotID: intersect.name,
+            });
             setPosition(controls.position0.clone());
           }
         }
       }
     },
-    [hotspots, rest]
+    [hotspots, rest.start, focus]
   );
 
-  const closeHotspot = useCallback(
-    (e) => {
-      rest.modelCallback('hotspot', '');
-    },
-    [rest]
-  );
-
+  // This Effect Called Multiple Times (TODO: Debug What causes to loop here...)
   useEffect(() => {
-    if (rest.start && sheet) {
-      sheet.sequence.play();
-    }
-
     if (actions && animationNames.length > 0) {
       animationNames.forEach((name) => {
         if (actions[name]) {
@@ -181,7 +213,19 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
         CanvasTheatreJS.color.b
       ).getStyle()}`;
     }
-  }, [actions, gltf, animationNames, hideItems, rest.wireframe, rest.ready, CanvasTheatreJS]);
+  }, [gltf, animationNames, hideItems, CanvasTheatreJS]);
+
+  // Fog Animation Running Once and specified range
+  useEffect(() => {
+    if (rest.start && rest.theatreObjects && rest.theatreObjects.Fog) {
+      const FogRange = sheet.sequence
+        .__experimental_getKeyframes(rest.theatreObjects.Fog.props.focalRange)
+        .flatMap((val) => val.position);
+      if (FogRange.length > 0) {
+        sheet.sequence.play({ range: FogRange });
+      }
+    }
+  }, [rest.start]);
 
   // Preload GLTF
   useEffect(() => {
@@ -209,6 +253,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     if (gltf && gltf.scene && metadata.screens && HotspotLinesTheatreJS) {
       gltf.scene.traverse((object) => {
         if (object.type === 'Mesh') {
+          /** @type {Hotspots} */
           let findHotspot = metadata.screens.detail.hotspots.find((val) => val.name === object.name);
 
           if (findHotspot && HotspotLinesTheatreJS && object.type === 'Mesh' && findHotspot.name === object.name) {
@@ -247,17 +292,15 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     }
   }, [HotspotLinesTheatreJS]);
 
-  // Run ONLY ONCE
   useEffect(() => {
-    if (rest.ready) {
-      setOrbitSettings({
-        autoRotate: controls.autoRotate,
-        enableRotate: controls.enableRotate,
-        enablePan: controls.enablePan,
-        enableZoom: controls.enableZoom,
+    if (gltf) {
+      gltf.scene.traverse((obj) => {
+        if (obj.type === 'Mesh' && obj.material.wireframe !== state.wireframe) {
+          obj.material.wireframe = state.wireframe;
+        }
       });
     }
-  }, [rest.ready]);
+  }, [state.wireframe, gltf]);
 
   useGSAP(() => {
     if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
@@ -272,10 +315,11 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
       });
     }
 
-    if (HotspotCameraTheatreJS && rest.hotspotID.length > 0 && gltf && !focus) {
-      const getHotspot = hotspots.find((val) => val.name === rest.hotspotID);
+    if (HotspotCameraTheatreJS && state.hotspotID.length > 0 && gltf && !focus) {
+      /** @type {Hotspots} */
+      const getHotspot = hotspots.find((val) => val.name === state.hotspotID);
 
-      const nextCameraLocation = gltf.scene.getObjectByName(rest.hotspotID);
+      const nextCameraLocation = gltf.scene.getObjectByName(state.hotspotID);
 
       let cameraPos = nextCameraLocation.position,
         cameraLookAt = nextCameraLocation.position;
@@ -302,8 +346,11 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
       const locationTween = gsap.to(
         {},
         {
-          onUpdate: () => {
+          onStart: () => {
+            controls.autoRotate = false;
             controls.enableRotate = false;
+          },
+          onUpdate: () => {
             const progress = locationTween.progress();
             let newLocation;
 
@@ -323,18 +370,16 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
             controls.target.set(cameraLookAt.x, cameraLookAt.y, cameraLookAt.z);
           },
           onComplete: () => {
-            controls.autoRotate = orbitSettings.autoRotate;
             controls.enableRotate = orbitSettings.enableRotate;
             controls.enableZoom = orbitSettings.enableZoom;
             controls.enablePan = orbitSettings.enablePan;
-
             setFocus(true);
           },
           duration: 1,
           ease: 'sine.in',
         }
       );
-    } else if (rest.hotspotID.length === 0 && focus) {
+    } else if (state.hotspotID.length === 0 && focus) {
       const currentCameraPosition = camera.position.clone();
       const backToCameraPosition = savedPosition.clone();
 
@@ -370,7 +415,10 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
             controls.target.set(0, 0, 0);
           },
           onComplete: () => {
-            controls.autoRotate = true;
+            controls.autoRotate = orbitSettings.autoRotate;
+            controls.enableRotate = orbitSettings.enableRotate;
+            controls.enableZoom = orbitSettings.enableZoom;
+            controls.enablePan = orbitSettings.enablePan;
             setFocus(false);
             controls.reset();
           },
@@ -379,7 +427,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
         }
       );
     }
-  }, [rest.loaded, FogTheatreJS, controls, size, gltf, rest.hotspotID, HotspotCameraTheatreJS, focus]);
+  }, [rest.loaded, FogTheatreJS, controls, size, gltf, state.hotspotID, HotspotCameraTheatreJS, focus]);
 
   // Controls Update
   useEffect(() => {
@@ -416,10 +464,15 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
                 <Hotspot
                   start={rest.start}
                   key={val.name + i}
-                  focus={rest.hotspotID === val.name && focus}
-                  id={rest.hotspotID}
+                  focus={state.hotspotID === val.name && focus}
+                  id={state.hotspotID}
                   hotspotName={val.name}
-                  onClose={closeHotspot}
+                  onClose={(e) =>
+                    dispatch({
+                      type: 'hotspot',
+                      hotspotID: '',
+                    })
+                  }
                   geometry={{
                     points: val.lines,
                   }}
@@ -446,12 +499,14 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
           </>
         )}
       </Suspense>
-      <Orbit ref={orbitRef} makeDefault rotate={rest.hotspotID.length > 0 ? false : true} />
+      <Orbit ref={orbitRef} makeDefault rotate={state.hotspotID.length > 0 ? false : true} />
     </>
   );
 }
 
-const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
+Model.displayName = 'Model';
+
+const theatreJSModel = withTheatreManagement(Model, 'Model Controller', {
   Fog: {
     props: {
       focalRange: types.number(focalRangeDefault, {
@@ -468,6 +523,9 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
           label: 'Fog Color',
         }
       ),
+    },
+    options: {
+      reconfigure: true,
     },
   },
   HotspotLines: {
@@ -498,6 +556,9 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
           label: 'Line Color',
         }
       ),
+    },
+    options: {
+      reconfigure: true,
     },
   },
   HotspotCamera: {
@@ -537,6 +598,9 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
         nudgeMultiplier: 1,
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
   Canvas: {
     props: {
@@ -555,4 +619,4 @@ const theatreJSModel = withTheatreManagement(memo(Model), 'Model', {
   },
 });
 
-export default withModelManagement(theatreJSModel);
+export default theatreJSModel;

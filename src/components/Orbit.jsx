@@ -6,7 +6,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useImperativeHandle, useRef } from 'react';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
 import { Vector3 } from 'three';
-import withModelManagement from './hoc/ModelManagement';
+import { useModelDispatch, useModelState } from './context/ModelManagement';
 
 export const STATE = {
   NONE: -1,
@@ -49,11 +49,13 @@ export class PowerOrbitControls extends OrbitControls {
 
 /**
  *
- * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & import('@/components/hoc/ModelManagement').ModelManagement & { enabled: boolean, makeDefault: boolean, ref: import('react').Ref }} param0
+ * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & import('@/components/context/ModelManagement').ModelManagement & { enabled: boolean, makeDefault: boolean, ref: import('react').Ref }} param0
  * @returns
  */
 const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
   const { camera, gl, get, set } = useThree();
+  const dispatch = useModelDispatch();
+  const state = useModelState();
   const { ['Orbit Controls']: OrbitControlsTheatreJS } = rest.theatre;
 
   /** @type {{ current: PowerOrbitControls }} */
@@ -173,8 +175,11 @@ const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
 
       const getDegreeRotation = Number((controlsRef.current.getAzimuthalAngle() * RAD2DEG).toFixed(0));
 
-      if (rest.rotationDegree !== getDegreeRotation) {
-        rest.modelCallback('rotation', getDegreeRotation);
+      if (state.rotationDegree !== getDegreeRotation) {
+        dispatch({
+          type: 'rotation',
+          rotationDegree: getDegreeRotation,
+        });
       }
     }
   }, -1);
@@ -184,9 +189,7 @@ const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
   return controlsRef.current ? <primitive ref={ref} object={controlsRef.current} dispose={null} /> : null;
 };
 
-const OrbitController = withModelManagement(Orbit);
-
-const TheatreOrbit = withTheatreManagement(OrbitController, 'Model', {
+const TheatreOrbit = withTheatreManagement(Orbit, 'Orbit Controller', {
   'Orbit Controls': {
     props: {
       autoRotate: types.boolean(true, {
@@ -220,6 +223,9 @@ const TheatreOrbit = withTheatreManagement(OrbitController, 'Model', {
           label: 'Orientation',
         }
       ),
+    },
+    options: {
+      reconfigure: true,
     },
   },
 });

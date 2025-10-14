@@ -34,7 +34,7 @@ import { useEffect, useState, useMemo } from 'react';
  */
 
 /**
- * @typedef {{ theatre: Record<string, any> }} TheatreReturnValue
+ * @typedef {{ theatre: Record<string, any>, theatreObjects: Record<string, import('@theatre/core').ISheetObject> }} TheatreReturnValue
  */
 
 /**
@@ -104,7 +104,11 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
 
       return () => {
         for (const objName in newObjects) {
-          sheet.detachObject(objName);
+          try {
+            if (sheet.object(objName)) {
+              sheet.detachObject(objName);
+            }
+          } catch (err) {}
         }
         setObjects({});
       };
@@ -135,7 +139,7 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
 
     return (
       <SheetProvider sheet={sheet}>
-        <WrappedComponent {...props} theatre={theatreValues} />
+        <WrappedComponent {...props} theatre={theatreValues} theatreObjects={objects} />
       </SheetProvider>
     );
   };

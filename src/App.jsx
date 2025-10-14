@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import AppProvider from '@/components/context/AppManagement';
+import ModelProvider from '@/components/context/ModelManagement';
 import Splash from '@/components/screens/splash';
 import Main from '@/components/screens/main';
 import withLoading from '@/components/hoc/LoadingScreen';
@@ -44,7 +45,9 @@ function InnerApp({ loaded }) {
           height: '100dvh',
         }}
       >
-        <Main start={start} loaded={animated} />
+        <ModelProvider>
+          <Main start={start} loaded={animated} />
+        </ModelProvider>
       </Canvas>
     </>
   );

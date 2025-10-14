@@ -1,4 +1,3 @@
-import { useThree } from '@react-three/fiber';
 import withTheatreManagement from '../hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import Model from '@/components/Model';
@@ -6,10 +5,9 @@ import { editable as e } from '@theatre/r3f';
 import Error from '@/components/ThreeJSError';
 import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
 import { useApp } from '../context/AppManagement';
-import withModelManagement from '../hoc/ModelManagement';
+import { useModelDispatch, useModelState } from '@/components/context/ModelManagement';
 import { Html } from '@react-three/drei';
 import Button from '@/components/Button';
-import { useWindowSize } from '@uidotdev/usehooks';
 import { useTranslations } from 'use-intl';
 import Headline from '@/components/Headline';
 import { useRef } from 'react';
@@ -20,7 +18,7 @@ const ambientLightIntensity = Math.PI / 2.0;
 
 /**
  * Main Scene
- * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & { start: boolean, loaded: boolean } & import('@/components/hoc/ModelManagement').ModelManagement} param0
+ * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & { start: boolean, loaded: boolean } & import('@/components/context/ModelManagement').ModelManagement} param0
  * @returns
  */
 const Main = ({ start, loaded, ...rest }) => {
@@ -28,10 +26,11 @@ const Main = ({ start, loaded, ...rest }) => {
 
   const t = useTranslations('Splash');
 
+  const dispatch = useModelDispatch();
+  const state = useModelState();
+
   /** @type {import('react').Ref<import('react').HTMLProps<HTMLHeadingElement>>} */
   const headlineRef = useRef();
-
-  const windowSize = useWindowSize();
 
   const { appProject } = useApp();
 
@@ -76,13 +75,17 @@ const Main = ({ start, loaded, ...rest }) => {
             hideItems={ModelTheatreJS.hideItems.length > 0 ? ModelTheatreJS.hideItems.split(',') : []}
           />
           {start && (
-            <Html as="div" fullscreen wrapperClass="pointer-events-none">
+            <Html
+              fullscreen
+              wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
+              className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
+            >
               {/* TODO: Add Ruler Here https://www.npmjs.com/package/react-native-ruler-picker?activeTab=readme */}
               <div
                 className="flex fixed w-screen h-auto"
                 style={{
-                  top: -windowSize.height / 2 + 41,
-                  left: -windowSize.width / 2 + 28,
+                  top: 41,
+                  left: 28,
                 }}
               >
                 <Headline ref={headlineRef} type="h2" weight="bold" color={/* tailwindcss */ 'text-corporateblue'}>
@@ -92,14 +95,36 @@ const Main = ({ start, loaded, ...rest }) => {
               <div
                 className="flex fixed size-fit pointer-events-auto"
                 style={{
-                  bottom: -windowSize.height / 2 + 30,
-                  left: -windowSize.width / 2 + 28,
+                  bottom: 30,
+                  left: 28,
                 }}
               >
-                <Button $buttonType="shout" $size="large" $weight="bold" $other={/* tailwindcss */ '!rounded-none'}>
+                <Button
+                  $buttonType={state.wireframe ? 'scream' : 'shout'}
+                  $size="large"
+                  $weight="bold"
+                  $other={/* tailwindcss */ '!rounded-none'}
+                  onClick={(e) =>
+                    dispatch({
+                      type: 'wireframe',
+                      wireframe: true,
+                    })
+                  }
+                >
                   Wireframe
                 </Button>
-                <Button $buttonType="scream" $size="large" $weight="bold" $other={/* tailwindcss */ '!rounded-none'}>
+                <Button
+                  $buttonType={state.wireframe ? 'shout' : 'scream'}
+                  $size="large"
+                  $weight="bold"
+                  $other={/* tailwindcss */ '!rounded-none'}
+                  onClick={(e) =>
+                    dispatch({
+                      type: 'wireframe',
+                      wireframe: false,
+                    })
+                  }
+                >
                   Solid
                 </Button>
               </div>
@@ -111,7 +136,7 @@ const Main = ({ start, loaded, ...rest }) => {
   );
 };
 
-const MainTheatre = withTheatreManagement(Main, 'Scene / Main', {
+const MainTheatre = withTheatreManagement(Main, 'Main Scene', {
   Model: {
     props: {
       draco: types.boolean(true, {
@@ -130,9 +155,10 @@ const MainTheatre = withTheatreManagement(Main, 'Scene / Main', {
         label: "Hide Items (Multiple items, use ',')",
       }),
     },
+    options: {
+      reconfigure: true,
+    },
   },
 });
 
-const MainScene = withModelManagement(MainTheatre);
-
-export default MainScene;
+export default MainTheatre;

@@ -57,7 +57,7 @@ const paragraphFont = (props) => {
 /**
  * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web' , HeadingParams & import('react').HTMLProps<HTMLHeadingElement>}
  */
-export const Heading = tw(headingStyle)`${(props) => (props.weight === 'semibold' ? 'font-semibold' : 'font-bold')} ${(
+export const Heading = tw(headingStyle)`${(props) => (props.$weight === 'semibold' ? 'font-semibold' : 'font-bold')} ${(
   props
 ) => props.color}`;
 
