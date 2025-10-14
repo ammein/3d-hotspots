@@ -9,13 +9,14 @@
   "scripts": {
     "dev": "vite --port 9222 --host",
     "build": "vite build",
-    "deploy": "yarn basis && yarn draco && yarn lygia && yarn build",
+    "deploy": "yarn basis && yarn draco && yarn lygia-production && yarn build",
     "clean-build": "rm -rf ./dist",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lygia": "chmod 777 ./scripts/lygia.sh && ./scripts/lygia.sh",
+    "lygia-production": "chmod 777 ./scripts/lygia-production.sh && ./scripts/lygia-production.sh",
     "draco": "chmod 777 ./scripts/draco.sh && ./scripts/draco.sh",
     "basis": "chmod 777 ./scripts/basis.sh && ./scripts/basis.sh"
   },

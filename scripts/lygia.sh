@@ -16,6 +16,8 @@ REPO_OWNER="patriciogonzalezvivo"  # Change this if lygia is transfered to other
 REPO_NAME="lygia"    # Change this if lygia library is renamed to something else
 BRANCH="main"  # Change this if the repo owner decides other names for the master branch
 
+
+
 prune_lygia() {
     if which python3 >/dev/null 2>&1; then
         # Go to directory
@@ -31,7 +33,9 @@ prune_lygia() {
                 echo "$display_index. ${LYGIA_FILE_TYPES[$i]}"
             done
             echo $'----------------------------------\n'
-            read -p $'Type your file type from the above lists to be use on your project:\n> ' TYPE;
+            if [[ -z "$TYPE" ]]; then
+                read -p $'Type your file type from the above lists to be use on your project:\n> ' TYPE; 
+            fi
             python3 $prune_file --all --keep $TYPE
         else
             echo $'Prune file named '"$prune_file"' is not available. Are you sure lygia has this file?'
@@ -96,8 +100,10 @@ check_lygia() {
         if [[ -d "$1" ]]; then
             version=$(check_npm_version)
 
-            # Check if update lygia needed
-            confirm_update_lygia "$version"
+            if [[ -z $PROD ]]; then
+                # Check if update lygia needed
+                confirm_update_lygia "$version"
+            fi
 
             rm -rf "$1"
         fi
@@ -109,8 +115,10 @@ check_lygia() {
         if [ -d "$default_lygia_path/$lygia_folder_name" ]; then
             version=$(check_npm_version)
 
-            # Check if update lygia needed
-            confirm_update_lygia "$version"
+            if [[ -z $PROD ]]; then
+                # Check if update lygia needed
+                confirm_update_lygia "$version"
+            fi
 
             echo "Run Delete existing lygia folder"
             rm -rf "$default_lygia_path/$lygia_folder_name"
