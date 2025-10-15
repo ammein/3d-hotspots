@@ -90,8 +90,8 @@ const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
     // Create new controls instance (but don't set it yet)
     const newControls = new PowerOrbitControls(
       camera,
-      gl.domElement,
-      OrbitControlsTheatreJS ? OrbitControlsTheatreJS.orientation : 'horizontal'
+      gl.domElement
+      // OrbitControlsTheatreJS ? OrbitControlsTheatreJS.orientation : 'horizontal'
     );
 
     // Apply TheatreJS props to newControls
@@ -217,17 +217,17 @@ const TheatreOrbit = withTheatreManagement(Orbit, 'Orbit Controller', {
         range: [0, 2 * Math.PI * RAD2DEG],
         nudgeMultiplier: 1,
       }),
-      orientation: types.stringLiteral(
-        'horizontal',
-        {
-          horizontal: 'horizontal',
-          vertical: 'vertical',
-        },
-        {
-          as: 'switch',
-          label: 'Orientation',
-        }
-      ),
+      // orientation: types.stringLiteral(
+      //   'horizontal',
+      //   {
+      //     horizontal: 'horizontal',
+      //     vertical: 'vertical',
+      //   },
+      //   {
+      //     as: 'switch',
+      //     label: 'Orientation',
+      //   }
+      // ),
     },
     options: {
       reconfigure: true,

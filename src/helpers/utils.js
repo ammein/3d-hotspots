@@ -151,3 +151,29 @@ export const stableLookAt = (object, cameraPosition) => {
     object.quaternion.copy(q);
 }
 
+
+/**
+ * Calculate Current Value For Ruler
+ * @param {number} scrollPosition 
+ * @param {number} stepWidth 
+ * @param {number} gapBetweenItems 
+ * @param {number} min 
+ * @param {number} max 
+ * @param {number} step 
+ * @param {number} fractionDigits .toFixed() convert to string function
+ * @returns 
+ */
+export const calculateCurrentValue = (
+    scrollPosition,
+    stepWidth,
+    gapBetweenItems,
+    min,
+    max,
+    step,
+    fractionDigits
+) => {
+    const index = Math.round(scrollPosition / (stepWidth + gapBetweenItems));
+    return Math.min(Math.max(index * step + min, min), max).toFixed(
+        fractionDigits
+    );
+};

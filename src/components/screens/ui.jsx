@@ -7,6 +7,9 @@ import { Vector3, Color, Spherical } from 'three';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { OrbitControls } from '@three-extras/controls/OrbitControls';
 import NodeGraphSVG from '@/assets/node-graph-circle.svg?react';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';
+import { types } from '@theatre/core';
+import RulerPicker from '@/components/Ruler';
 
 extend({ OrbitControls });
 
@@ -84,16 +87,16 @@ function Controls({ ref, cameraRef, degree, sign, makeDefault }) {
  * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & { start: boolean, loaded: boolean } & import('@/components/context/ModelManagement').ModelManagement} param0
  * @returns
  */
-const Ui = ({ start, loaded, ...rest }) => {
+const UI = ({ start, loaded, ...rest }) => {
   /** @type {import('react').Ref<import('@three-extras/controls/OrbitControls').OrbitControls>} */
   const orbitRef = useRef();
+
+  const { Point: PointTheatreJS, Line: LineTheatreJS, Ruler: RulerTheatreJS } = rest.theatre;
 
   /** @type {import('react').Ref<import('three').OrthographicCamera>} */
   const orthoCameraRef = useRef();
 
   const state = useModelState();
-
-  const { size } = useThree();
 
   const hotspots = useMemo(() => {
     return state.hotspotData.map((val, i) => {
@@ -105,21 +108,37 @@ const Ui = ({ start, loaded, ...rest }) => {
           name={val.name}
           active={state.hotspotID}
           material={{
-            lineWidth: 0.02,
-            color: new Color('black'),
+            lineWidth: LineTheatreJS.lineWidth,
+            color: new Color(LineTheatreJS.lineColor.r, LineTheatreJS.lineColor.g, LineTheatreJS.lineColor.b),
           }}
           geometry={{
-            points: [new Vector3(0, 0, 0), dir.multiplyScalar(1)],
+            points: [new Vector3(0, 0, 0), dir],
           }}
+          pointColor={new Color(
+            PointTheatreJS.pointColor.r,
+            PointTheatreJS.pointColor.g,
+            PointTheatreJS.pointColor.b
+          ).convertSRGBToLinear()}
+          pointSize={PointTheatreJS.pointSize}
+          activeColor={new Color(
+            PointTheatreJS.activeColor.r,
+            PointTheatreJS.activeColor.g,
+            PointTheatreJS.activeColor.b
+          ).convertSRGBToLinear()}
+          sphereOpac={PointTheatreJS.opacity}
+          lineOpac={LineTheatreJS.opacity}
+          dashArray={LineTheatreJS.dashArray}
+          dashOffset={LineTheatreJS.dashOffset}
+          dashRatio={LineTheatreJS.dashRatio}
         />
       );
     });
-  }, [state.hotspotData, state.hotspotID]);
+  }, [state.hotspotData, state.hotspotID, PointTheatreJS, LineTheatreJS]);
 
   useFrame(({ gl, scene }) => {
     if (orthoCameraRef.current) {
       gl.render(scene, orthoCameraRef.current);
-      gl.clearDepth();
+      gl.clearDepth(); // Clear Background Render to make Alpha Background
     }
   });
 
@@ -129,53 +148,276 @@ const Ui = ({ start, loaded, ...rest }) => {
       wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
       className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
     >
-      {start && (
-        <Canvas
-          dpr={[1, 2]}
-          style={{
-            width: '100px',
-            height: '100px',
-          }}
-          className="right-[27px] top-[23px] !absolute bg-transparent"
-        >
-          {/* UI Scene */}
-          {/* Orthographic Camera for UI overlay */}
-          <orthographicCamera
-            ref={orthoCameraRef}
-            left={-1}
-            right={1}
-            top={1}
-            bottom={-1}
-            near={0}
-            far={1000}
-            position={[0, 0, 10]}
-          />
-          {/* Minimap plane in the top-right corner */}
-          {hotspots}
-          {orthoCameraRef.current && (
-            <Controls
-              ref={orbitRef}
-              cameraRef={orthoCameraRef}
-              degree={state.rotationDegree}
-              sign={state.rotationSign}
-              makeDefault
-            />
-          )}
-          <Html
-            prepend
-            fullscreen
-            wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
-            className={/* tailwindcss */ '!transform-none !left-0 !top-0 !right-0 !size-full'}
-            style={{}}
+      <div className="right-[27px] top-[23px] !absolute bg-transparent flex gap-1.5 justify-center flex-col align-middle items-center">
+        {start && (
+          <Canvas
+            dpr={[1, 2]}
+            style={{
+              width: '100px',
+              height: '100px',
+            }}
           >
-            <div className="size-full flex justify-center items-center text-2xl">
-              <NodeGraphSVG />
-            </div>
-          </Html>
-        </Canvas>
-      )}
+            {/* UI Scene */}
+            {/* Orthographic Camera for UI overlay */}
+            <orthographicCamera
+              ref={orthoCameraRef}
+              left={-1}
+              right={1}
+              top={1}
+              bottom={-1}
+              near={0}
+              far={1000}
+              position={[0, 0, 10]}
+            />
+            {/* Minimap plane in the top-right corner */}
+            {hotspots}
+            {orthoCameraRef.current && (
+              <Controls
+                ref={orbitRef}
+                cameraRef={orthoCameraRef}
+                degree={state.rotationDegree}
+                sign={state.rotationSign}
+                makeDefault
+              />
+            )}
+            <Html
+              fullscreen
+              wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none z-10'}
+              className={/* tailwindcss */ '!transform-none !left-0 !top-0 !right-0 !size-full'}
+            >
+              <div className="size-full flex justify-center items-center text-2xl">
+                <NodeGraphSVG />
+              </div>
+            </Html>
+          </Canvas>
+        )}
+        {start && (
+          <RulerPicker
+            min={0}
+            width={RulerTheatreJS.width}
+            height={RulerTheatreJS.height}
+            unit={RulerTheatreJS.unit}
+            max={360 * 2}
+            step={RulerTheatreJS.step}
+            valueTextStyle={RulerTheatreJS.valueTextStyle}
+            unitTextStyle={RulerTheatreJS.unitTextStyle}
+            stepWidth={RulerTheatreJS.stepWidth}
+            gapBetweenSteps={RulerTheatreJS.gapBetweenSteps}
+            indicatorColor={`rgba(${RulerTheatreJS.indicatorColor.r * 255}, ${RulerTheatreJS.indicatorColor.g * 255}, ${
+              RulerTheatreJS.indicatorColor.b * 255
+            }, 1)`}
+            indicatorHeight={RulerTheatreJS.indicatorHeight}
+            shortStepColor={`rgba(${RulerTheatreJS.shortStepColor.r * 255}, ${RulerTheatreJS.shortStepColor.g * 255}, ${
+              RulerTheatreJS.shortStepColor.b * 255
+            })`}
+            shortStepHeight={RulerTheatreJS.shortStepHeight}
+            longStepColor={`rgba(${RulerTheatreJS.longStepColor.r * 255}, ${RulerTheatreJS.longStepColor.g * 255}, ${
+              RulerTheatreJS.longStepColor.b * 255
+            })`}
+            longStepHeight={RulerTheatreJS.longStepHeight}
+            fractionDigits={RulerTheatreJS.fractionDigits}
+            indicatorXOffset={RulerTheatreJS.indicatorXOffset}
+            initialValue={state.rotationDegree}
+          />
+        )}
+      </div>
     </Html>
   );
 };
 
-export default Ui;
+const UITheatreJS = withTheatreManagement(UI, 'Scene / UI', {
+  Ruler: {
+    props: {
+      width: types.number(100, {
+        range: [1, window.innerWidth],
+        nudgeMultiplier: 1,
+      }),
+      height: types.number(16, {
+        range: [1, window.innerHeight],
+        nudgeMultiplier: 1,
+      }),
+      unit: types.string('°', {
+        label: 'Unit Label',
+      }),
+      step: types.number(1, {
+        range: [1, 360],
+        nudgeMultiplier: 1,
+      }),
+      stepWidth: types.number(1, {
+        range: [0.01, 100],
+        nudgeMultiplier: 0.01,
+      }),
+      gapBetweenSteps: types.number(5, {
+        range: [1, 100],
+        nudgeMultiplier: 1,
+      }),
+      indicatorColor: types.rgba({
+        r: 0,
+        g: 0.34,
+        b: 0.53,
+        a: 1,
+      }),
+      indicatorHeight: types.number(26, {
+        nudgeMultiplier: 1,
+      }),
+      indicatorXOffset: types.number(0.4, {
+        nudgeMultiplier: 0.01,
+      }),
+      shortStepColor: types.rgba({
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 1,
+      }),
+      shortStepHeight: types.number(18, {
+        nudgeMultiplier: 1,
+      }),
+      longStepColor: types.rgba({
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 1,
+      }),
+      longStepHeight: types.number(21, {
+        nudgeMultiplier: 1,
+      }),
+      fractionDigits: types.number(0, {
+        nudgeMultiplier: 1,
+      }),
+      valueTextStyle: types.compound({
+        color: types.rgba({
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        }),
+        fontSize: types.number(12, {
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+      unitTextStyle: types.compound({
+        color: types.rgba({
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        }),
+        fontSize: types.number(12, {
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+    },
+    options: {
+      reconfigure: true,
+    },
+  },
+  Point: {
+    props: {
+      pointSize: types.number(0.1, {
+        range: [0, 1],
+        nudgeMultiplier: 0.01,
+        label: 'Size',
+      }),
+      pointColor: types.rgba(
+        {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        },
+        {
+          label: 'Color',
+        }
+      ),
+      activeColor: types.rgba(
+        {
+          r: 8 / 255,
+          g: 112 / 255,
+          b: 211 / 255,
+          a: 1,
+        },
+        {
+          label: 'Active',
+        }
+      ),
+      opacity: types.compound({
+        behind: types.number(0.5, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+        front: types.number(1, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+    },
+    options: {
+      reconfigure: true,
+    },
+  },
+  Line: {
+    props: {
+      lineWidth: types.number(0.02, {
+        range: [0, 1],
+        nudgeMultiplier: 0.01,
+        label: 'Width',
+      }),
+      lineColor: types.rgba(
+        {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        },
+        {
+          label: 'Color',
+        }
+      ),
+      opacity: types.compound({
+        behind: types.number(0.5, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+        front: types.number(1, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+      dashArray: types.compound({
+        behind: types.number(0.1, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+        front: types.number(0, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+      dashOffset: types.compound({
+        behind: types.number(0.1, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+        front: types.number(0, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+      dashRatio: types.compound({
+        behind: types.number(0.1, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+        front: types.number(0, {
+          range: [0, 1],
+          nudgeMultiplier: 0.01,
+        }),
+      }),
+    },
+    options: {
+      reconfigure: true,
+    },
+  },
+});
+
+export default UITheatreJS;

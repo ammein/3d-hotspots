@@ -209,16 +209,20 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
         CanvasTheatreJS.color.r,
         CanvasTheatreJS.color.g,
         CanvasTheatreJS.color.b
-      ).getStyle()}`;
+      )
+        .convertSRGBToLinear()
+        .getStyle()}`;
     }
   }, [gltf, animationNames, hideItems, CanvasTheatreJS]);
 
   // Fog Animation Running Once and specified range
   useEffect(() => {
     if (rest.start && rest.theatreObjects && rest.theatreObjects.Fog) {
+      // Get only first index and last index for TheatreJS sequence play range
       const FogRange = sheet.sequence
         .__experimental_getKeyframes(rest.theatreObjects.Fog.props.focalRange)
-        .flatMap((val) => val.position);
+        .flatMap((val, i, total) => (i === 0 || i === total.length - 1 ? val.position : null))
+        .filter((v) => v !== null);
       if (FogRange.length > 0) {
         sheet.sequence.play({ range: FogRange });
       }
@@ -300,6 +304,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     }
   }, [hotspots]);
 
+  // When wireframe state updated
   useEffect(() => {
     if (gltf) {
       gltf.scene.traverse((obj) => {
@@ -310,6 +315,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     }
   }, [state.wireframe, gltf]);
 
+  // Animations
   useGSAP(() => {
     if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
       let gsapRunnerVal = {
@@ -485,11 +491,13 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
                   }}
                   material={{
                     lineWidth: HotspotLinesTheatreJS.width,
-                    color: new Color().setRGB(
-                      HotspotLinesTheatreJS.color.r,
-                      HotspotLinesTheatreJS.color.g,
-                      HotspotLinesTheatreJS.color.b
-                    ),
+                    color: new Color()
+                      .setRGB(
+                        HotspotLinesTheatreJS.color.r,
+                        HotspotLinesTheatreJS.color.g,
+                        HotspotLinesTheatreJS.color.b
+                      )
+                      .convertSRGBToLinear(),
                   }}
                 />
               ))}
@@ -498,7 +506,11 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
               <Effects
                 uniformsFog={{
                   focalRange: !rest.start ? initialFog.value : FogTheatreJS.focalRange,
-                  fogColor: new Color(FogTheatreJS.fogColor.r, FogTheatreJS.fogColor.g, FogTheatreJS.fogColor.b),
+                  fogColor: new Color(
+                    FogTheatreJS.fogColor.r,
+                    FogTheatreJS.fogColor.g,
+                    FogTheatreJS.fogColor.b
+                  ).convertSRGBToLinear(),
                 }}
                 fogRef={shaderRef}
               />

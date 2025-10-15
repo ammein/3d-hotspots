@@ -201,7 +201,9 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
           >
             {t('label')}
             <meshPhysicalMaterial
-              color={new Color().setRGB(TextTheatreJS.color.r, TextTheatreJS.color.g, TextTheatreJS.color.b)}
+              color={new Color()
+                .setRGB(TextTheatreJS.color.r, TextTheatreJS.color.g, TextTheatreJS.color.b)
+                .convertSRGBToLinear()}
               transparent
             />
             <Html

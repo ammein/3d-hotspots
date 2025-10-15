@@ -86,7 +86,6 @@ const Main = ({ start, loaded, ...rest }) => {
               wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
               className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
             >
-              {/* TODO: Add Ruler Here https://www.npmjs.com/package/react-native-ruler-picker?activeTab=readme */}
               <div
                 className="flex fixed w-screen h-auto"
                 style={{
@@ -145,7 +144,7 @@ const Main = ({ start, loaded, ...rest }) => {
   );
 };
 
-const MainTheatre = withTheatreManagement(Main, 'Main Scene', {
+const MainTheatre = withTheatreManagement(Main, 'Scene / Main', {
   Model: {
     props: {
       draco: types.boolean(true, {
