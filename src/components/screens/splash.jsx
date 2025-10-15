@@ -1,11 +1,8 @@
 import styled from 'styled-components';
 import tw from 'tailwind-styled-components';
-import withLoading from '@/components/hoc/LoadingScreen';
 import Headline from '@/components/Headline';
-import { useApp } from '@/components/context/AppManagement';
 import { Paragraph } from '@/stories/Paragraph';
 import Button from '@/components/Button';
-import { useGSAP } from '@gsap/react';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'use-intl';
 
@@ -41,20 +38,11 @@ function Splash({ callback, loaded }) {
 
   return (
     <SplashContainer ref={container} $show={visibility}>
-      <Headline
-        ref={headline}
-        type="h1"
-        color={/* tailwindcss */ 'text-corporateblue'}
-      >
+      <Headline ref={headline} type="h1" color={/* tailwindcss */ 'text-corporateblue'}>
         {t('title')}
       </Headline>
       <Paragraph ref={paragraph}>{t('description')}</Paragraph>
-      <Button
-        $buttonType="scream"
-        $size="large"
-        $weight="bold"
-        onClick={buttonClick}
-      >
+      <Button $buttonType="scream" $size="large" $weight="bold" onClick={buttonClick}>
         {t('button')}
       </Button>
     </SplashContainer>

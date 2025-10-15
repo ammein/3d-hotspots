@@ -178,7 +178,12 @@ const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
       if (state.rotationDegree !== getDegreeRotation) {
         dispatch({
           type: 'rotation',
-          rotationDegree: getDegreeRotation,
+          value: Math.sign(getDegreeRotation) < 0 ? getDegreeRotation + 360 : getDegreeRotation,
+        });
+
+        dispatch({
+          type: 'rotation-sign',
+          value: Math.sign(getDegreeRotation),
         });
       }
     }

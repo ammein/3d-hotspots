@@ -4,14 +4,14 @@ Command: npx gltfjsx@6.5.3 ./public/model/model.glb -o ./src/components/Globe.js
 Files: ./public/model/model.glb [9.57MB] > /Users/ASN74/Documents/codes/Interactive Assets/3d-hotspots/src/components/model-transformed.glb [4.88MB] (49%)
 */
 
-import { useEffect, useMemo, useRef, useState, memo, Suspense, useCallback } from 'react';
-import { useGLTF, useAnimations, PerspectiveCamera } from '@react-three/drei';
+import { useEffect, useMemo, useRef, useState, Suspense, useCallback } from 'react';
+import { useGLTF, useAnimations } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { KTX2Loader } from 'three-stdlib';
 import { useModelDispatch, useModelState } from '@/components/context/ModelManagement';
 import Effects from '@/components/Effects';
 import { types } from '@theatre/core';
-import { editable, useCurrentSheet } from '@theatre/r3f';
+import { useCurrentSheet } from '@theatre/r3f';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
 import { Color, Spherical, Vector3 } from 'three';
 import { useDebounce } from '@uidotdev/usehooks';
@@ -43,8 +43,6 @@ const ktx2Loader = new KTX2Loader();
 ktx2Loader.setTranscoderPath(import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_KTX_PATH);
 
 const focalRangeDefault = 25.0;
-
-const EditableCamera = editable(PerspectiveCamera, 'perspectiveCamera');
 
 /**
  * Model Component
@@ -171,7 +169,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
             });
             dispatch({
               type: 'hotspot',
-              hotspotID: intersect.name,
+              value: intersect.name,
             });
             setPosition(controls.position0.clone());
           }
@@ -291,6 +289,16 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
       });
     }
   }, [HotspotLinesTheatreJS]);
+
+  // When hotspots updated
+  useEffect(() => {
+    if (hotspots.length > 0) {
+      dispatch({
+        type: 'hotspot-data',
+        value: hotspots,
+      });
+    }
+  }, [hotspots]);
 
   useEffect(() => {
     if (gltf) {
@@ -453,7 +461,6 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
 
   return (
     <>
-      <EditableCamera theatreKey="Camera" makeDefault />
       <Suspense fallback={null}>
         {gltf && gltf.scene && (
           <>
@@ -470,7 +477,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
                   onClose={(e) =>
                     dispatch({
                       type: 'hotspot',
-                      hotspotID: '',
+                      value: '',
                     })
                   }
                   geometry={{

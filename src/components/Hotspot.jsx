@@ -7,16 +7,13 @@ import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
 import { getTextScale, stableLookAt } from '@/helpers/utils';
-import withModelManagement from '@/components/context/ModelManagement';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { MeshLineGeometry, MeshLineMaterial, raycast } from 'meshline';
 import { Html } from '@react-three/drei';
-import { useMediaQuery } from 'react-responsive';
 import Button from '@/components/Button';
 import { useApp } from './context/AppManagement';
 import CloseIcon from '@/design-system/icons/close-big.svg?react';
-import { useCurrentSheet } from '@theatre/r3f';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 

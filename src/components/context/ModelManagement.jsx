@@ -1,54 +1,82 @@
-import { useThrottle } from '@uidotdev/usehooks';
 import { createContext, useContext, useReducer } from 'react';
 
 /**
  * @typedef {Object} ModelManagement
  * @property {boolean} wireframe
  * @property {boolean} hotspotID
+ * @property {Array<import('@/components/Model').Hotspots>} hotspotData
  * @property {number} rotationDegree
+ * @property {number} rotationSign
  * @property {ModelCallback} modelCallback
  * @returns
  */
 
 /**
  * @typedef {Object} ModelType
- * @property {"wireframe" | "hotspot" | "rotation"} type
+ * @property {"wireframe" | "hotspot" | "rotation" | "hotspot-data" | "rotation-sign"} type
+ */
+
+/**
+ * @typedef {Object} ModelValue
+ * @property {any} value
  */
 
 /**
  * @callback ModelCallback
- * @param {ModelManagement & ModelType} 0
+ * @param {ModelType & ModelValue} 0
  * @returns {void}
+ */
+
+/**
+ * @typedef {Object} ModelState
+ * @property {boolean} wireframe
+ * @property {string} hotspotID
+ * @property {Array<import('@/components/Model').Hotspots>} hotspotData
+ * @property {number} rotationDegree
+ * @property {number} rotationSign
  */
 
 export const StateContext = createContext(null);
 export const DispatchContext = createContext(null);
 
+/** @type {ModelState} */
 const initialModelState = {
   wireframe: false,
   hotspotID: '',
+  hotspotData: [],
   rotationDegree: 0,
+  rotationSign: 0,
 };
 
 /**
  * @function ReducerModelManagement
  * @param {ModelType} state
- * @param {any} action
+ * @param {ModelValue} action
+ * @returns {ModelState}
  */
 const reducer = (state, action) => {
   switch (action.type) {
     case 'wireframe':
-      return { ...state, wireframe: action.wireframe };
+      return { ...state, wireframe: action.value };
 
     case 'hotspot':
-      return { ...state, hotspotID: action.hotspotID };
+      return { ...state, hotspotID: action.value };
 
     case 'rotation':
-      return { ...state, rotationDegree: action.rotationDegree };
+      return { ...state, rotationDegree: action.value };
+
+    case 'rotation-sign':
+      return { ...state, rotationSign: action.value };
+
+    case 'hotspot-data':
+      return { ...state, hotspotData: action.value };
 
     default:
       throw new Error(
-        'You did not set any valid type for updating state. \nType supported:\n1. mode\n2. hotspot\n3. rotation'
+        'You did not set any valid type for updating state. \nType supported:' +
+          ['wireframe', 'hotspot', 'rotation', 'hotspot-data', 'rotation-sign']
+            .map((val, i) => '\n' + (i + 1) + '. ' + val)
+            .join(' ')
       );
   }
 };

@@ -1,4 +1,4 @@
-import { DepthOfField, EffectComposer } from '@react-three/postprocessing';
+import { EffectComposer } from '@react-three/postprocessing';
 import { FogEffect } from '@/components/effect/FogPostProcessing';
 
 /**

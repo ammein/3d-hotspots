@@ -7,6 +7,7 @@ import AppProvider from '@/components/context/AppManagement';
 import ModelProvider from '@/components/context/ModelManagement';
 import Splash from '@/components/screens/splash';
 import Main from '@/components/screens/main';
+import Ui from '@/components/screens/ui';
 import withLoading from '@/components/hoc/LoadingScreen';
 import TextPlugin from 'gsap/TextPlugin';
 import ScrambleTextPlugin from 'gsap/ScrambleTextPlugin';
@@ -47,6 +48,7 @@ function InnerApp({ loaded }) {
       >
         <ModelProvider>
           <Main start={start} loaded={animated} />
+          <Ui start={start} loaded={animated} />
         </ModelProvider>
       </Canvas>
     </>

@@ -6,15 +6,20 @@ import Error from '@/components/ThreeJSError';
 import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
 import { useApp } from '../context/AppManagement';
 import { useModelDispatch, useModelState } from '@/components/context/ModelManagement';
-import { Html } from '@react-three/drei';
+import { Html, PerspectiveCamera } from '@react-three/drei';
 import Button from '@/components/Button';
 import { useTranslations } from 'use-intl';
 import Headline from '@/components/Headline';
 import { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { useFrame } from '@react-three/fiber';
+import { Vector4 } from 'three';
+import { editable } from '@theatre/r3f';
 
 const ambientLightIntensity = Math.PI / 2.0;
+
+const EditableCamera = editable(PerspectiveCamera, 'perspectiveCamera');
 
 /**
  * Main Scene
@@ -53,7 +58,7 @@ const Main = ({ start, loaded, ...rest }) => {
             type: 'diff',
           },
         });
-      typeHeading.play(0).delay(1);
+      typeHeading.play(0);
     }
   }, [start, headlineRef.current, ModelTheatreJS]);
 
@@ -61,6 +66,7 @@ const Main = ({ start, loaded, ...rest }) => {
     <>
       {ModelTheatreJS && ModelTheatreJS.model.id && (
         <ErrorBoundary fallback={Error}>
+          <EditableCamera theatreKey="Camera" makeDefault />
           {/* Important to set Editable Ambient Light & Point Light to here. 
           Since everything under this will be controlled by TheatreJS in snapshot */}
           <e.ambientLight theatreKey="Ambient Light" intensity={ambientLightIntensity} />
@@ -74,7 +80,7 @@ const Main = ({ start, loaded, ...rest }) => {
             animationNames={ModelTheatreJS.animations.length > 0 ? ModelTheatreJS.animations.split(',') : []}
             hideItems={ModelTheatreJS.hideItems.length > 0 ? ModelTheatreJS.hideItems.split(',') : []}
           />
-          {start && (
+          {start && state && (
             <Html
               fullscreen
               wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
@@ -88,9 +94,12 @@ const Main = ({ start, loaded, ...rest }) => {
                   left: 28,
                 }}
               >
-                <Headline ref={headlineRef} type="h2" weight="bold" color={/* tailwindcss */ 'text-corporateblue'}>
-                  {t('title')}
-                </Headline>
+                <Headline
+                  ref={headlineRef}
+                  type="h2"
+                  weight="bold"
+                  color={/* tailwindcss */ 'text-corporateblue'}
+                ></Headline>
               </div>
               <div
                 className="flex fixed size-fit pointer-events-auto"
@@ -107,7 +116,7 @@ const Main = ({ start, loaded, ...rest }) => {
                   onClick={(e) =>
                     dispatch({
                       type: 'wireframe',
-                      wireframe: true,
+                      value: true,
                     })
                   }
                 >
@@ -121,7 +130,7 @@ const Main = ({ start, loaded, ...rest }) => {
                   onClick={(e) =>
                     dispatch({
                       type: 'wireframe',
-                      wireframe: false,
+                      value: false,
                     })
                   }
                 >

@@ -34,3 +34,6 @@ storybook-static
 
 # Lygia file
 lygia/
+
+# Zip Files
+*.zip
