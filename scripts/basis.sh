@@ -39,12 +39,24 @@ check_git(){
     cd $basis_project_name
 }
 
+replace_git(){
+    echo "Cloning $basis_git_url into $basis_project_name"
+    git clone --depth 1 --filter=blob:none --no-checkout "$basis_git_url" "$basis_project_name"
+    cd "$basis_project_name" || exit 1
+}
+
 main(){
     if [[ ! -d "$basis_local_path""/$basis_project_name" ]]; then
         echo "Basis not exists"
         check_local_basis_folder
         cd $basis_local_path
         check_git
+        sparse_info
+        git checkout $basis_branch
+
+    elif [[ -n $PROD ]];
+        echo "basis exists on Production"
+        replace_git
         sparse_info
         git checkout $basis_branch
     else
