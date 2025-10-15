@@ -38,12 +38,23 @@ check_git(){
     cd $draco_project_name
 }
 
+replace_git(){
+    echo "Cloning $basis_git_url into $draco_project_name"
+    git clone --depth 1 --filter=blob:none --no-checkout "$draco_git_url" "$draco_project_name"
+    cd "$draco_project_name" || exit 1
+}
+
 main(){
     if [[ ! -d "$draco_local_path""/$draco_project_name" ]]; then
         echo "Draco not exists"
         check_local_draco_folder
         cd $draco_local_path
         check_git
+        sparse_info
+        git checkout $draco_branch
+    elif [[ -n $PROD ]]; then
+        echo "draco exists on Production"
+        replace_git
         sparse_info
         git checkout $draco_branch
     else

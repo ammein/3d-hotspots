@@ -54,7 +54,7 @@ main(){
         sparse_info
         git checkout $basis_branch
 
-    elif [[ -n $PROD ]];
+    elif [[ -n $PROD ]]; then
         echo "basis exists on Production"
         replace_git
         sparse_info
