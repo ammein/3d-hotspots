@@ -3,7 +3,7 @@ pages:
   stage: deploy
   script:
     - yarn install
-    - yarn build-storybook
+    - yarn build:storybook:safe
     # Create the public directory if not exists to hold our site files
     - mkdir -p public
 
