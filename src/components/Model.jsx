@@ -127,7 +127,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
   // Error Handling
   if (!gltf) {
     let error = new Error(
-      `Looks like you trying to load an invalid model paths. Make sure you don't include 'public' directory to your path.\nReadjust your url again and click button "reset" to initalize model again.\n\nYour error model path URL: "${url}"`
+      `Looks like you trying to load an invalid model paths. Make sure you upload your model into 'public/theatrejs-assets' folder.\nMove your model 'public/theatrejs-assets', then click button "reset" and try again .\n\nYour error model path URL: "${url}"`
     );
 
     error.status = 'Model Not Found';

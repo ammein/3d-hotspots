@@ -40,6 +40,8 @@ check_git(){
 }
 
 replace_git(){
+    echo "Removing existing $basis_project_name"
+    rm -rf "$basis_project_name"
     echo "Cloning $basis_git_url into $basis_project_name"
     git clone --depth 1 --filter=blob:none --no-checkout "$basis_git_url" "$basis_project_name"
     cd "$basis_project_name" || exit 1
@@ -56,6 +58,7 @@ main(){
 
     elif [[ -n $PROD ]]; then
         echo "basis exists on Production"
+        cd $basis_local_path
         replace_git
         sparse_info
         git checkout $basis_branch
