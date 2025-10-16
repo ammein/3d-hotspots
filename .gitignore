@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-preview
 *.local
 
 # Exclude Three Public files
@@ -37,3 +38,6 @@ lygia/
 
 # Zip Files
 *.zip
+
+# Env Files
+.env.production

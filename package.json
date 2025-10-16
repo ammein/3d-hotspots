@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "vite --port 9222 --host",
     "build": "vite build",
+    "build-preview": "vite build --mode=preview --outDir=dist-preview",
     "deploy": "yarn basis-production && yarn draco-production && yarn lygia-production && yarn build",
     "clean-build": "rm -rf ./dist",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --mode=preview --outDir=dist-preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lygia": "chmod 777 ./scripts/lygia.sh && ./scripts/lygia.sh",
