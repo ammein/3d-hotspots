@@ -7,7 +7,8 @@
   "Loading": {
     "text": "Loading",
     "font": "Font",
-    "model": "Model"
+    "model": "Model",
+    "loaded": "Asset Loaded"
   },
   "Hotspots": {
     "Robot_ArmPart2": {
@@ -25,5 +26,9 @@
       "description": "Bottling lines are production lines that fill a liquid product, often a beverage, into bottles on a large scale.[1] Many prepared foods are also bottled, such as sauces, syrups, marinades, oils and vinegars. Bottling lines usually include label application equipment, capping operations, date stamps, etc. Quality assurance verification equipemt is often included.",
       "button": "See How Bottle is made"
     }
+  },
+  "UI": {
+    "wireframe": "Wireframe",
+    "solid": "Solid"
   }
 }

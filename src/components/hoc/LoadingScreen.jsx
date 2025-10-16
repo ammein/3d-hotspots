@@ -19,11 +19,7 @@ const withLoading = (WrappedComponent) => {
     const { ready } = useApp();
     const t = useTranslations('Loading');
     const buttonLoadRef = useRef();
-    const {
-      progress: ThreeJSProgress,
-      active: ThreeJSActive,
-      errors,
-    } = useProgress();
+    const { progress: ThreeJSProgress, active: ThreeJSActive, errors } = useProgress();
     const [loaded, setLoaded] = useState(false);
     const [assetName, setAssetName] = useState('');
     const [progress, setProgress] = useState(0);
@@ -134,14 +130,7 @@ const withLoading = (WrappedComponent) => {
           gsap.to(progressRef.current, {
             value: (loaded.length / loadingTotal.length) * 100,
             duration: loadingDuration,
-            onStart: () =>
-              setAssetName(
-                t(
-                  loaded[
-                    Math.floor(loaded.length / loadingTotal.length)
-                  ].type.toLowerCase()
-                )
-              ),
+            onStart: () => setAssetName(t(loaded[Math.floor(loaded.length / loadingTotal.length)].type.toLowerCase())),
             onUpdate: ({ value }) => setProgress(value),
             onUpdateParams: [progressRef.current],
             onComplete: () => {
@@ -164,11 +153,7 @@ const withLoading = (WrappedComponent) => {
       }
     );
 
-    const loadText = ready
-      ? progress !== 100
-        ? t('text') + ' ' + assetName
-        : 'Asset Loaded'
-      : t('text') + '...';
+    const loadText = ready ? (progress !== 100 ? t('text') + ' ' + assetName : t('loaded')) : t('text') + '...';
 
     return (
       <>
@@ -178,9 +163,7 @@ const withLoading = (WrappedComponent) => {
           $buttonType="scream"
           $size="large"
           $weight="bold"
-          $other={
-            /* tailwindcss */ 'mx-auto fixed z-100 top-[50%] left-[50%] -translate-1/2'
-          }
+          $other={/* tailwindcss */ 'mx-auto absolute z-100 top-[50%] left-[50%] -translate-1/2'}
         >
           {progress.toFixed(0) + '% ' + loadText}
         </Button>

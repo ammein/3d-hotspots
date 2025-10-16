@@ -12,7 +12,7 @@ const SplashStyles = styled.div`
 
 const SplashContainer = tw(SplashStyles)`${({ $show = false }) =>
   $show ? 'inline-flex animate-blur-appear' : 'hidden'} will-change-transform
-        fixed z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex-col justify-center items-center gap-8
+        absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex-col justify-center items-center gap-8
 				bg-white-32
 				bg-blend-color-burn bg-white backdrop-blur-[5px]
 				pt-[20px] pb-[20px]`;

@@ -1,6 +1,6 @@
 import { Text3D } from '@react-three/drei';
 
-const fontPath = '/fonts/json/';
+const fontPath = import.meta.env.PROD ? import.meta.env.VITE_BASE_URL + '/fonts/json/' : '/fonts/json/';
 
 /**
  * @typedef {Object} DassaultText3DProps

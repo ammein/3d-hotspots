@@ -90,6 +90,9 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
   /** @type {[boolean, Function]} */
   const [focus, setFocus] = useState(false);
 
+  /** @type {[boolean, Function]} */
+  const [isAnimate, setAnimate] = useState(false);
+
   /** @type {[string]} */
   const urlDebounced = useDebounce(url, 1000);
 
@@ -149,7 +152,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
     (e) => {
       const intersections = e.intersections;
 
-      if (intersections.length > 0 && rest.start && orbitRef.current.state === STATE.NONE && !focus) {
+      if (intersections.length > 0 && rest.start && orbitRef.current.state === STATE.NONE && !focus && !isAnimate) {
         /** @type {Hotspots} */
         let intersect = hotspots.find(({ pointer, name }) =>
           intersections.some(({ object }) =>
@@ -329,7 +332,7 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
       });
     }
 
-    if (HotspotCameraTheatreJS && state.hotspotID.length > 0 && gltf && !focus) {
+    if (HotspotCameraTheatreJS && state.hotspotID.length > 0 && gltf && !focus && !isAnimate) {
       /** @type {Hotspots} */
       const getHotspot = hotspots.find((val) => val.name === state.hotspotID);
 
@@ -387,13 +390,19 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
             controls.enableRotate = orbitSettings.enableRotate;
             controls.enableZoom = orbitSettings.enableZoom;
             controls.enablePan = orbitSettings.enablePan;
-            setFocus(true);
+            gsap.to(
+              {},
+              {
+                onStart: () => setFocus(true),
+                delay: 1,
+              }
+            );
           },
           duration: 1,
           ease: 'sine.in',
         }
       );
-    } else if (state.hotspotID.length === 0 && focus) {
+    } else if (state.hotspotID.length === 0 && focus && !isAnimate) {
       const currentCameraPosition = camera.position.clone();
       const backToCameraPosition = savedPosition.clone();
 
@@ -433,7 +442,13 @@ function Model({ url, useDraco, useKTX2, animationNames = [], hideItems = [], ..
             controls.enableRotate = orbitSettings.enableRotate;
             controls.enableZoom = orbitSettings.enableZoom;
             controls.enablePan = orbitSettings.enablePan;
-            setFocus(false);
+            gsap.to(
+              {},
+              {
+                onStart: () => setFocus(false),
+                delay: 1,
+              }
+            );
             controls.reset();
           },
           duration: 0.8,

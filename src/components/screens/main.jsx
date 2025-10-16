@@ -30,6 +30,7 @@ const Main = ({ start, loaded, ...rest }) => {
   const { Model: ModelTheatreJS } = rest.theatre;
 
   const t = useTranslations('Splash');
+  const t_UI = useTranslations('UI');
 
   const dispatch = useModelDispatch();
   const state = useModelState();
@@ -87,7 +88,7 @@ const Main = ({ start, loaded, ...rest }) => {
               className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
             >
               <div
-                className="flex fixed w-screen h-auto"
+                className="flex absolute w-screen h-auto"
                 style={{
                   top: 41,
                   left: 28,
@@ -101,7 +102,7 @@ const Main = ({ start, loaded, ...rest }) => {
                 ></Headline>
               </div>
               <div
-                className="flex fixed size-fit pointer-events-auto"
+                className="flex absolute size-fit pointer-events-auto"
                 style={{
                   bottom: 30,
                   left: 28,
@@ -119,7 +120,7 @@ const Main = ({ start, loaded, ...rest }) => {
                     })
                   }
                 >
-                  Wireframe
+                  {t_UI('wireframe')}
                 </Button>
                 <Button
                   $buttonType={state.wireframe ? 'shout' : 'scream'}
@@ -133,7 +134,7 @@ const Main = ({ start, loaded, ...rest }) => {
                     })
                   }
                 >
-                  Solid
+                  {t_UI('solid')}
                 </Button>
               </div>
             </Html>

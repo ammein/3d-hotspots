@@ -17,11 +17,10 @@ function Error({ errorStatus, errorMessage, reset }) {
   return (
     <Html
       as={'div'}
-      wrapperClass={`w-full !fixed !top-0 !left-0 !transform-none ${
-        close ? ' !hidden' : ''
-      }`}
+      className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
+      wrapperClass={`pointer-events-none !absolute size-full !top-0 !left-0 !transform-none ${close ? ' !hidden' : ''}`}
     >
-      <div className="!w-full h-fit !fixed bottom-0 left-0">
+      <div className="!w-full h-fit !absolute bottom-0 left-0 pointer-events-auto">
         <div className="inline-flex flex-col justify-start items-center gap-9 w-full">
           <div className="w-full p-3.5 bg-white flex flex-row items-center gap-12 bg-darkgrey drop-shadow-2xl justify-between">
             <div className="flex flex-col justify-start items-start gap-4">
