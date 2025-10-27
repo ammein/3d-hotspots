@@ -1,0 +1,112 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+/* Base */
+.base {
+  @apply inline-flex items-center justify-center border-none transition-colors font-regular;
+  word-wrap: normal;
+}
+
+/* Cursor */
+.cursorPointer {
+  cursor: pointer;
+}
+
+/* Circle styles */
+.circle {
+  @apply bg-white-100 shadow-[0px_16px_16px_rgba(0,0,0,0.32)] rounded-full;
+}
+.circleLarge {
+  @apply p-6 min-w-16 min-h-16;
+}
+.circleSmall {
+  @apply p-3 min-w-10 min-h-10;
+}
+
+/* Scream (primary pill) */
+.scream {
+  @apply !text-white-100 !bg-[#0870D3] rounded-[28px];
+}
+/* Scream grey */
+.screamGrey {
+  @apply bg-white-100 rounded-full outline-1 outline-[var(--black-64)] outline-offset-[-0.5px] text-black-64;
+}
+
+/* Scream hover (only applies when .enabledHover exists on the element) */
+.scream-enabledHover:hover {
+  @apply hover:!text-[#075CAD] hover:!bg-white-100 hover:outline-2 hover:!outline-[#075CAD] hover:!outline-offset-[-2px] dark:hover:!bg-[#075CAD] dark:hover:!text-white-100 dark:hover:!outline-white-100;
+}
+
+/* Shout (outlined pill) */
+.shout {
+  @apply bg-transparent text-[#0870D3] outline-2 outline-[#0870D3] outline-offset-[-2px] rounded-[28px] dark:text-white-100 dark:outline-white-100;
+}
+.shoutGrey {
+  @apply bg-transparent rounded-full outline-2 !outline-black-64 outline-offset-[-2px] text-black-64;
+}
+.shout-enabledHover:hover {
+  @apply hover:!text-white-100 hover:!bg-[#075CAD] dark:hover:!text-[#075CAD] dark:hover:!bg-white-100;
+}
+
+/* Cheer */
+.cheer {
+  @apply bg-transparent text-[#0870D3] p-0 gap-2 dark:text-white-100 [&>svg]:rounded-full [&>svg]:p-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:border-2 [&>svg]:border-[#0870D3];
+}
+
+/* Murmur */
+.murmur {
+  @apply bg-transparent text-[#0870D3] p-0 gap-2 dark:text-white-100 [&>svg]:w-4 [&>svg]:h-4;
+}
+
+/* Size helpers: icon present */
+.sizeIconLarge {
+  @apply py-[14px] pl-6 pr-7 gap-2;
+}
+.sizeIconRegular {
+  @apply py-3 pl-4 pr-5 gap-2;
+}
+.sizeIconSmall {
+  @apply py-2 px-3 gap-1;
+}
+
+/* Size helpers: text only (no icon) */
+.sizeTextLarge {
+  @apply gap-2.5 justify-start items-start px-10 py-[14px];
+}
+.sizeTextRegular {
+  @apply gap-2.5 justify-start items-start px-6 py-3;
+}
+.sizeTextSmall {
+  @apply gap-2.5 justify-start items-start px-4 py-[9.5px];
+}
+
+/* Weight helpers */
+.weightRegular {
+  @apply !font-normal;
+}
+.weightItalic {
+  @apply !font-normal italic;
+}
+.weightSemibold {
+  @apply !font-semibold;
+}
+.weightSemiboldItalic {
+  @apply !font-semibold italic;
+}
+.weightBold {
+  @apply !font-bold;
+}
+.weightBoldItalic {
+  @apply !font-bold italic;
+}
+
+/* Text size helpers */
+.textLarge {
+  @apply !text-[18px] !leading-[18px];
+}
+.textRegular {
+  @apply !text-base !leading-4;
+}
+.textSmall {
+  @apply !text-[13px] !leading-[13px];
+}

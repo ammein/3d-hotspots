@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/refs */
 import { Html } from '@react-three/drei';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
@@ -10,6 +12,8 @@ import NodeGraphSVG from '@/assets/node-graph-circle.svg?react';
 import withTheatreManagement from '@/components/hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import RulerPicker from '@/components/Ruler';
+import HtmlCSS from '@/stylesheets/modules/Html.module.css';
+import UiCSS from '@/stylesheets/modules/Ui.module.css';
 
 extend({ OrbitControls });
 
@@ -47,7 +51,7 @@ function Controls({ ref, cameraRef, degree, sign, makeDefault }) {
     return () => {
       set({ controls: oldControls, camera: oldCamera });
     };
-  }, [makeDefault, orbitControlsRef.current, cameraRef.current]);
+  }, [makeDefault, cameraRef, set, oldControls, oldCamera]);
 
   useFrame(({ camera }) => {
     const controls = orbitControlsRef.current;
@@ -72,7 +76,7 @@ function Controls({ ref, cameraRef, degree, sign, makeDefault }) {
     controls.update();
   });
 
-  useImperativeHandle(ref, () => orbitControlsRef.current, [ref]);
+  useImperativeHandle(ref, () => orbitControlsRef.current, []);
 
   return <orbitControls ref={orbitControlsRef} args={[cameraRef.current, domElement]} />;
 }
@@ -143,12 +147,8 @@ const UI = ({ start, loaded, ...rest }) => {
   });
 
   return (
-    <Html
-      fullscreen
-      wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
-      className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
-    >
-      <div className="right-[27px] top-[23px] !absolute bg-transparent flex gap-1.5 justify-center flex-col align-middle items-center">
+    <Html fullscreen wrapperClass={HtmlCSS.WrapperHtml} className={HtmlCSS.HtmlContainer}>
+      <div className={UiCSS.NodeGraphContainer}>
         {start && (
           <Canvas
             dpr={[1, 2]}
@@ -180,12 +180,8 @@ const UI = ({ start, loaded, ...rest }) => {
                 makeDefault
               />
             )}
-            <Html
-              fullscreen
-              wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none z-10'}
-              className={/* tailwindcss */ '!transform-none !left-0 !top-0 !right-0 !size-full'}
-            >
-              <div className="size-full flex justify-center items-center text-2xl">
+            <Html fullscreen wrapperClass={HtmlCSS.WrapperNodeGraphSVG} className={HtmlCSS.NodeGraphSVGContainer}>
+              <div className={UiCSS.NodeGraphSVG}>
                 <NodeGraphSVG />
               </div>
             </Html>

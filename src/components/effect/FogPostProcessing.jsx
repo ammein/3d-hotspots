@@ -1,4 +1,4 @@
-import { forwardRef, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Color, Uniform } from 'three';
 import { Effect, EffectAttribute } from 'postprocessing';
 import fragmentShader from '@/glsl/main.frag';

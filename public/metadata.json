@@ -1,19 +1,9 @@
 {
-    "style": {
-
+    "tracking": {
+        "category": "Navigation",
+        "action": "iframe_menu"
     },
     "screens": {
-        "splash": {
-            "button": {
-                "label": "Loading",
-                "tracking": {
-                    "event": "click",
-                    "event_category": "Splash 3D Hotspots",
-                    "event_action": "splash-menu",
-                    "event_name": "splash-button"
-                }
-            }
-        },
         "detail": {
             "hotspots": [
                 {

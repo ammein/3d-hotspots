@@ -1,0 +1,10 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.NodeGraphContainer {
+  @apply right-[27px] top-[23px] !absolute bg-transparent flex gap-1.5 justify-center flex-col align-middle items-center;
+}
+
+.NodeGraphSVG {
+  @apply size-full flex justify-center items-center text-2xl;
+}

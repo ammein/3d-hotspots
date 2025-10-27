@@ -1,16 +1,36 @@
-import { Button as DassaultButton } from '@/design-system/components/buttons';
+import DassaultButton from '@/design-system/components/Buttons';
+import { convertCase } from '@/helpers/utils';
 
 /**
  * Dassault Systemes Button Component
  * @typedef ButtonProps
  * @property {string} label Aria Label of a button
- *
- * @param {import('@/design-system/components/buttons').Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps} rest
+ * @property {string} seo SEO for ItemProp 'label'
+ * @property {Object} metadata Metadata from metadata.json
+ */
+
+/**
+ * Button Component
+ * @param {import('@/design-system/components/Buttons').Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps} rest
  * @returns
  */
-const Button = ({ label = 'button', ...rest }) => {
+const Button = ({ label = 'button', seo = '', metadata = {}, ...rest }) => {
   return (
-    <DassaultButton type="button" aria-label={label} {...rest}>
+    <DassaultButton
+      type="button"
+      aria-label={label}
+      itemScope={import.meta.env.PROD ? true : undefined}
+      itemType={import.meta.env.PROD ? import.meta.env.VITE_TRACKING_URL : undefined}
+      {...rest}
+    >
+      {import.meta.env.PROD && Object.values(metadata).length > 0 && (
+        <>
+          {/* https://react.dev/reference/react-dom/components/meta#annotating-specific-items-within-the-document-with-metadata */}
+          <meta itemProp="category" content={metadata.tracking.category} />
+          <meta itemProp="action" content={metadata.tracking.action} />
+          <meta itemProp="label" content={convertCase(seo, 'snake')} />
+        </>
+      )}
       {rest.children}
     </DassaultButton>
   );
@@ -18,4 +38,7 @@ const Button = ({ label = 'button', ...rest }) => {
 
 Button.displayName = 'Button';
 
+/**
+ * @returns {import('@/design-system/components/Buttons').Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps}
+ */
 export default Button;

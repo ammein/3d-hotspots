@@ -30,11 +30,11 @@ import { useEffect, useState, useMemo } from 'react';
  */
 
 /**
- * @typedef {Record<string, TheatreObject>} TheatreOptionsValues
+ * @typedef {Record<string, TheatreObject> & { r3f: boolean }} TheatreOptionsValues
  */
 
 /**
- * @typedef {{ theatre: Record<string, any>, theatreObjects: Record<string, import('@theatre/core').ISheetObject> }} TheatreReturnValue
+ * @typedef {{ theatre: Record<string, any>, theatreObjects: Record<string, import('@theatre/core').ISheetObject>, sheet: import('@theatre/core').ISheet }} TheatreReturnValue
  */
 
 /**
@@ -75,11 +75,17 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
     /** @type {[TheatreOptionsValues, Function]} */
     const [theatreValues, setTheatreValues] = useState({});
 
+    const defaultOptions = useMemo(() => {
+      return Object.assign({}, { r3f: true }, theatreOptions);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [theatreOptions]);
+
     /**
      * Build the sheet once per HOC call
      */
     const sheet = useMemo(() => {
       return appProject.sheet(sheetName);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sheetName]);
 
     // Seed objects + initial values
@@ -89,10 +95,15 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
       const newObjects = {};
       const newValues = {};
 
-      for (const objName in theatreOptions) {
-        if (!Object.hasOwn(theatreOptions, objName)) continue;
+      for (const objName in defaultOptions) {
+        if (!Object.hasOwn(defaultOptions, objName)) continue;
 
-        const { props, options } = theatreOptions[objName];
+        if (objName === 'r3f') {
+          delete defaultOptions[objName];
+          continue;
+        }
+
+        const { props, options } = defaultOptions[objName];
         const obj = sheet.object(objName, props, options);
 
         newObjects[objName] = obj;
@@ -108,11 +119,14 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
             if (sheet.object(objName)) {
               sheet.detachObject(objName);
             }
-          } catch (err) {}
+            // eslint-disable-next-line no-unused-vars
+          } catch (err) {
+            /* empty */
+          }
         }
         setObjects({});
       };
-    }, [appProject.isReady, theatreOptions, sheet]);
+    }, [appProject.isReady, defaultOptions, sheet]);
 
     // Subscribe to changes
     useEffect(() => {
@@ -137,11 +151,15 @@ const withTheatreManagement = (WrappedComponent, sheetName, theatreOptions) => {
       };
     }, [objects]);
 
-    return (
-      <SheetProvider sheet={sheet}>
-        <WrappedComponent {...props} theatre={theatreValues} theatreObjects={objects} />
-      </SheetProvider>
-    );
+    if (Object.prototype.hasOwnProperty.call(theatreOptions, 'r3f') && !theatreOptions.r3f) {
+      return <WrappedComponent {...props} sheet={sheet} theatre={theatreValues} theatreObjects={objects} />;
+    } else {
+      return (
+        <SheetProvider sheet={sheet}>
+          <WrappedComponent {...props} sheet={sheet} theatre={theatreValues} theatreObjects={objects} />
+        </SheetProvider>
+      );
+    }
   };
 };
 

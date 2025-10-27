@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import './App.css';
+import '@/stylesheets/App.css';
 import { Canvas } from '@react-three/fiber';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -11,6 +11,7 @@ import Ui from '@/components/screens/ui';
 import withLoading from '@/components/hoc/LoadingScreen';
 import TextPlugin from 'gsap/TextPlugin';
 import ScrambleTextPlugin from 'gsap/ScrambleTextPlugin';
+import AppCSS from '@/stylesheets/modules/App.module.css';
 
 gsap.registerPlugin(useGSAP);
 gsap.registerPlugin(TextPlugin);
@@ -34,17 +35,14 @@ function InnerApp({ loaded }) {
 
   return (
     <>
-      <Splash callback={startCallback} loaded={loaded} />
+      <Splash callback={startCallback} start={start} loaded={loaded} />
       <Canvas
         gl={{
           preserveDrawingBuffer: import.meta.env.DEV,
           antialias: true,
         }}
         dpr={[1, 2]}
-        style={{
-          width: '100dvw',
-          height: '100dvh',
-        }}
+        className={AppCSS.Canvas}
       >
         <ModelProvider>
           <Main start={start} loaded={animated} />
@@ -57,7 +55,7 @@ function InnerApp({ loaded }) {
 
 const InnerAppLoads = withLoading(InnerApp);
 
-function App(props) {
+function App(_props) {
   return (
     <AppProvider>
       <InnerAppLoads />

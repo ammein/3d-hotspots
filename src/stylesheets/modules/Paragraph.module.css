@@ -1,0 +1,39 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.paragraph {
+  word-wrap: break-word;
+}
+
+/* Body (default larger) */
+.body {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.2px;
+}
+
+/* Caption / smaller */
+.caption {
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: 0px;
+}
+
+/* Font family helpers (same as headings) */
+.font-regular {
+  font-family: var(--font-regular) !important;
+}
+.font-italic {
+  font-family: var(--font-italic) !important;
+}
+.font-light {
+  font-family: var(--font-light) !important;
+}
+.font-light-italic {
+  font-family: var(--font-light-italic) !important;
+}
+
+/* Default visual */
+.defaultVisual {
+  @apply text-[var(--color-black-100)];
+}

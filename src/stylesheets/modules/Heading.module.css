@@ -1,0 +1,115 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.heading {
+  word-wrap: break-word;
+}
+
+/* Default (large desktop / original default) */
+.h1 {
+  font-size: 55px;
+  line-height: 64px;
+  letter-spacing: -1.3px;
+}
+.h2 {
+  font-size: 44px;
+  line-height: 48px;
+  letter-spacing: -1px;
+}
+.h3 {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.8px;
+}
+.h4 {
+  font-size: 26px;
+  line-height: 32px;
+  letter-spacing: -0.6px;
+}
+
+/* Medium screens: min-width: 768px and max-width: 1599px */
+@media only screen and (min-width: 768px) and (max-width: 1599px) {
+  .h1 {
+    font-size: 44px;
+    line-height: 48px;
+    letter-spacing: -1px;
+  }
+  .h2 {
+    font-size: 32px;
+    line-height: 36px;
+    letter-spacing: -0.8px;
+  }
+  .h3 {
+    font-size: 26px;
+    line-height: 32px;
+    letter-spacing: -0.6px;
+  }
+  .h4 {
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: -0.5px;
+  }
+}
+
+/* Small screens: max-width: 767px */
+@media only screen and (max-width: 767px) {
+  .h1 {
+    font-size: 32px;
+    line-height: 36px;
+    letter-spacing: -0.8px;
+  }
+  .h2 {
+    font-size: 26px;
+    line-height: 32px;
+    letter-spacing: -0.6px;
+  }
+  .h3 {
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: -0.4px;
+  }
+  .h4 {
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: -0.2px;
+  }
+}
+
+/* Font family helpers using your CSS variables from theme */
+.font-regular {
+  font-family: var(--font-regular) !important;
+}
+.font-italic {
+  font-family: var(--font-italic) !important;
+}
+.font-light {
+  font-family: var(--font-light) !important;
+}
+.font-light-italic {
+  font-family: var(--font-light-italic) !important;
+}
+.font-semibold {
+  font-family: var(--font-semibold) !important;
+}
+.font-semibold-italic {
+  font-family: var(--font-semibold-italic) !important;
+}
+.font-bold {
+  font-family: var(--font-bold) !important;
+}
+.font-bold-italic {
+  font-family: var(--font-bold-italic) !important;
+}
+
+/* Default typography visual style using Tailwind utilities via @apply.
+   Uses your color variables; using @apply with arbitrary value may require Tailwind config to allow it.
+   If @apply with text-[var(--...)] causes build issues, replace with `color: var(--color-black-100);` */
+.defaultVisual {
+  @apply font-semibold;
+  color: var(--color-black-100);
+}
+
+/* Helper to allow utility classes to control color (keeps color inheritance) */
+.inheritColor {
+  color: inherit;
+}

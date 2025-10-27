@@ -1,177 +1,136 @@
-import tw from 'tailwind-styled-components';
+import styles from '@/stylesheets/modules/Button.module.css';
 
 /**
  * @typedef {{
- * $size: "large" | "regular" | "small";
- * $icon: boolean;
- * $buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
- * $greyButton: boolean;
- * $weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic";
- * $other: string
+ * size: "large" | "regular" | "small";
+ * icon: boolean;
+ * buttonType: "scream" | "shout" | "cheer" | "murmur" | "circle";
+ * greyButton: boolean;
+ * weight: "regular" | "italic" | "semibold" | "semibold-italic" | "bold" | "bold-italic";
+ * other: string
  * }} Button
  */
 
 /**
- * --- The Button Component ---
- * A flexible button built with tailwind-styled-components.
- *
- * Props are prefixed with '$' to prevent them from being passed to the
- * underlying DOM element, which is the standard convention for this library.
- * @type {import('tailwind-styled-components/dist/tailwind').TailwindComponent<'web', Button & React.HTMLAttributes<HTMLButtonElement>>}
+ * Dassault Button
+ * @param {Button} props
+ * @returns
  */
-export const Button = tw.button`
-    inline-flex
-    items-center
-    justify-center
-    border-none
-    ${(props) => !props.disabled && 'cursor-pointer'}
-    transition-colors
-    font-sans
-    ${(props) => props.$other}
+const Button = (props) => {
+  const {
+    size = 'regular',
+    icon = false,
+    buttonType = 'scream',
+    greyButton = false,
+    weight = 'regular',
+    other = '',
+    disabled = false,
+    noHover = false,
+    className = '',
+    children,
+    ...rest
+  } = props;
 
-    ${({ $buttonType = 'scream', $greyButton = false, disabled = false }) => {
-      // --- Button Type, Style, and Hover States ---
-      switch ($buttonType) {
-        case 'scream':
-          return $greyButton
-            ? `
-              bg-white-100
-              rounded-full
-              outline
-              outline-1
-              outline-[var(--black-64)]
-              outline-offset-[-0.5px]
-              text-black-64
-            `
-            : `
-              text-white-100
-              bg-[#0870D3]
-              rounded-[28px]
+  const classes = [styles.base];
 
-              dark:bg-white-100
-              dark:text-[#075CAD]
-            ` +
-                (!disabled &&
-                  `
-                hover:text-[#075CAD]
-                hover:bg-white-100
-                hover:outline
-                hover:outline-2
-                hover:outline-[#075CAD]
-                hover:outline-offset-[-2px]
-                dark:hover:bg-[#075CAD]
-                dark:hover:text-white-100
-                dark:hover:outline-white-100
-              `);
-        case 'shout':
-          return $greyButton
-            ? `
-              bg-transparent
-              rounded-full
-              outline
-              outline-2
-              !outline-black-64
-              outline-offset-[-2px]
-              text-black-64
-            `
-            : `
-              bg-transparent
-              text-[#0870D3]
-              outline
-              outline-2
-              outline-[#0870D3]
-              outline-offset-[-2px]
-              rounded-[28px]
-              dark:text-white-100
-              dark:outline-white-100
-            ` +
-                (!disabled &&
-                  `
-                hover:text-white-100
-                hover:bg-[#075CAD]
-                dark:hover:text-[#075CAD]
-                dark:hover:bg-white-100
-              `);
-        case 'cheer':
-          return `
-            bg-transparent
-            text-[#0870D3]
-            p-0
-            gap-2
-            dark:text-white-100
-            [&>svg]:rounded-full
-            [&>svg]:p-1
-            [&>svg]:w-4
-            [&>svg]:h-4
-            [&>svg]:border-2
-            [&>svg]:border-[#0870D3]
-          `;
-        case 'murmur':
-          return `
-            bg-transparent
-            text-[#0870D3]
-            p-0
-            gap-2
-            dark:text-white-100
-            [&>svg]:w-4
-            [&>svg]:h-4
-          `;
-        case 'circle':
-          return `
-            bg-white-100
-            shadow-[0px_16px_16px_rgba(0,0,0,0.32)]
-            rounded-full
-          `;
-        default:
-          return '';
+  if (!disabled) classes.push(styles.cursorPointer);
+
+  // allow passing raw utility classes via other or className
+  if (other) classes.push(other);
+  if (className) classes.push(className);
+
+  // Button type styles
+  switch (buttonType) {
+    case 'scream':
+      if (greyButton) {
+        classes.push(styles.screamGrey, styles.outline1, styles.outlineBlack64);
+      } else {
+        classes.push(styles.scream, (!disabled || !noHover) && styles['scream-enabledHover']);
       }
-    }}
+      break;
 
-    ${({ $buttonType = 'scream', $size = 'regular', $icon = false }) => {
-      // --- Sizing Logic based on Type and Icon ---
-      if ($buttonType === 'circle') {
-        return $size === 'large' || $size === 'regular'
-          ? 'p-6 min-w-16 min-h-16'
-          : 'p-3 min-w-10 min-h-10';
+    case 'shout':
+      if (greyButton) {
+        classes.push(styles.shoutGrey);
+      } else {
+        classes.push(styles.shout, (!disabled || !noHover) && styles['shout-enabledHover']);
       }
+      break;
 
-      if ($buttonType === 'scream' || $buttonType === 'shout') {
-        if ($icon) {
-          return (
-            {
-              large: 'py-[14px] pl-6 pr-7 gap-2',
-              regular: 'py-3 pl-4 pr-5 gap-2',
-              small: 'py-2 px-3 gap-1',
-            }[$size] || ''
-          );
-        } else {
-          return `gap-2.5 justify-start items-start ${
-            {
-              large: 'px-10 py-[14px]',
-              regular: 'px-6 py-3',
-              small: 'px-4 py-[9.5px]',
-            }[$size] || ''
-          }`;
-        }
-      }
-      return '';
-    }}
+    case 'cheer':
+      classes.push(styles.cheer);
+      break;
 
-    ${({ $weight = 'regular' }) =>
-      ({
-        regular: '!font-normal',
-        italic: '!font-normal italic',
-        semibold: '!font-semibold',
-        'semibold-italic': '!font-semibold italic',
-        bold: '!font-bold',
-        '!bold-italic': '!font-bold italic',
-      }[$weight])}
+    case 'murmur':
+      classes.push(styles.murmur);
+      break;
 
+    case 'circle':
+      classes.push(styles.circle, styles.circleShadow);
+      break;
 
-    ${({ $size = 'regular' }) =>
-      ({
-        large: '!text-[18px] !leading-[18px]',
-        regular: '!text-base !leading-4',
-        small: '!text-[13px] !leading-[13px]',
-      }[$size])}
-`;
+    default:
+      throw new Error("You forgot to insert param named: 'buttonType'");
+  }
+
+  // Sizing logic (applies the exact sizes from your original)
+  if (buttonType === 'circle') {
+    if (size === 'large' || size === 'regular') {
+      classes.push(styles.circleLarge);
+    } else {
+      classes.push(styles.circleSmall);
+    }
+  } else if (buttonType === 'scream' || buttonType === 'shout') {
+    if (icon) {
+      if (size === 'large') classes.push(styles.sizeIconLarge);
+      else if (size === 'regular') classes.push(styles.sizeIconRegular);
+      else classes.push(styles.sizeIconSmall);
+    } else {
+      // text-only variants
+      if (size === 'large') classes.push(styles.sizeTextLarge);
+      else if (size === 'regular') classes.push(styles.sizeTextRegular);
+      else classes.push(styles.sizeTextSmall);
+      // gap/justify/items already included in sizeText* helpers
+    }
+  }
+
+  // Weight
+  switch (weight) {
+    case 'regular':
+      classes.push(styles.weightRegular);
+      break;
+    case 'italic':
+      classes.push(styles.weightItalic);
+      break;
+    case 'semibold':
+      classes.push(styles.weightSemibold);
+      break;
+    case 'semibold-italic':
+      classes.push(styles.weightSemiboldItalic);
+      break;
+    case 'bold':
+      classes.push(styles.weightBold);
+      break;
+    case 'bold-italic':
+      classes.push(styles.weightBoldItalic);
+      break;
+    default:
+      classes.push(styles.weightRegular);
+  }
+
+  // Text size
+  if (size === 'large') classes.push(styles.textLarge);
+  else if (size === 'regular') classes.push(styles.textRegular);
+  else classes.push(styles.textSmall);
+
+  const finalClassName = classes.filter(Boolean).join(' ');
+
+  // Do not forward  props to DOM
+  return (
+    <button className={finalClassName} disabled={disabled} {...rest}>
+      {children}
+    </button>
+  );
+};
+
+export default Button;

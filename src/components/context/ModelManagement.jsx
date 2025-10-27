@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer } from 'react';
 
 /**
@@ -87,7 +88,7 @@ const reducer = (state, action) => {
  * @param {React.ComponentType<P>} WrappedComponent - The component to be wrapped.
  * @returns {function(React.ComponentType): React.ComponentType} A function that takes a React component and returns a new component with model management state.
  */
-export default ({ children }) => {
+const ModelManagement = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialModelState);
 
   return (
@@ -96,6 +97,11 @@ export default ({ children }) => {
     </StateContext.Provider>
   );
 };
+
+/**
+ * @returns {function(React.ComponentType): React.ComponentType}
+ */
+export default ModelManagement;
 
 /**
  * @returns {ModelManagement}

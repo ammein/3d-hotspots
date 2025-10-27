@@ -1,0 +1,6 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.LoadingButton {
+  @apply !size-fit overflow-auto !m-auto absolute z-100 !top-0 !left-0 !right-0 !bottom-0;
+}

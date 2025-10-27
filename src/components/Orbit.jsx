@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useThree } from '@react-three/fiber';
 import { OrbitControls } from '@three-extras/controls/OrbitControls';
 import withTheatreManagement from './hoc/TheatreManagement';
@@ -41,7 +42,6 @@ export class PowerOrbitControls extends OrbitControls {
   update(deltaTime = null) {
     super.update(deltaTime);
     if (this.autoRotate && this.state === STATE.NONE && this.orientation === 'vertical') {
-      this._spherical.phi = this._spherical.phi;
       super._rotateUp(super._getAutoRotationAngle(deltaTime));
     }
   }
@@ -189,7 +189,7 @@ const Orbit = ({ ref, makeDefault, enabled = true, ...rest }) => {
     }
   }, -1);
 
-  useImperativeHandle(ref, () => controlsRef.current, [controlsRef.current]);
+  useImperativeHandle(ref, () => controlsRef.current, []);
 
   return controlsRef.current ? <primitive ref={ref} object={controlsRef.current} dispose={null} /> : null;
 };

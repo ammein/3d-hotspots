@@ -28,7 +28,13 @@
     }
   },
   "UI": {
-    "wireframe": "Maquette filaire",
-    "solid": "Solide"
+    "wireframe": {
+      "label": "Maquette filaire",
+      "seo": "Mode Wireframe"
+    },
+    "solid": {
+      "label": "Solide",
+      "seo": "Mode Solide"
+    }
   }
 }

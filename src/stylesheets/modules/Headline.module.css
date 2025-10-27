@@ -1,0 +1,6 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.Headline {
+  @apply !text-corporateblue;
+}

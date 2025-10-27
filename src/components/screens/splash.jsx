@@ -1,52 +1,136 @@
-import styled from 'styled-components';
-import tw from 'tailwind-styled-components';
 import Headline from '@/components/Headline';
 import { Paragraph } from '@/stories/Paragraph';
 import Button from '@/components/Button';
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useLayoutEffect } from 'react';
 import { useTranslations } from 'use-intl';
+import SplashCSS from '@/stylesheets/modules/Splash.module.css';
+import HeadlineCSS from '@/stylesheets/modules/Headline.module.css';
+import withTheatreManagement from '../hoc/TheatreManagement';
+import { types } from '@theatre/core';
+import { useApp } from '../context/AppManagement';
 
-const SplashStyles = styled.div`
-  height: auto;
-`;
-
-const SplashContainer = tw(SplashStyles)`${({ $show = false }) =>
-  $show ? 'inline-flex animate-blur-appear' : 'hidden'} will-change-transform
-        absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex-col justify-center items-center gap-8
-				bg-white-32
-				bg-blend-color-burn bg-white backdrop-blur-[5px]
-				pt-[20px] pb-[20px]`;
-
-function Splash({ callback, loaded }) {
+/**
+ * Splash Container
+ * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & { callback: Function, loaded: boolean, start: boolean }} param0
+ * @returns
+ */
+function Splash({ callback, loaded, start, ...rest }) {
   const t = useTranslations('Splash');
   const [visibility, setVisibility] = useState(false);
   const headline = useRef();
   const container = useRef();
   const paragraph = useRef();
+  const SplashStyles = [];
 
-  const buttonClick = useCallback((e) => {
-    callback('start');
+  const { appProject, metadata } = useApp();
+
+  const { Splash: SplashTheatreJS } = rest.theatre;
+
+  if (loaded && !start && !visibility) {
+    setVisibility(true);
+  } else if (loaded && start && visibility) {
     setVisibility(false);
-  });
+  }
 
-  useEffect(() => {
+  const buttonClick = useCallback(() => {
+    callback('start');
+  }, [callback]);
+
+  useLayoutEffect(() => {
     if (loaded) {
       callback('loaded');
-      setVisibility(true);
     }
-  }, [loaded]);
+  }, [callback, loaded]);
+
+  SplashStyles.push(SplashCSS.Splash);
+
+  if (visibility) {
+    SplashStyles.push(SplashCSS['Splash-Display'], 'animate-blur-appear');
+  }
+
+  const SplashFinalClasses = SplashStyles.filter(Boolean).join(' ');
 
   return (
-    <SplashContainer ref={container} $show={visibility}>
-      <Headline ref={headline} type="h1" color={/* tailwindcss */ 'text-corporateblue'}>
-        {t('title')}
-      </Headline>
-      <Paragraph ref={paragraph}>{t('description')}</Paragraph>
-      <Button $buttonType="scream" $size="large" $weight="bold" onClick={buttonClick}>
-        {t('button')}
-      </Button>
-    </SplashContainer>
+    SplashTheatreJS && (
+      <div className={SplashCSS.Container}>
+        <div
+          className={SplashFinalClasses}
+          style={{
+            backdropFilter: `blur(${SplashTheatreJS.backdrop.blur}px) opacity(${
+              SplashTheatreJS.backdrop.backgroundOpacity * 100
+            }%)`,
+          }}
+          ref={container}
+        >
+          <Headline
+            ref={headline}
+            weight={SplashTheatreJS.title.weight}
+            type={SplashTheatreJS.title.type}
+            color={HeadlineCSS.Headline}
+          >
+            {t('title')}
+          </Headline>
+          <Paragraph ref={paragraph}>{t('description')}</Paragraph>
+          <Button
+            buttonType="scream"
+            size="large"
+            weight="bold"
+            label={t('button')}
+            seo={t('seo')}
+            metadata={metadata}
+            onClick={buttonClick}
+            other={SplashCSS.SplashButton}
+          >
+            {t('button')}
+          </Button>
+        </div>
+        {SplashTheatreJS.image && SplashTheatreJS.image.id.length > 0 && (
+          <img
+            src={appProject.getAssetUrl(SplashTheatreJS.image)}
+            alt="Thumbnail"
+            className={(visibility ? 'animate-blur-appear' : 'animate-blur-dissappear') + ' ' + SplashCSS.Thumbnail}
+          />
+        )}
+      </div>
+    )
   );
 }
 
-export default Splash;
+const SplashTheatreJS = withTheatreManagement(Splash, 'Scene / Splash', {
+  Splash: {
+    props: {
+      backdrop: types.compound({
+        backgroundOpacity: types.number(1, {
+          range: [0, 1],
+          label: 'opacity',
+          nudgeMultiplier: 0.01,
+        }),
+        blur: types.number(5, {
+          range: [0, 1000],
+          nudgeMultiplier: 1,
+        }),
+      }),
+      title: types.compound({
+        type: types.stringLiteral('h1', {
+          h1: 'Heading 1',
+          h2: 'Heading 2',
+          h3: 'Heading 3',
+          h4: 'Heading 4',
+        }),
+        weight: types.stringLiteral('bold', {
+          bold: 'Bold',
+          semibold: 'SemiBold',
+        }),
+      }),
+      image: types.image('', {
+        label: 'Splash Image',
+      }),
+    },
+    options: {
+      reconfigure: true,
+    },
+  },
+  r3f: false,
+});
+
+export default SplashTheatreJS;

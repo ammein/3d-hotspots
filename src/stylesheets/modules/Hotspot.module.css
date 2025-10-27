@@ -1,0 +1,6 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.HotspotButton {
+  @apply absolute size-fit;
+}

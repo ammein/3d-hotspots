@@ -135,9 +135,9 @@ if [[ -z $path ]]; then
     npx degit https://github.com/patriciogonzalezvivo/lygia.git "$default_lygia_path/$lygia_folder_name"
     prune_lygia "$default_lygia_path/$lygia_folder_name"
 else
-    check_lygia $path
+    check_lygia "$path/$lygia_folder_name"
     # Add manually to some path
-    echo "Clone to $path"
-    npx degit https://github.com/patriciogonzalezvivo/lygia.git "$path"
-    prune_lygia "$path"
+    echo "Clone to $path/$lygia_folder_name"
+    npx degit https://github.com/patriciogonzalezvivo/lygia.git "$path/$lygia_folder_name"
+    prune_lygia "$path/$lygia_folder_name"
 fi

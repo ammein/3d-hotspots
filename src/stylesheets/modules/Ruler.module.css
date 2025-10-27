@@ -1,0 +1,30 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.RulerContainer {
+  @apply w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap box-border p-0 m-0 snap-x webkit-scroll pointer-events-none;
+}
+
+.RulerWrapper {
+  @apply !inline-block;
+}
+
+.RulerChildWrapper {
+  @apply snap-start inline-block;
+}
+
+.RulerSpacer {
+  @apply inline-block;
+}
+
+.IndicatorWrapper {
+  @apply absolute left-1/2 pointer-events-none flex items-center justify-center flex-col;
+}
+
+.IndicatorTextWrapper {
+  @apply flex items-center justify-center;
+}
+
+.IndicatorText {
+  @apply text-center;
+}

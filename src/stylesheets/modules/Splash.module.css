@@ -1,0 +1,22 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.Container {
+  @apply size-full flex-col justify-center items-center absolute flex top-0 left-0;
+}
+
+.Splash {
+  @apply will-change-transform relative z-10 w-1/2 text-center flex-col gap-8 bg-white-32 items-center bg-blend-color-burn pt-[20px] pb-[20px] h-auto hidden;
+}
+
+.Splash-Display {
+  @apply !inline-flex;
+}
+
+.Thumbnail {
+  @apply size-full will-change-transform absolute z-9 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none;
+}
+
+.SplashButton {
+  @apply size-fit;
+}
