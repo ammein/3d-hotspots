@@ -1,0 +1,18 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.WrapperHtml {
+  @apply pointer-events-none size-full !transform-none;
+}
+
+.HtmlContainer {
+  @apply !transform-none !left-0 !top-0 !size-full;
+}
+
+.WrapperNodeGraphSVG {
+  @apply pointer-events-none size-full !transform-none z-10;
+}
+
+.NodeGraphSVGContainer {
+  @apply !transform-none !left-0 !top-0 !right-0 !size-full;
+}

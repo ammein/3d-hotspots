@@ -12,7 +12,7 @@ import { FogEffect } from '@/components/effect/FogPostProcessing';
  * @param {EffectsParams} param0
  * @returns
  */
-export default function Effects({ uniformsFog, depthProps, depthRef, fogRef }) {
+export default function Effects({ uniformsFog, fogRef }) {
   return (
     <EffectComposer>
       <FogEffect

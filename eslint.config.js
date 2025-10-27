@@ -8,16 +8,27 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist',
+    'public',
+    'storybook',
+    'dist-preview',
+    'scripts',
+    'storybook-static',
+    'src/glsl',
+    'src/assets',
+    'vite.config.js'
+  ]),
   {
     files: ['**/*.{js,jsx}'],
-    plugins: [
-      'react-hooks'
-    ],
+    plugins: {
+      'react-hooks': reactHooks,
+      'storybook': storybook
+    },
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
+      reactRefresh.configs.vite
     ],
     languageOptions: {
       ecmaVersion: 2020,
@@ -29,18 +40,9 @@ export default defineConfig([
       },
     },
     rules: {
-      "indent": ["error", 2], // Enforces 4-space indentation
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
       'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
-      "@typescript-eslint/no-unused-vars": [
-        "warn", // or "error"
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_"
-        }
-      ]
+      'react-hooks/exhaustive-deps': 'warn' // Checks effect dependencies
     },
   },
 ])

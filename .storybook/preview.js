@@ -1,4 +1,5 @@
-import '@/theme.css'
+import '../src/stylesheets/theme.css'
+import './font.css'
 
 
 /** @type { import('@storybook/react-vite').Preview } */

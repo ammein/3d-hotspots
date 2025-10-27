@@ -1,7 +1,6 @@
 import withTheatreManagement from '../hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import Model from '@/components/Model';
-import { editable as e } from '@theatre/r3f';
 import Error from '@/components/ThreeJSError';
 import ErrorBoundary from '@/components/hoc/ThreeErrorBoundary';
 import { useApp } from '../context/AppManagement';
@@ -10,12 +9,13 @@ import { Html, PerspectiveCamera } from '@react-three/drei';
 import Button from '@/components/Button';
 import { useTranslations } from 'use-intl';
 import Headline from '@/components/Headline';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { useFrame } from '@react-three/fiber';
-import { Vector4 } from 'three';
 import { editable } from '@theatre/r3f';
+import HtmlCSS from '@/stylesheets/modules/Html.module.css';
+import HeadlineCSS from '@/stylesheets/modules/Headline.module.css';
+import MainCSS from '@/stylesheets/modules/Main.module.css';
 
 const ambientLightIntensity = Math.PI / 2.0;
 
@@ -35,33 +35,45 @@ const Main = ({ start, loaded, ...rest }) => {
   const dispatch = useModelDispatch();
   const state = useModelState();
 
+  /** @type {import('react').Ref<import('react').HTMLProps<HTMLDivElement>>} */
+  const containerRef = useRef();
+
   /** @type {import('react').Ref<import('react').HTMLProps<HTMLHeadingElement>>} */
   const headlineRef = useRef();
 
-  const { appProject } = useApp();
+  const [headlineActive, setHeadline] = useState(false);
 
-  useGSAP(() => {
-    if (start && headlineRef.current && ModelTheatreJS.model.id) {
-      const typeHeading = gsap.timeline({ paused: true });
-      typeHeading
-        .from(headlineRef.current, {
-          duration: 1,
-          text: {
-            value: '',
-            type: 'diff',
-          },
-        })
+  const { appProject, metadata } = useApp();
 
-        .to(headlineRef.current, {
-          duration: 0.6,
-          text: {
-            value: t('title'),
-            type: 'diff',
-          },
-        });
-      typeHeading.play(0);
+  useGSAP(
+    () => {
+      const el = headlineRef.current;
+      if (start && el && headlineActive && ModelTheatreJS.model.id) {
+        const typeHeading = gsap.timeline({ paused: true });
+        typeHeading
+          .from(el, {
+            duration: 1,
+            text: {
+              value: '',
+              type: 'diff',
+            },
+          })
+
+          .to(el, {
+            duration: 0.6,
+            text: {
+              value: t('title'),
+              type: 'diff',
+            },
+          });
+        typeHeading.play(0);
+      }
+    },
+    {
+      dependencies: [start, ModelTheatreJS, headlineActive],
+      scope: containerRef,
     }
-  }, [start, headlineRef.current, ModelTheatreJS]);
+  );
 
   return (
     <>
@@ -70,8 +82,8 @@ const Main = ({ start, loaded, ...rest }) => {
           <EditableCamera theatreKey="Camera" makeDefault />
           {/* Important to set Editable Ambient Light & Point Light to here. 
           Since everything under this will be controlled by TheatreJS in snapshot */}
-          <e.ambientLight theatreKey="Ambient Light" intensity={ambientLightIntensity} />
-          <e.pointLight theatreKey="Point Light" intensity={10} position={[0, 3, 0]} />
+          <editable.ambientLight theatreKey="Ambient Light" intensity={ambientLightIntensity} />
+          <editable.pointLight theatreKey="Point Light" intensity={10} position={[0, 3, 0]} />
           <Model
             start={start}
             loaded={loaded}
@@ -82,59 +94,53 @@ const Main = ({ start, loaded, ...rest }) => {
             hideItems={ModelTheatreJS.hideItems.length > 0 ? ModelTheatreJS.hideItems.split(',') : []}
           />
           {start && state && (
-            <Html
-              fullscreen
-              wrapperClass={/* tailwindcss */ 'pointer-events-none size-full !transform-none'}
-              className={/* tailwindcss */ '!transform-none !left-0 !top-0 !size-full'}
-            >
-              <div
-                className="flex absolute w-screen h-auto"
-                style={{
-                  top: 41,
-                  left: 28,
-                }}
-              >
+            <Html fullscreen wrapperClass={HtmlCSS.WrapperHtml} className={HtmlCSS.HtmlContainer}>
+              <div ref={containerRef} className={MainCSS.TitleContainer}>
                 <Headline
-                  ref={headlineRef}
+                  ref={(newRef) => {
+                    headlineRef.current = newRef;
+                    setHeadline(true);
+                    return headlineRef;
+                  }}
                   type="h2"
                   weight="bold"
-                  color={/* tailwindcss */ 'text-corporateblue'}
+                  color={HeadlineCSS.Headline + ' headline-title'}
                 ></Headline>
               </div>
-              <div
-                className="flex absolute size-fit pointer-events-auto"
-                style={{
-                  bottom: 30,
-                  left: 28,
-                }}
-              >
+              <div className={MainCSS.MaterialButtonContainer}>
                 <Button
-                  $buttonType={state.wireframe ? 'scream' : 'shout'}
-                  $size="large"
-                  $weight="bold"
-                  $other={/* tailwindcss */ '!rounded-none'}
-                  onClick={(e) =>
+                  buttonType={state.wireframe ? 'scream' : 'shout'}
+                  size="large"
+                  weight="bold"
+                  label={t_UI('wireframe.label')}
+                  seo={t_UI('wireframe.seo')}
+                  other={MainCSS.TabButton}
+                  metadata={metadata}
+                  onClick={() =>
                     dispatch({
                       type: 'wireframe',
                       value: true,
                     })
                   }
                 >
-                  {t_UI('wireframe')}
+                  {t_UI('wireframe.label')}
                 </Button>
                 <Button
-                  $buttonType={state.wireframe ? 'shout' : 'scream'}
-                  $size="large"
-                  $weight="bold"
-                  $other={/* tailwindcss */ '!rounded-none'}
-                  onClick={(e) =>
+                  buttonType={state.wireframe ? 'shout' : 'scream'}
+                  size="large"
+                  weight="bold"
+                  other={MainCSS.TabButton}
+                  label={t_UI('solid.label')}
+                  seo={t_UI('solid.seo')}
+                  metadata={metadata}
+                  onClick={() =>
                     dispatch({
                       type: 'wireframe',
                       value: false,
                     })
                   }
                 >
-                  {t_UI('solid')}
+                  {t_UI('solid.label')}
                 </Button>
               </div>
             </Html>

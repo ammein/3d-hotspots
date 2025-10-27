@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { calculateCurrentValue } from '@/helpers/utils';
 import { useDebounce } from '@uidotdev/usehooks';
+import RulerCSS from '@/stylesheets/modules/Ruler.module.css';
 
 /**
  * Replicate from this library:
@@ -41,7 +42,6 @@ import { useDebounce } from '@uidotdev/usehooks';
  * Minimal web version of a ruler item. Replace or style to match your RN look.
  *
  * @param {Object} props
- * @param {boolean} props.isLast
  * @param {number} props.index
  * @param {number} props.shortStepHeight
  * @param {number} props.longStepHeight
@@ -51,7 +51,6 @@ import { useDebounce } from '@uidotdev/usehooks';
  * @param {string} props.longStepColor
  */
 export const RulerPickerItem = ({
-  isLast,
   index,
   shortStepHeight,
   longStepHeight,
@@ -99,7 +98,6 @@ const RulerPicker = (props) => {
     min,
     max,
     step = 1,
-    initialValue = useDebounce(min, 2000),
     fractionDigits = 1,
     unit = 'cm',
     indicatorHeight = 80,
@@ -116,6 +114,10 @@ const RulerPicker = (props) => {
     onValueChange,
     onValueChangeEnd,
   } = props;
+
+  const minDebounced = useDebounce(min, 2000);
+
+  const initialValue = !props.initialValue ? minDebounced : props.initialValue;
 
   const itemAmount = Math.floor((max - min) / step);
   const arrData = useMemo(() => Array.from({ length: itemAmount + 1 }, (_, index) => index), [itemAmount]);
@@ -218,37 +220,15 @@ const RulerPicker = (props) => {
   // but use a small fixed-width container (stepWidth) so the vertical line remains centered independent of text width.
   return (
     <div style={{ width, height, position: 'relative' }}>
-      <div
-        ref={containerRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          whiteSpace: 'nowrap',
-          boxSizing: 'border-box',
-          padding: 0,
-          margin: 0,
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          pointerEvents: 'none',
-        }}
-        className="ruler-container"
-      >
+      <div ref={containerRef} className={RulerCSS.RulerContainer}>
         <div
           style={{
-            display: 'inline-block',
             width: width * 0.5 - stepWidth * 0.5,
           }}
+          className={RulerCSS.RulerWrapper}
         />
         {arrData.map((_, index) => (
-          <div
-            key={index}
-            style={{
-              scrollSnapAlign: 'start',
-              display: 'inline-block',
-            }}
-          >
+          <div key={index} className={RulerCSS.RulerChildWrapper}>
             <RulerPickerItem
               isLast={index === arrData.length - 1}
               index={index}
@@ -263,27 +243,21 @@ const RulerPicker = (props) => {
         ))}
         <div
           style={{
-            display: 'inline-block',
             width: width * 0.5 - stepWidth * 0.5,
           }}
+          className={RulerCSS.RulerSpacer}
         />
       </div>
 
       {/* Indicator: small centered container so the vertical line is centered exactly */}
       <div
         style={{
-          position: 'absolute',
           top: indicatorHeight + 'px',
-          left: '50%',
           transform: `translate(${indicatorXOffset}px, ${-indicatorHeight}px)`, // center horizontally; vertical will be handled below
           width: stepWidth,
           height: indicatorHeight + textHeight + 8, // extra space for value text above
-          pointerEvents: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
         }}
+        className={RulerCSS.IndicatorWrapper}
       >
         {/* Vertical center line */}
         <div
@@ -297,12 +271,10 @@ const RulerPicker = (props) => {
         <div
           ref={valueRef}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             height: textHeight,
             marginBottom: 8,
           }}
+          className={RulerCSS.IndicatorTextWrapper}
         >
           <div
             style={{
@@ -310,8 +282,8 @@ const RulerPicker = (props) => {
               fontWeight: 800,
               color: (valueTextStyle && valueTextStyle.color) || 'black',
               lineHeight: `${valueFontSize}px`,
-              textAlign: 'center',
             }}
+            className={RulerCSS.IndicatorText}
           >
             {displayValue}
           </div>
@@ -330,11 +302,6 @@ const RulerPicker = (props) => {
           )}
         </div>
       </div>
-
-      <style>{`
-                .ruler-container::-webkit-scrollbar { display: none; }
-                .ruler-container { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
     </div>
   );
 };

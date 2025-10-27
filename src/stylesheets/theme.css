@@ -1,12 +1,11 @@
-@import "tailwindcss";
-
+@import 'tailwindcss';
 
 @theme {
-
   /************************
     Animations
   ************************/
   --animate-blur-appear: blur-appear 1s ease-out;
+  --animate-blur-dissappear: blur-appear 1s ease-out;
 
   @keyframes blur-appear {
     0% {
@@ -15,7 +14,7 @@
       filter: blur(10px);
     }
 
-    50%{
+    50% {
       opacity: 50%;
     }
 
@@ -25,7 +24,6 @@
       filter: blur(0px);
     }
   }
-
 
   @keyframes blur-dissapear {
     0% {
@@ -45,23 +43,23 @@
     Templates Styling
   ************************/
   --font-*: initial;
-  --font-regular: "3ds Regular", sans-serif;
-  --font-italic: "3ds Italic", sans-serif;
-  --font-light: "3ds Light", sans-serif;
-  --font-light-italic: "3ds Light Italic", sans-serif;
-  --font-semibold: "3ds Semibold", sans-serif;
-  --font-semibold-italic: "3ds Semibold Italic", sans-serif;
-  --font-bold: "3ds Bold", sans-serif;
-  --font-bold-italic: "3ds Bold Italic", sans-serif;
+  --font-regular: '3ds Regular', sans-serif;
+  --font-italic: '3ds Italic', sans-serif;
+  --font-light: '3ds Light', sans-serif;
+  --font-light-italic: '3ds Light Italic', sans-serif;
+  --font-semibold: '3ds Semibold', sans-serif;
+  --font-semibold-italic: '3ds Semibold Italic', sans-serif;
+  --font-bold: '3ds Bold', sans-serif;
+  --font-bold-italic: '3ds Bold Italic', sans-serif;
   --color-*: initial;
-  --color-black-100: rgba(0, 0, 0, 1.0);
+  --color-black-100: rgba(0, 0, 0, 1);
   --color-black-80: rgba(0, 0, 0, 0.8);
   --color-black-64: rgba(0, 0, 0, 0.64);
   --color-black-48: rgba(0, 0, 0, 0.48);
   --color-black-32: rgba(0, 0, 0, 0.32);
   --color-black-16: rgba(0, 0, 0, 0.16);
   --color-black-8: rgba(0, 0, 0, 0.08);
-  --color-white-100: rgba(255, 255, 255, 1.0);
+  --color-white-100: rgba(255, 255, 255, 1);
   --color-white-80: rgba(255, 255, 255, 0.8);
   --color-white-64: rgba(255, 255, 255, 0.64);
   --color-white-48: rgba(255, 255, 255, 0.48);
@@ -92,6 +90,15 @@
   --radius-medium: 6px;
   --radius-small: 2px;
   --radius-full: 9999px;
+}
+
+@utility webkit-scroll {
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 :root {

@@ -1,0 +1,14 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.TitleContainer {
+  @apply flex absolute w-screen h-auto !top-[41px] !left-[28px];
+}
+
+.MaterialButtonContainer {
+  @apply flex absolute size-fit pointer-events-auto !bottom-[30px] !left-[28px];
+}
+
+.TabButton {
+  @apply !rounded-none;
+}

@@ -1,0 +1,7 @@
+@source "../theme.css";
+@reference "../theme.css";
+
+.Canvas {
+  width: 100%;
+  height: 100%;
+}

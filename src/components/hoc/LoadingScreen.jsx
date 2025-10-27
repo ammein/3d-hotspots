@@ -6,6 +6,7 @@ import Button from '@/components/Button';
 import { useApp } from '../context/AppManagement';
 import { useProgress } from '@react-three/drei';
 import { useTranslations } from 'use-intl';
+import LoadingCSS from '@/stylesheets/modules/Loading.module.css';
 
 const loadingDuration = 0.35;
 
@@ -14,15 +15,17 @@ const loadingDuration = 0.35;
  * @param {React.Component} WrappedComponent
  * @returns {React.Component}
  */
+// eslint-disable-next-line no-unused-vars
 const withLoading = (WrappedComponent) => {
   return (props) => {
     const { ready } = useApp();
     const t = useTranslations('Loading');
     const buttonLoadRef = useRef();
-    const { progress: ThreeJSProgress, active: ThreeJSActive, errors } = useProgress();
+    const { progress: ThreeJSProgress, active: ThreeJSActive } = useProgress();
     const [loaded, setLoaded] = useState(false);
     const [assetName, setAssetName] = useState('');
     const [progress, setProgress] = useState(0);
+    const ellipsesLoading = useRef();
 
     const progressRef = useRef({
       value: 0,
@@ -153,19 +156,48 @@ const withLoading = (WrappedComponent) => {
       }
     );
 
-    const loadText = ready ? (progress !== 100 ? t('text') + ' ' + assetName : t('loaded')) : t('text') + '...';
+    // Ellipses Animation
+    useGSAP(() => {
+      const typeLoading = gsap.timeline({ paused: true, repeat: -1 });
+      typeLoading
+        .from(ellipsesLoading.current, {
+          duration: 0.2,
+          text: {
+            value: '',
+            type: 'diff',
+          },
+        })
+
+        .to(ellipsesLoading.current, {
+          duration: 0.6,
+          text: {
+            value: '...',
+            type: 'diff',
+          },
+        });
+
+      if (progress !== 100) {
+        typeLoading.play();
+      }
+      if (ready && progress === 100) {
+        typeLoading.pause(0);
+      }
+    }, [ready, progress, ellipsesLoading.current]);
+
+    const loadText = ready ? (progress !== 100 ? t('text') + ' ' + assetName : t('loaded')) : t('text');
 
     return (
       <>
         <Button
           ref={buttonLoadRef}
           disabled={true}
-          $buttonType="scream"
-          $size="large"
-          $weight="bold"
-          $other={/* tailwindcss */ 'mx-auto absolute z-100 top-[50%] left-[50%] -translate-1/2'}
+          buttonType="scream"
+          size="large"
+          weight="bold"
+          other={LoadingCSS.LoadingButton}
         >
           {progress.toFixed(0) + '% ' + loadText}
+          <span ref={ellipsesLoading} />
         </Button>
         <WrappedComponent progress={progress} loaded={loaded} {...props} />
       </>

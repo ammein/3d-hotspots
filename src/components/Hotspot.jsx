@@ -1,7 +1,7 @@
 import { useFrame, useThree, extend } from '@react-three/fiber';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Color, Vector3 } from 'three';
-import { DassaultText3D } from '@/design-system/components/text3d';
+import { DassaultText3D } from '@/design-system/components/Text3d';
 import { useTranslations } from 'use-intl';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
@@ -14,6 +14,7 @@ import { Html } from '@react-three/drei';
 import Button from '@/components/Button';
 import { useApp } from './context/AppManagement';
 import CloseIcon from '@/design-system/icons/close-big.svg?react';
+import HotspotCSS from '@/stylesheets/modules/Hotspot.module.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
@@ -75,7 +76,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
     }
 
     return null;
-  }, [metadata]);
+  }, [hotspotName, metadata.screens.detail.hotspots]);
 
   const [lookAtDirection, setLookAtDirection] = useState(initialLookAt);
 
@@ -83,7 +84,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
 
   const t = useTranslations(`Hotspots.${hotspotName}`);
 
-  useFrame(({ camera, gl, controls }) => {
+  useFrame(({ camera, gl }) => {
     if (start && textRef.current) {
       if (!lineRef.current.material.visible) lineRef.current.material.visible = true;
       if (!focus && id.length === 0) {
@@ -101,7 +102,6 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
           geometry.points[0],
           new Vector3(lineMiddle.x, lineMiddle.y, lineMiddle.z),
           new Vector3(lineText.x, lineText.y, lineText.z),
-          ,
         ]);
 
         textRef.current.material.opacity = gsap.utils.clamp(0, 1, opac);
@@ -165,11 +165,9 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
   // Update States and Live Props Changes
   useEffect(() => {
     if (TextTheatreJS && !focus) {
-      setLookAtDirection((prev) => {
-        let final = initialLookAt.clone().applyAxisAngle(new Vector3(0, 1, 0), TextTheatreJS.direction * DEG2RAD);
-
-        return final;
-      });
+      setLookAtDirection((prev) =>
+        prev.clone().applyAxisAngle(new Vector3(0, 1, 0), TextTheatreJS.direction * DEG2RAD)
+      );
     } else if (TextTheatreJS && !hidden && focus) {
       if (textSizeRef.current !== TextTheatreJS.focusSize) {
         const textSize = getTextScale(
@@ -181,7 +179,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         textSizeRef.current = textSize;
       }
     }
-  }, [TextTheatreJS]);
+  }, [TextTheatreJS, camera, focus, gl, hidden]);
 
   return (
     <>
@@ -195,6 +193,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         <>
           <DassaultText3D
             ref={textRef}
+            // eslint-disable-next-line react-hooks/refs
             size={textSizeRef.current}
             weight={TextTheatreJS.weight}
             height={TextTheatreJS.thickness}
@@ -223,11 +222,13 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
               }}
             >
               <Button
-                $icon
-                $buttonType="circle"
-                $size="small"
+                icon
+                buttonType="circle"
+                size="small"
                 label="Close Button"
-                $other={/* tailwindcss */ `absolute bg-transparent size-fit`}
+                seo="Close Hotspot"
+                metadata={metadata}
+                other={HotspotCSS.HotspotButton}
                 style={{
                   top: CloseButtonTheatreJS.position.top + '%',
                   left: CloseButtonTheatreJS.position.left + '%',
@@ -240,9 +241,12 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
               {link && (
                 <a href={link}>
                   <Button
-                    $buttonType={ButtonTheatreJS.type}
-                    $size={ButtonTheatreJS.size}
-                    $weight={ButtonTheatreJS.font}
+                    buttonType={ButtonTheatreJS.type}
+                    size={ButtonTheatreJS.size}
+                    weight={ButtonTheatreJS.font}
+                    metadata={metadata}
+                    label={t('button')}
+                    seo={t('seo')}
                   >
                     {t('button')}
                   </Button>

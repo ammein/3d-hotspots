@@ -16,7 +16,7 @@ class ThreeErrorBoundary extends Component {
     };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(_error, _errorInfo) {
     this.setState({ hasError: true });
   }
 
@@ -38,9 +38,7 @@ class ThreeErrorBoundary extends Component {
     if (this.state.hasError) {
       return addExtraProps(this.props.fallback, {
         errorMessage: this.state.message,
-        errorStatus: this.state.status
-          ? this.state.status
-          : 'Something is wrong!',
+        errorStatus: this.state.status ? this.state.status : 'Something is wrong!',
         reset: this.resetErrorBoundary,
       });
     }

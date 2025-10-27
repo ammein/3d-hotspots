@@ -8,11 +8,14 @@ import Body from '@/components/Body';
 function Error({ errorStatus, errorMessage, reset }) {
   const [close, setClose] = useState(false);
 
-  const closeClick = useCallback((e) => {
-    e.preventDefault();
-    setClose(true);
-    reset();
-  });
+  const closeClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      setClose(true);
+      reset();
+    },
+    [reset]
+  );
 
   return (
     <Html
@@ -28,11 +31,11 @@ function Error({ errorStatus, errorMessage, reset }) {
               <Body className="whitespace-pre-wrap">{errorMessage}</Body>
             </div>
             <Button
-              $buttonType="scream"
-              $icon={true}
+              buttonType="scream"
+              icon={true}
               onClick={closeClick}
-              $size="regular"
-              $other={/* tailwindcss */ 'right-0'}
+              size="regular"
+              other={/* tailwindcss */ 'right-0'}
             >
               <CloseIcon />
               <b className="!font-bold whitespace-nowrap">Reset</b>
