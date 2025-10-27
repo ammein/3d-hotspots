@@ -15,7 +15,7 @@
     "deploy": "yarn basis-production && yarn draco-production && yarn lygia-production && yarn build",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
-    "build:storybook:safe": "chmod +x ./scripts/build-storybook-safe.sh && ./scripts/build-storybook-safe.sh ./public",
+    "build:storybook:safe": "chmod +x ./scripts/build-storybook-safe.sh && NODE_ENV=development ./scripts/build-storybook-safe.sh ./public",
     "lygia": "chmod 777 ./scripts/lygia.sh && ./scripts/lygia.sh",
     "lygia-production": "chmod 777 ./scripts/lygia-production.sh && ./scripts/lygia-production.sh",
     "draco": "chmod 777 ./scripts/draco.sh && ./scripts/draco.sh",

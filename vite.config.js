@@ -83,7 +83,7 @@ export default defineConfig(async ({ mode }) => {
     }
   }
 
-  if (mode === "production") {
+  if (mode === "production" && env.NODE_ENV === 'production') {
     console.clear()
     console.log('----------------------------------------------')
     console.log("Model Name:", env.VITE_MODEL_NAME)
@@ -119,7 +119,7 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    plugins: [react(), svgr(), tailwindcss(), glsl(), (mode === 'production' || mode === 'preview') && htmlPlugin(), mode === 'production' && cssInjectedByJsPlugin({
+    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' && env.NODE_ENV === 'production') || mode === 'preview') && htmlPlugin(), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
       preRenderCSSCode: (cssCode) => {
         // Replace font url from url('/fonts/ttf/3DSV2-BoldItalic.ttf') to url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')
         if (cssCode.match(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi)) {
