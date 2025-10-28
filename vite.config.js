@@ -57,8 +57,13 @@ const htmlPlugin = () => {
  * @author Amin Shazrin https://github.com/ammein
  */
 export default defineConfig(async ({ mode }) => {
+  // Insert all environment variables into `env`
   const env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+
+  // Allow production environment variables that matches with this keys
   const production_envs = ["VITE_MODEL_NAME", "VITE_LOCAL_DRACO_PATH", "VITE_LOCAL_KTX_PATH", "VITE_BASE_URL", "VITE_TRACKING_URL"]
+
+  // Only when production
   if ((mode === "production" && env.NODE_ENV === "production")) {
     const empty_envs = production_envs.filter(envVal => !env[envVal])
     if (empty_envs.length > 0) {
@@ -83,6 +88,7 @@ export default defineConfig(async ({ mode }) => {
     }
   }
 
+  // Only when production
   if (mode === "production" && env.NODE_ENV === 'production') {
     console.clear()
     console.log('----------------------------------------------')
@@ -119,7 +125,7 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' && env.NODE_ENV === 'production') || mode === 'preview') && htmlPlugin(), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
+    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' || mode === 'preview') && env.NODE_ENV === 'production') && htmlPlugin(), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
       preRenderCSSCode: (cssCode) => {
         // Replace font url from url('/fonts/ttf/3DSV2-BoldItalic.ttf') to url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')
         if (cssCode.match(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi)) {
@@ -139,7 +145,7 @@ export default defineConfig(async ({ mode }) => {
     },
     assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
     build: {
-      outDir: mode === "production" ? env.VITE_MODEL_NAME : "dist",
+      outDir: mode === "production" ? env.VITE_MODEL_NAME : env.NODE_ENV === "storybook" ? 'public' : "dist",
       rollupOptions: {
         output: {
           entryFileNames: (chunkInfo) => {
@@ -150,7 +156,7 @@ export default defineConfig(async ({ mode }) => {
       sourcemap: env.VITE_SOURCEMAP === 'true' ? true : false
     },
     preview: {
-      port: env.VITE_BASE_URL.match(/:(\d+)/) ? env.VITE_BASE_URL.match(/:(\d+)/)[1] : 4173
+      port: env.VITE_BASE_URL && env.VITE_BASE_URL.match(/:(\d+)/) ? env.VITE_BASE_URL.match(/:(\d+)/)[1] : 4173
     },
     test: {
       server: {

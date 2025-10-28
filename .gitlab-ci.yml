@@ -1,28 +1,130 @@
-pages:
-  image: node:lts
-  stage: deploy
+image: node:lts
+
+stages:
+  - lint
+  - story-test
+  - build
+  - deploy
+  - cleanup
+
+variables:
+  YARN_CACHE_FOLDER: '$CI_PROJECT_DIR/.yarn-cache'
+
+cache:
+  paths:
+    - .yarn-cache/
+    - node_modules/
+
+before_script:
+  - set -euo pipefail
+  - node --version
+  - yarn --version
+  - yarn install --frozen-lockfile
+
+lint:
+  stage: lint
   script:
-    - yarn install
-    - yarn build:storybook:safe
-    # Create the public directory if not exists to hold our site files
+    - yarn lint
+
+storybook-tests:
+  stage: story-test
+  # Make sure to grab the latest version of the Playwright image
+  # https://playwright.dev/docs/docker#pull-the-image
+  image: mcr.microsoft.com/playwright:v1.52.0-noble
+  script:
+    - yarn test-storybook
+  # Must add matching rules to pipeline. Otherwise,
+  # it will show empty that were releated from `build-storybook`
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: never
+
+build-storybook:
+  stage: build
+  needs:
+    - job: storybook-tests
+  script:
+    - echo "Building Storybook"
+    - yarn storybook-gitlab
+    - ls -la storybook-static || true
+  artifacts:
+    expire_in: 2 weeks
+    when: always
+    paths:
+      - storybook-static/
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: never
+
+pages:
+  stage: deploy
+  image: node:lts
+  needs:
+    - job: build-storybook
+      artifacts: true
+  script:
+    - set -euo pipefail
+    - echo "Move Storybook to /public"
     - mkdir -p public
-
-    # Create the special _redirects file required by GitLab Pages to link to storybook's index.html
     - echo "/ /storybook-static/index.html 301" > public/_redirects
-
-    # Move the storybook build output INTO the public directory
-    - mv storybook-static public/
+    - if [ -d "storybook-static" ]; then mv storybook-static public/; else echo "No storybook-static found"; fi
+    - ls -la public || true
   artifacts:
     paths:
       - public
-  only:
-    - main
-
-lint:
-  image: node:lts
-  script:
-    - yarn install
-    - yarn lint
-
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: never
+  environment:
+    name: pages
+    url: $CI_PAGES_URL
+
+# Automatic cleanup job — runs on default branch pipelines to remove public/<branch> for branches that no longer exist remotely
+remove-storybook:
+  stage: cleanup
+  image: alpine:3.18
+  before_script:
+    - set -euo pipefail
+    - apk add --no-cache git
+    - git config --global --add safe.directory "$CI_PROJECT_DIR" || true
+  script:
+    - echo "Fetching remote branches"
+    - git remote set-url origin "$CI_REPOSITORY_URL"
+    - git fetch --prune origin +refs/heads/*:refs/remotes/origin/* || true
+    - echo "Listing directories under public/"
+    - ls -1 public || true
+    - |
+      echo "Cleaning public/* directories for branches that do not exist remotely."
+      for dir in public/*/; do
+          [ -d "$dir" ] || continue
+          branch=$(basename "$dir")
+          # skip main branch (or default) directory if you want to keep it
+          if [ "$branch" = "$CI_DEFAULT_BRANCH" ]; then
+              echo "Skipping default branch directory: $branch"
+              continue
+          fi
+          if ! git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+              echo "Branch '$branch' not found on origin — removing public/$branch"
+              rm -rf "public/$branch"
+          else
+              echo "Branch '$branch' exists on origin — keeping public/$branch"
+          fi
+      done
+  rules:
+    # Run cleanup only on default branch pipelines to avoid accidental deletions from feature branch pipelines
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - when: never
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
