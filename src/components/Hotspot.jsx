@@ -1,7 +1,7 @@
 import { useFrame, useThree, extend } from '@react-three/fiber';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Color, Vector3 } from 'three';
-import { DassaultText3D } from '@/design-system/components/Text3d';
+import { DassaultText3D } from '@/design-system/components/3DText';
 import { useTranslations } from 'use-intl';
 import withTheatreManagement from './hoc/TheatreManagement';
 import { types } from '@theatre/core';
@@ -12,7 +12,7 @@ import gsap from 'gsap';
 import { MeshLineGeometry, MeshLineMaterial, raycast } from 'meshline';
 import { Html } from '@react-three/drei';
 import Button from '@/components/Button';
-import { useApp } from './context/AppManagement';
+import { useApp } from '@/components/context/AppManagement';
 import CloseIcon from '@/design-system/icons/close-big.svg?react';
 import HotspotCSS from '@/stylesheets/modules/Hotspot.module.css';
 

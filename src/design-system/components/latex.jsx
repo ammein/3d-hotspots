@@ -43,7 +43,19 @@ const LatexRenderer = ({ latex, displayMode = true }) => {
     }
   }, [latex, displayMode]);
 
-  return <div ref={containerRef} />;
+  return (
+    <div
+      ref={containerRef}
+      style={
+        displayMode
+          ? {
+              backgroundColor: '#e3e3e3',
+              padding: '20px 0 20px 0',
+            }
+          : undefined
+      }
+    />
+  );
 };
 
 export { LatexRenderer };

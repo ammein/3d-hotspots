@@ -100,11 +100,3 @@
     display: none;
   }
 }
-
-:root {
-  color-scheme: light dark;
-
-  --border-small: 1px;
-  --border-medium: 2px;
-  --border-large: 4px;
-}

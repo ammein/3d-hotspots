@@ -4,7 +4,7 @@ import styles from '@/stylesheets/modules/Paragraph.module.css';
  * @typedef {Object} Paragraph
  * @property {"regular" | "italic"} weight
  * @property {string} color - Tailwindcss color
- * @property {"body" | "p"} type
+ * @property {"body" | "caption"} type
  * @property {string} className
  * @property {import('react').PropsWithChildren<HTMLParagraphElement>} rest
  */

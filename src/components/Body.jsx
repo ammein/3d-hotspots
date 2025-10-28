@@ -8,7 +8,7 @@ import Paragraph from '@/design-system/atoms/Paragraph';
  * @param {import('@/design-system/atoms/Paragraph').Paragraph & import('react').HTMLAttributes<HTMLHeadingElement>} props
  * @returns
  */
-export const Body = ({ type = 'body', color, weight, ...props }) => {
+export const Body = ({ type = 'p', color, weight, ...props }) => {
   // 3. Render the selected component
   return <Paragraph weight={weight} color={color} type={type} {...props} />;
 };

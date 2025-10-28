@@ -1,4 +1,4 @@
-import DassaultButton from '@/design-system/components/buttons';
+import DassaultButton from '@/design-system/components/DassaultButton';
 import { convertCase } from '@/helpers/utils';
 
 /**
@@ -11,7 +11,7 @@ import { convertCase } from '@/helpers/utils';
 
 /**
  * Button Component
- * @param {import('@/design-system/components/buttons).Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps} rest
+ * @param {import('@/design-system/components/DassaultButton).Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps} rest
  * @returns
  */
 const Button = ({ label = 'button', seo = '', metadata = {}, ...rest }) => {
@@ -39,6 +39,6 @@ const Button = ({ label = 'button', seo = '', metadata = {}, ...rest }) => {
 Button.displayName = 'Button';
 
 /**
- * @returns {import('@/design-system/components/buttons').Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps}
+ * @returns {import('@/design-system/components/DassaultButton').Button & import('react').HTMLAttributes<HTMLButtonElement> & ButtonProps}
  */
 export default Button;

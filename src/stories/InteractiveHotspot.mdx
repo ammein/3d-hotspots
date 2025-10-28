@@ -1,0 +1,22 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { LatexRenderer } from '@/design-system/components/Latex'
+import Headline from '@/components/Headline'
+import Paragraph from '@/components/Body'
+
+<Meta title="Documentation/Hotspot Locations" />
+
+<div>
+    <Headline type={'h2'} >Hotspot Lines</Headline>
+    <Paragraph weight={'regular'} >Lets create a random vector as an act of hotspots locations:</Paragraph>
+    <LatexRenderer latex={`
+    Vp1 = (-155.0, 50., 30.)
+
+    Vp2 = (55.0, 10., 10.)
+
+    Vp3 = (-155.0, 20., 80.)
+    `} />
+
+    <Paragraph>Now the line label can be multiplied using scalar:</Paragraph>
+    <Paragraph type='caption' className='flex gap-0.5 bg-white-16'><LatexRenderer latex={`S`} displayMode={false} /> represents as 'Scalar'</Paragraph>
+    <LatexRenderer latex={`Vp_( n...3 _) = Vp_n \\cdot S`} />
+</div>
