@@ -1,0 +1,107 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { LatexRenderer } from '@/design-system/components/Latex';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+
+<Meta title="Documentation/Camera Interpolation" />
+
+<div>
+    <Headline type={'h2'} >Basic Interpolation</Headline>
+    <Paragraph weight={'regular'} >Now, this is a very basic formula for interpolation between two values with a factor of <LatexRenderer latex={`C`} as='span' displayMode={false} /> that accepts value between <LatexRenderer latex={`0...1`} as='span' displayMode={false} />:</Paragraph>
+    <LatexRenderer latex={`
+        y = (1 - c) \\cdot y_0 + c \\cdot y_1
+    `} />
+    <Plot refresh={true} options={{
+        title: "Basic interpolation",
+        width: 500, 
+        height: 500,
+        xAxis: {
+            domain: [-6, 6]
+        },
+        
+    }} aspectRatio={[-4, 4]} calculations={(data) => {
+        function unitVector(x, y) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            let uv =  Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+            return [x/uv * randomSign, y/uv * randomSign];
+        }
+
+        function dotProductVector(v1, v2) {
+            let a_dev = Math.sqrt(Math.pow(v1[0], 2) + Math.pow(v2[0], 2));
+            let b_dev = Math.sqrt(Math.pow(v1[1], 2) + Math.pow(v2[1], 2));
+            let a = v1[0] * v2[0];
+            let b = v1[1] * v2[1];
+            return (a + b) / (a_dev + b_dev)
+        }
+
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min
+        }
+
+        function randomSign(val) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            return val * randomSign;
+        }
+
+        function midpoint(v1, v2){
+            return [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+        }
+
+        function clamp(x, min, max) {
+            return Math.max(Math.min(x, 1), 0);
+        }
+
+        let point_A = [randomSign(randomRange(1, 2)), randomSign(randomRange(1, 2))];
+        let point_B = [randomSign(randomRange(0, 4)), randomSign(randomRange(0, 4))];
+
+        // Vector Hotspot
+        data.push({
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 5
+            },
+            points: [
+                point_A,
+                point_B
+            ]
+        })
+        data.push({
+            graphType: 'polyline',
+            fn: function (scope) {
+                
+                var dx = point_B[0] - point_A[0];
+                var x = scope.x
+                
+                let m = (point_B[1] - point_A[1]) / (point_B[0] - point_A[0])
+                let b = point_A[1] - m * point_A[0];
+
+                return m * x + b;
+            }
+        })
+        // Text Dot Product
+        data.push({
+            graphType: 'text', location: midpoint(point_B, point_A), text: `Interpolate: y = (1 - c) ⋅ y_0 + c ⋅ y_1` , attr: {
+                'fill': 'red'
+            },
+        })
+        // Text
+        data.push({
+            graphType: 'text', location: point_A, text: 'Point A', attr: {
+                'fill': 'blue'
+            },
+        })
+        data.push({
+            graphType: 'text', location: point_B, text: 'Point B', attr: {
+                'fill': 'blue'
+            },
+        })
+
+        return data;
+    }} />
+    
+</div>

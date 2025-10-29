@@ -1,7 +1,8 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { LatexRenderer } from '@/design-system/components/Latex'
-import Headline from '@/components/Headline'
-import Paragraph from '@/components/Body'
+import { LatexRenderer } from '@/design-system/components/Latex';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
 
 <Meta title="Documentation/Hotspot Locations" />
 
@@ -16,7 +17,160 @@ import Paragraph from '@/components/Body'
     Vp3 = (-155.0, 20., 80.)
     `} />
 
-    <Paragraph>Now the line label can be multiplied using scalar:</Paragraph>
-    <Paragraph type='caption' className='flex gap-0.5 bg-white-16'><LatexRenderer latex={`S`} displayMode={false} /> represents as 'Scalar'</Paragraph>
+    <Paragraph>
+        Now the line label can be multiplied using scalar:
+    </Paragraph>
+    <Paragraph type='caption' className='flex gap-0.5'><LatexRenderer as='span' latex={`S`} displayMode={false} /> represents as 'Scalar'. It is used for line length from the hotspot location...</Paragraph>
     <LatexRenderer latex={`Vp_( n...3 _) = Vp_n \\cdot S`} />
+    <Paragraph className='flex gap-0.5'>Say <LatexRenderer as='span' latex={`S`} displayMode={false} /> is equal to <LatexRenderer as='span' latex={`2`} displayMode={false} /></Paragraph>
+    <Paragraph className='flex gap-0.5 bg-white-16'>Therefore the calculation is:</Paragraph>
+    <LatexRenderer latex={`
+    Vp1 = (Vp1)2 = (Vp1_x * 2, Vp1_y * 2, Vp1_z * 2)
+
+    Vp2 = (Vp2)2 = (Vp2_x * 2, Vp2_y * 2, Vp2_z * 2)
+
+    Vp3 = (Vp3)2 = (Vp3_x * 2, Vp3_y * 2, Vp3_z * 2)
+    `} />
+    <Plot className={'w-full'} aspectRatio={[19, 6]} options={{ title: "Hotspot", width: 500, height: 500, xAxis: { domain: [-1000, 1000] }, grid: true, data: [
+        { vector: [-310, 100], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'blue'
+        } }, 
+        { vector: [110, 20], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'blue'
+        } }, 
+        { vector: [-310, 40], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'blue'
+        } }, 
+        { vector: [-155, 50], offset: [-310, 100], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'red'
+        } }, 
+        { vector: [55, 10], offset: [110, 20], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'red'
+        } },
+        { vector: [-155, 20], offset: [-310, 40], graphType: 'polyline', fnType: 'vector', attr: {
+            'stroke': 'red'
+        } },
+        { graphType: 'text', location: [-155 , 50], text: 'Vp1', attr: {
+            'fill': 'blue'
+        } },
+        { graphType: 'text', location: [55 , 10], text: 'Vp2', attr: {
+            'fill': 'blue'
+        } },
+        { graphType: 'text', location: [-155 , 20], text: 'Vp3', attr: {
+            'fill': 'blue'
+        } },
+        { graphType: 'text', location: [-310 , 100], text: 'Scalar Vp1', attr: {
+            'fill': 'red'
+        } },
+        { graphType: 'text', location: [110 , 20], text: 'Scalar Vp2', attr: {
+            'fill': 'red'
+        } },
+        { graphType: 'text', location: [-310 , 40], text: 'Scalar Vp3', attr: {
+            'fill': 'red'
+        } }
+        ] }} />
+
+    <Headline type={'h2'} >Nearest Hotspot to Camera</Headline>
+    <Paragraph>This function is to explain how the hotspot line will be opaque when it is located behind the model (Negate Location)</Paragraph>
+    <Paragraph>Dot Product is the perfect method to do this functionality. Assume <LatexRenderer latex={`C`} as='span' displayMode={false} /> represents camera. Here is the formula for how the dot product is:</Paragraph>
+    <Headline type={'h3'} >Component formula:</Headline>
+    <LatexRenderer latex={`
+    \\overrightarrow{Vp_1} = \\left\\langle Vp_x, Vp_y, Vp_z \\right\\rangle
+
+    \\overrightarrow{C} = \\left\\langle C_x, C_y, C_z \\right\\rangle
+    
+    \\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} = Vp_x C_x + Vp_y C_y + Vp_z C_z
+    `} />
+    <Plot options={{
+        title: "Dot Product",
+        grid: true,
+        width: 500, 
+        height: 500,
+        xAxis: {
+            domain: [-2, 2]
+        }
+    }} refresh={true} aspectRatio={[-2, 2]} calculations={(data) => {
+        function unitVector(x, y) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            let uv =  Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+            return [x/uv * randomSign, y/uv * randomSign];
+        }
+
+        function dotProductVector(v1, v2) {
+            let a_dev = Math.sqrt(Math.pow(v1[0], 2) + Math.pow(v2[0], 2));
+            let b_dev = Math.sqrt(Math.pow(v1[1], 2) + Math.pow(v2[1], 2));
+            let a = v1[0] * v2[0];
+            let b = v1[1] * v2[1];
+            return (a + b) / (a_dev + b_dev)
+        }
+
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min
+        }
+
+        function randomSign(val) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            return val * randomSign;
+        }
+
+        function midpoint(v1, v2){
+            return [v1[0] + v2[0] / 2, v1[1] + v2[1] / 2];
+        }
+
+        let camera = [randomSign(randomRange(1, 2)), randomSign(randomRange(1, 2))];
+
+        for (let i = 1; i <= 3; i += 1) {
+            const radius = 1
+            const vectorLocation = unitVector.apply(null, [Math.random(), Math.random()]);
+            // Vector Hotspot
+            data.push({
+                vector: vectorLocation, offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
+                    'stroke': 'blue'
+                }
+            })
+            // Camera to Hotspot
+            data.push({
+                vector: [vectorLocation[0] - camera[0], vectorLocation[1] - camera[1]], offset: camera, graphType: 'polyline', fnType: 'vector', attr: {
+                    'stroke': 'red'
+                }
+            })
+            // Text Dot Product
+            data.push({
+                graphType: 'text', location: midpoint(camera, [vectorLocation[0] - camera[0], vectorLocation[1] - camera[1]]), text: `Dot Product Vp${i}: ${dotProductVector(camera, vectorLocation).toFixed(2)}` , attr: {
+                    'fill': 'red'
+                },
+            })
+            // Text
+            data.push({
+                graphType: 'text', location: midpoint([0, 0], vectorLocation), text: 'Vp' + i, attr: {
+                    'fill': 'blue'
+                },
+            })
+            // Circle
+            data.push({ fn: `sqrt(${Math.pow(radius, 2)} - x * x)` }, { fn: `-sqrt(${Math.pow(radius, 2)} - x * x)` })
+        }
+
+        data.push({
+            points: [
+                camera
+            ],
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 5
+            }
+        })
+
+        data.push({
+            graphType: 'text', location: camera, text: 'Camera', attr: {
+                'fill': 'red'
+            },
+        })
+
+        return data;
+    }}/>
+    <Paragraph type='caption' >As you can see from above graph, if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} > 0`} as='span' displayMode={false} /> is facing towards camera. Meanwhile if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} < 0`} as='span' displayMode={false} /> is facing opposite to the camera. We can use this value to set opacity and clamp between value <LatexRenderer latex={`0`} as='span' displayMode={false} /> and <LatexRenderer latex={`1`} as='span' displayMode={false} /></Paragraph>
 </div>

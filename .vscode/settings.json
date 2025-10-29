@@ -55,6 +55,9 @@
         "i18n"
     ],
     "files.associations": {
-        "*.css": "tailwindcss"
+        "*.css": "tailwindcss",
+    },
+    "emmet.includeLanguages": {
+        "mdx": "javascriptreact"
     }
 }

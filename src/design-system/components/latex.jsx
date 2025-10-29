@@ -13,8 +13,16 @@ const renderBlock = (latex, container, displayMode = true) => {
   }
 };
 
-const LatexRenderer = ({ latex, displayMode = true }) => {
+/**
+ * Latex Renderer
+ * @param {{ as: string, latex: string, displayMode: boolean }} param0
+ * @link https://latexeditor.lagrida.com/
+ * @returns
+ */
+const LatexRenderer = ({ as = 'div', latex, displayMode = true }) => {
   const containerRef = useRef();
+
+  const Tag = as;
 
   useEffect(() => {
     if (containerRef.current && latex) {
@@ -26,7 +34,7 @@ const LatexRenderer = ({ latex, displayMode = true }) => {
       containerRef.current.innerHTML = ''; // clear previous
 
       blocks.forEach((block) => {
-        const el = document.createElement('div');
+        const el = document.createElement(Tag);
         containerRef.current.appendChild(el);
 
         const isMathBlock =
@@ -41,10 +49,10 @@ const LatexRenderer = ({ latex, displayMode = true }) => {
         renderBlock(cleanBlock, el, isMathBlock);
       });
     }
-  }, [latex, displayMode]);
+  }, [latex, displayMode, Tag]);
 
   return (
-    <div
+    <Tag
       ref={containerRef}
       style={
         displayMode

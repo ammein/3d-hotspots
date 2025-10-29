@@ -14,9 +14,9 @@
 
 /* Caption / smaller */
 .caption {
-  font-size: 13px;
-  line-height: 20px;
-  letter-spacing: 0px;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  letter-spacing: 0px !important;
 }
 
 /* Font family helpers (same as headings) */
