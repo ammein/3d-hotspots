@@ -51,10 +51,6 @@ import Plot from '@/design-system/components/Plot';
             return [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
         }
 
-        function clamp(x, min, max) {
-            return Math.max(Math.min(x, 1), 0);
-        }
-
         let point_A = [randomSign(randomRange(1, 2)), randomSign(randomRange(1, 2))];
         let point_B = [randomSign(randomRange(0, 4)), randomSign(randomRange(0, 4))];
 
@@ -74,19 +70,29 @@ import Plot from '@/design-system/components/Plot';
         data.push({
             graphType: 'polyline',
             fn: function (scope) {
-                
+
                 var dx = point_B[0] - point_A[0];
                 var x = scope.x
-                
+
                 let m = (point_B[1] - point_A[1]) / (point_B[0] - point_A[0])
                 let b = point_A[1] - m * point_A[0];
 
-                return m * x + b;
+                let y = m * x + b;
+
+                let y_max = Math.max(point_A[1], point_B[1]);
+                let y_min = Math.min(point_A[1], point_B[1]);
+
+                if (y > y_max)
+                    return null;
+                else if (y < y_min)
+                    return null;
+                else
+                    return y;
             }
         })
         // Text Dot Product
         data.push({
-            graphType: 'text', location: midpoint(point_B, point_A), text: `Interpolate: y = (1 - c) ⋅ y_0 + c ⋅ y_1` , attr: {
+            graphType: 'text', location: midpoint(point_B, point_A), text: `C [0...1]` , attr: {
                 'fill': 'red'
             },
         })
@@ -104,5 +110,331 @@ import Plot from '@/design-system/components/Plot';
 
         return data;
     }} />
-    
+
+    <Headline type={'h2'} >Interpolate Camera Movement using Spherical Coordinates</Headline>
+    <Paragraph>Now there is a catch in a specific use case when using linear interpolation. If the model has some big or tall buildings, when linear interpolation executes, it will go through the subjects. It is definitely not as intended. Therefore, we need to have interpolation, but in an orbit-like manner. Imagine a satellite orbiting the Earth.</Paragraph>
+    <Paragraph>
+        Formula as follows:
+            <ol style={{
+                listStyleType: "decimal"
+            }}>
+                <li>Convert camera position (relative to target) to spherical coordinates:</li>
+                <ul>
+                    <li><LatexRenderer as='span' latex={`r = \\parallel pos - target \\parallel`} displayMode={false} /></li>
+                    <li><LatexRenderer as='span' latex={`\\theta = arctan2(z, x)`} displayMode={false} /></li>
+                    <li><LatexRenderer as='span' latex={`\\phi = arccos(y/r)`} displayMode={false} /></li>
+                </ul>
+                <li>Interpolate the spherical components:</li>
+                <LatexRenderer as='span' latex={`
+                    \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B}
+
+                    \\operatorname{\\theta}(t) = (1 - t) \\times \\theta_{A} + t \\times \\theta_{B}
+
+                    \\operatorname{\\phi}(t) = (1 - t) \\times \\phi_{A} + t \\times \\phi_{B}
+                `} />
+                <li>Convert back to Cartesian:</li>
+                <LatexRenderer as='span' latex={`
+                    x=r \\times sin(\\phi)⋅cos(\\theta)
+
+                    y=r \\times cos(\\phi)
+
+                    z=r \\times sin(\\phi) \\times sin(\\theta)
+                `} />
+                <li>Add back to the target</li>
+                <LatexRenderer as='span' latex={`
+                    \\operatorname{P}(t)=target+(x,y,z)
+                `} />
+            </ol>
+    </Paragraph>
+    <Plot refresh={true} options={{
+        title: "Spherical interpolation",
+        width: 500,
+        height: 500,
+        xAxis: {
+            domain: [-6, 6]
+        }
+    }} aspectRatio={[-4, 4]} calculations={(data) => {
+        function normalizeVector(vector) {
+            const magnitude = Math.sqrt(vector.x ** 2 + vector.y ** 2 + vector.z ** 2);
+            if (magnitude === 0) {
+                throw new Error("Cannot normalize a zero vector");
+            }
+            return [vector.x / magnitude, vector.y / magnitude, vector.z / magnitude ];
+        }
+
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min
+        }
+
+        function randomSign(val) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            return val * randomSign;
+        }
+
+        function midpoint(v1, v2){
+            return [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+        }
+
+        function interpolate(a, b, c) {
+            return a + (b - a) * c;
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+
+        let point_A = [randomSign(randomRange(1, 2)), randomSign(randomRange(1, 2))];
+        let point_B = [randomSign(randomRange(0, 4)), randomSign(randomRange(0, 4))];
+
+        // Vector Hotspot
+        data.push({
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 5
+            },
+            points: [
+                point_A,
+                point_B
+            ]
+        })
+
+        // Text Dot Product
+        data.push({
+            graphType: 'text', location: midpoint(point_B, point_A), text: `t = [0...1]` , attr: {
+                'fill': 'red'
+            },
+        })
+        // Text
+        data.push({
+            graphType: 'text', location: point_A, text: 'Point A', attr: {
+                'fill': 'blue'
+            },
+        })
+        data.push({
+            graphType: 'text', location: point_B, text: 'Point B', attr: {
+                'fill': 'blue'
+            },
+        })
+
+                // Function to calculate the norm of a vector
+        function norm(vector) {
+            return Math.sqrt(vector[0] ** 2 + vector[1] ** 2 + vector[2] ** 2);
+        }
+
+        // Function to perform spherical interpolation
+        function interpolateSpherical(pos, target, t) {
+            if(pos.length === 2)
+                pos.push(1)
+
+            if(target.length === 2)
+                target.push(1)
+
+            const rA = norm(pos);
+            const rB = norm(target);
+
+            // Check if the magnitudes are valid
+            if (rA === 0 || rB === 0) {
+                throw new Error("One of the vectors has zero magnitude.");
+            }
+
+            const thetaA = Math.atan2(pos[2], pos[0]);
+            const thetaB = Math.atan2(target[2], target[0]);
+
+            // Calculate phi values and clamp them to avoid NaN
+            const phiA = Math.acos(clamp(pos[1] / rA, -1, 1));
+            const phiB = Math.acos(clamp(target[1] / rB, -1, 1));
+
+            const r_lerp = rA + (rB - rA) * t;
+            const theta_lerp = thetaA + (thetaB - thetaA) * t;
+            const phi_lerp = phiA + (phiB - phiA) * t;
+
+            // Convert back to Cartesian coordinates
+            const x = r_lerp * Math.sin(phi_lerp) * Math.cos(theta_lerp);
+            const y = r_lerp * Math.cos(phi_lerp);
+
+            return [x, y];
+        }
+
+        // Generate points for interpolation
+        const points = [];
+        const steps = 100; // Number of interpolation steps
+
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            points.push(interpolateSpherical(point_A, point_B, t));
+        }
+
+        let pointsData = {
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 0.5
+            },
+            points: []
+        }
+
+        points.map((point, index) => (pointsData.points.push(point)))
+
+        // Prepare data for plotting
+        data.push(pointsData);
+
+        return data;
+    }} />
+
+    <Headline type={'h2'} >Manipulate Arc by making it wider/inner</Headline>
+    <Headline type={'h3'} >Adding a wide orbit bump</Headline>
+    <Paragraph>To push the camera outward during the interpolation, we define:</Paragraph>
+    <LatexRenderer latex={`
+        \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B} + H \\times sin(\\pi t)
+    `} />
+    <Paragraph>
+        <ul>
+            <li><LatexRenderer as='span' latex={`H > 0`} displayMode={false} />: camera bulges outward (wide arc)</li>
+            <li><LatexRenderer as='span' latex={`H < 0`} displayMode={false} />: camera dips inward (narrow arc)</li>
+            <li><LatexRenderer as='span' latex={`sin(\\pi t)`} displayMode={false} /> symmetric bump that peaks at <LatexRenderer as='span' latex={`t = 0.5`} displayMode={false} /></li>
+        </ul>
+    </Paragraph>
+    <Plot refresh={true} options={{
+        title: "Spherical interpolation Arc Manipulation",
+        width: 500,
+        height: 500,
+        xAxis: {
+            domain: [-6, 6]
+        }
+    }} aspectRatio={[-4, 4]} calculations={(data) => {
+        function normalizeVector(vector) {
+            const magnitude = Math.sqrt(vector.x ** 2 + vector.y ** 2 + vector.z ** 2);
+            if (magnitude === 0) {
+                throw new Error("Cannot normalize a zero vector");
+            }
+            return [vector.x / magnitude, vector.y / magnitude, vector.z / magnitude ];
+        }
+
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min
+        }
+
+        function randomSign(val) {
+            let randomSign = Math.round(Math.random() * 2 - 1);
+            randomSign = Math.sign(randomSign) === 0 ? 1 : randomSign;
+            return val * randomSign;
+        }
+
+        function midpoint(v1, v2){
+            return [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+        }
+
+        function interpolate(a, b, c) {
+            return a + (b - a) * c;
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        let H = randomRange(0, 5).toFixed(2);
+
+
+        let point_A = [randomSign(randomRange(1, 2)), randomSign(randomRange(1, 2))];
+        let point_B = [randomSign(randomRange(0, 4)), randomSign(randomRange(0, 4))];
+
+        // Vector Hotspot
+        data.push({
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 5
+            },
+            points: [
+                point_A,
+                point_B
+            ]
+        })
+
+        // Text Dot Product
+        data.push({
+            graphType: 'text', location: midpoint(point_B, point_A), text: `H = ${H}` , attr: {
+                'fill': 'red'
+            },
+        })
+        // Text
+        data.push({
+            graphType: 'text', location: point_A, text: 'Point A', attr: {
+                'fill': 'blue'
+            },
+        })
+        data.push({
+            graphType: 'text', location: point_B, text: 'Point B', attr: {
+                'fill': 'blue'
+            },
+        })
+
+                // Function to calculate the norm of a vector
+        function norm(vector) {
+            return Math.sqrt(vector[0] ** 2 + vector[1] ** 2 + vector[2] ** 2);
+        }
+
+        // Function to perform spherical interpolation
+        function interpolateSpherical(pos, target, t, H = 2.0) {
+            if(pos.length === 2)
+                pos.push(1)
+
+            if(target.length === 2)
+                target.push(1)
+
+            const rA = norm(pos);
+            const rB = norm(target);
+
+            // Check if the magnitudes are valid
+            if (rA === 0 || rB === 0) {
+                throw new Error("One of the vectors has zero magnitude.");
+            }
+
+            const thetaA = Math.atan2(pos[2], pos[0]);
+            const thetaB = Math.atan2(target[2], target[0]);
+
+            // Calculate phi values and clamp them to avoid NaN
+            const phiA = Math.acos(clamp(pos[1] / rA, -1, 1));
+            const phiB = Math.acos(clamp(target[1] / rB, -1, 1));
+
+            const r_lerp = interpolate(rA, rB, t) + H * Math.sin(Math.PI * t);
+            const theta_lerp = interpolate(thetaA, thetaB, t);
+            const phi_lerp = interpolate(phiA, phiB, t);
+
+            // Convert back to Cartesian coordinates
+            const x = r_lerp * Math.sin(phi_lerp) * Math.cos(theta_lerp);
+            const y = r_lerp * Math.cos(phi_lerp);
+
+            return [x, y];
+        }
+
+        // Generate points for interpolation
+        const points = [];
+        const steps = 100; // Number of interpolation steps
+
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            points.push(interpolateSpherical(point_A, point_B, t, H));
+        }
+
+        let pointsData = {
+            fnType: 'points',
+            graphType: 'scatter',
+            attr: {
+                'r': 0.5
+            },
+            points: []
+        }
+
+        points.map((point, index) => (pointsData.points.push(point)))
+
+        // Prepare data for plotting
+        data.push(pointsData);
+
+        return data;
+    }} />
+
 </div>

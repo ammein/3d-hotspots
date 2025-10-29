@@ -34,16 +34,16 @@ import Plot from '@/design-system/components/Plot';
     <Plot className={'w-full'} aspectRatio={[19, 6]} options={{ title: "Hotspot", width: 500, height: 500, xAxis: { domain: [-1000, 1000] }, grid: true, data: [
         { vector: [-310, 100], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
             'stroke': 'blue'
-        } }, 
+        } },
         { vector: [110, 20], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
             'stroke': 'blue'
-        } }, 
+        } },
         { vector: [-310, 40], offset: [0, 0], graphType: 'polyline', fnType: 'vector', attr: {
             'stroke': 'blue'
-        } }, 
+        } },
         { vector: [-155, 50], offset: [-310, 100], graphType: 'polyline', fnType: 'vector', attr: {
             'stroke': 'red'
-        } }, 
+        } },
         { vector: [55, 10], offset: [110, 20], graphType: 'polyline', fnType: 'vector', attr: {
             'stroke': 'red'
         } },
@@ -78,13 +78,13 @@ import Plot from '@/design-system/components/Plot';
     \\overrightarrow{Vp_1} = \\left\\langle Vp_x, Vp_y, Vp_z \\right\\rangle
 
     \\overrightarrow{C} = \\left\\langle C_x, C_y, C_z \\right\\rangle
-    
+
     \\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} = Vp_x C_x + Vp_y C_y + Vp_z C_z
     `} />
     <Plot options={{
         title: "Dot Product",
         grid: true,
-        width: 500, 
+        width: 500,
         height: 500,
         xAxis: {
             domain: [-2, 2]
@@ -173,4 +173,5 @@ import Plot from '@/design-system/components/Plot';
         return data;
     }}/>
     <Paragraph type='caption' >As you can see from above graph, if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} > 0`} as='span' displayMode={false} /> is facing towards camera. Meanwhile if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} < 0`} as='span' displayMode={false} /> is facing opposite to the camera. We can use this value to set opacity and clamp between value <LatexRenderer latex={`0`} as='span' displayMode={false} /> and <LatexRenderer latex={`1`} as='span' displayMode={false} /></Paragraph>
+
 </div>
