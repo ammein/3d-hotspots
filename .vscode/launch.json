@@ -27,6 +27,30 @@
                 "!**/node_modules/**"
             ],
             "sourceMaps": true
-        }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug Storybook",
+            "url": "http://localhost:6006/",
+            "webRoot": "${workspaceFolder}",
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*", // Adjust based on your project structure
+                "@/*": "${webRoot}/src/*" // Crucial for alias resolution
+            },
+            "runtimeArgs": [
+                "--remote-debugging-port=6006"
+            ],
+            "skipFiles": [
+                "<node_internals>/**",
+                "node_modules/**"
+            ],
+            // To silent sourcemap errors. Not to include node_modules files but include current workspace folder
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "sourceMaps": true
+        },
     ]
 }

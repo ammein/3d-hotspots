@@ -8,7 +8,21 @@ import DassaultButton from '@/components/Button';
  * @returns {Array<import('function-plot').FunctionPlotDatum>}
  */
 
-const FunctionPlot = ({ aspectRatio, calculations, refresh, options, ...props }) => {
+/**
+ * @typedef {Object} FunctionPlotParams
+ * @property {Calculations} calculations
+ * @property {boolean} refresh
+ * @property {string} buttonText
+ * @property {Array<number, number>} aspectRatio
+ * @property {import('function-plot').FunctionPlotOptions} options
+ */
+
+/**
+ * Function Plot
+ * @param {FunctionPlotParams & import('react').HTMLAttributes<HTMLDivElement>} param0
+ * @returns
+ */
+const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options, ...props }) => {
   /** @type {import('react').Ref<HTMLDivElement>} */
   const rootEl = useRef(null);
 
@@ -77,7 +91,7 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, options, ...props })
       <div ref={rootEl} {...props} />
       {refresh && (
         <DassaultButton label={'Update'} size="small" onClick={buttonClick}>
-          Refresh Graph
+          {buttonText ? buttonText : 'Refresh Graph'}
         </DassaultButton>
       )}
     </>
@@ -85,7 +99,7 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, options, ...props })
 };
 
 /**
- * @param {import('react').HTMLAttributes<HTMLDivElement> & { calculations: Calculations, aspectRatio: Array<number, number>, options: import('function-plot').FunctionPlotOptions }} MainProps
+ * @param {import('react').HTMLAttributes<HTMLDivElement> & FunctionPlotParams} MainProps
  * @returns {import('react').FC<import('function-plot').FunctionPlotProps>}
  * @link https://mauriciopoppe.github.io/function-plot/
  */

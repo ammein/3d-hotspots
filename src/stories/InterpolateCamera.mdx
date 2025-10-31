@@ -153,7 +153,7 @@ import Plot from '@/design-system/components/Plot';
         xAxis: {
             domain: [-6, 6]
         }
-    }} aspectRatio={[-4, 4]} calculations={(data) => {
+    }} buttonText='Regenerate Points Position' aspectRatio={[-4, 4]} calculations={(data) => {
         function normalizeVector(vector) {
             const magnitude = Math.sqrt(vector.x ** 2 + vector.y ** 2 + vector.z ** 2);
             if (magnitude === 0) {
@@ -304,7 +304,7 @@ import Plot from '@/design-system/components/Plot';
         xAxis: {
             domain: [-6, 6]
         }
-    }} aspectRatio={[-4, 4]} calculations={(data) => {
+    }} buttonText='Regenerate H & Points' aspectRatio={[-4, 4]} calculations={(data) => {
         function normalizeVector(vector) {
             const magnitude = Math.sqrt(vector.x ** 2 + vector.y ** 2 + vector.z ** 2);
             if (magnitude === 0) {
