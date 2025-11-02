@@ -3,7 +3,6 @@ import { LatexRenderer } from '@/design-system/components/Latex';
 import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
-import CodeBlock from '@/design-system/components/CodeBlock';
 
 <Meta title="Documentation/Hotspot Locations" />
 
@@ -172,27 +171,5 @@ import CodeBlock from '@/design-system/components/CodeBlock';
         return data;
     }}/>
     <Paragraph type='caption' >As you can see from above graph, if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} > 0`} as='span' displayMode={false} /> is facing towards camera. Meanwhile if <LatexRenderer latex={`\\overrightarrow{Vp_1} \\cdot \\overrightarrow{C} < 0`} as='span' displayMode={false} /> is facing opposite to the camera. We can use this value to set opacity and clamp between value <LatexRenderer latex={`0`} as='span' displayMode={false} /> and <LatexRenderer latex={`1`} as='span' displayMode={false} /></Paragraph>
-    <CodeBlock code={`function spherical_lerp(pos, target, distance, t) {
-            pos = pos.clone();
-            target = target.clone();
-
-            let rA = pos.length();
-            let rB = target.length();
-            let thetaA = Math.atan2(pos.z, pos.x);
-            let thetaB = Math.atan2(target.z, target.x);
-            let phiA = Math.acos(pos.y / rA)
-            let phiB = Math.acos(target.y / rB)
-
-            let r_lerp = gsap.utils.interpolate(rA, rB, t) + distance * Math.sin(Math.PI * t);
-            let theta_lerp = gsap.utils.interpolate(thetaA, thetaB);
-            let phi_lerp = gsap.utils.interpolate(phiA, phiB);
-
-            let x = r_lerp * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
-            let y = r_lerp * Math.cos(phi_lerp(t));
-            let z = r_lerp * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
-
-            return new Vector3(x, y, z);
-
-        }`} line={'2'} language='javascript' />
 
 </div>

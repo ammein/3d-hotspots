@@ -3,6 +3,7 @@ import { LatexRenderer } from '@/design-system/components/Latex';
 import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
+import CodeBlock from '@/design-system/components/CodeBlock';
 
 <Meta title="Documentation/Camera Interpolation" />
 
@@ -436,5 +437,30 @@ import Plot from '@/design-system/components/Plot';
 
         return data;
     }} />
+    <Headline type={'h2'}>Code Implementation</Headline>
+    <Paragraph>You will see how the code implements in javascript with gsap interpolation as per below:</Paragraph>
+    <CodeBlock language="javascript" showLineNumbers>
+      {`function spherical_lerp(pos, target, distance, t) {
+            pos = pos.clone();
+            target = target.clone();
+
+            let rA = pos.length();
+            let rB = target.length();
+            let thetaA = Math.atan2(pos.z, pos.x);
+            let thetaB = Math.atan2(target.z, target.x);
+            let phiA = Math.acos(pos.y / rA)
+            let phiB = Math.acos(target.y / rB)
+
+            let r_lerp = gsap.utils.interpolate(rA, rB, t) + distance * Math.sin(Math.PI * t);
+            let theta_lerp = gsap.utils.interpolate(thetaA, thetaB);
+            let phi_lerp = gsap.utils.interpolate(phiA, phiB);
+
+            let x = r_lerp * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
+            let y = r_lerp * Math.cos(phi_lerp(t));
+            let z = r_lerp * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
+
+            return new Vector3(x, y, z);
+        }`}
+    </CodeBlock>
 
 </div>

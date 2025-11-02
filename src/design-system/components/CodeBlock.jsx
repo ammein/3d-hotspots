@@ -1,55 +1,65 @@
-import { useEffect, useMemo } from 'react';
-import '@/assets/prismjs/prism';
-import '@/assets/prismjs/prism.css';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { FiClipboard } from 'react-icons/fi';
 import beautify from 'js-beautify';
-
-// if you are intending to use Prism functions manually, you will need to set:
-window.Prism.manual = true;
+import { useState } from 'react';
 
 /**
- * @typedef {Object} PrismParams
- * @property {string} code
- * @property {boolean} showLineNumbers
- * @property {"javascript" | "glsl" | "html" | "css" | "jsx" | "diff" | "shell"} language
- * @property {string} line Line Range. Refer: https://prismjs.com/plugins/line-highlight/
+ * @typedef {Object} SyntaxHiglightedParams
+ * @property {string} language
+ * @property {string} children
+ * @property {import('react-syntax-highlighter').SyntaxHighlighterProps} props
  */
 
 /**
- * Function Plot
- * @param {PrismParams} param0
+ * Syntax Highlight Block
+ * @param {SyntaxHiglightedParams} param0
+ * @link https://github.com/react-syntax-highlighter/react-syntax-highlighter?tab=readme-ov-file
  * @returns
  */
-const CodeBlock = ({ code, showLineNumbers = true, language, line }) => {
-  useEffect(() => {
-    window.Prism.highlightAll(); // Highlights all code blocks on the page
-  }, [code, language]); // Re-highlight if code or language changes
+const SyntaxHighlightedContent = ({ language, children, ...props }) => {
+  const [active, setActive] = useState(false);
+  const [delayDuration, _setDelayDuration] = useState(3000);
 
-  const beautifyCode = useMemo(() => {
-    switch (language) {
-      case 'javascript':
-        return beautify.js(code);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(children);
+    setActive(true);
+    // Use setTimeout to simulate a delayed action
+    setTimeout(() => {
+      setActive(false);
+    }, delayDuration);
+  };
 
-      case 'html':
-        return beautify.html(code);
+  switch (language) {
+    case 'javascript':
+      children = beautify.js(children);
+      break;
 
-      case 'css':
-        return beautify.js(code);
+    case 'html':
+      children = beautify.html(children);
+      break;
 
-      default:
-        return code;
-    }
-  }, [code, language]);
+    case 'css':
+      children = beautify.css(children);
+      break;
+  }
 
   return (
-    <pre>
-      <code
-        className={`language-${language} ${showLineNumbers ? 'line-numbers' : ''}`}
-        data-line={line ? line : undefined}
+    <div className="relative w-full h-auto">
+      <SyntaxHighlighter
+        language={language}
+        style={materialDark}
+        customStyle={{ margin: '0', fontSize: '0.8em' }}
+        {...props}
       >
-        {beautifyCode}
-      </code>
-    </pre>
+        {children}
+      </SyntaxHighlighter>
+      <div className="absolute top-2 right-2 flex flex-row gap-1 justify-center">
+        {active && <span className="font-bold text-white-100">Copied to Clipboard</span>}
+        <FiClipboard className="text-white-100" onClick={handleCopy} />
+      </div>
+    </div>
   );
 };
 
-export default CodeBlock;
+export default SyntaxHighlightedContent;
