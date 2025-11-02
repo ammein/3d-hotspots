@@ -17,7 +17,8 @@ export default defineConfig([
     'storybook-static',
     'src/glsl',
     'src/assets',
-    'vite.config.js'
+    'vite.config.js',
+    'torchlight.config.js'
   ]),
   {
     files: ['**/*.{js,jsx}'],

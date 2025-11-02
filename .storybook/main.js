@@ -40,7 +40,7 @@ const config = {
         ...options.plugins,
         'babel-plugin-twin',
         'babel-plugin-macros',
-        'babel-plugin-styled-components',
+        'babel-plugin-styled-components'
       ],
     }
   },

@@ -41,3 +41,4 @@ lygia/
 
 # Env Files
 .env.production
+.env.storybook
