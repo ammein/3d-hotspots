@@ -1,38 +1,44 @@
 /* PrismJS 1.30.0
 https://prismjs.com/download#themes=prism-tomorrow&languages=markup+css+clike+javascript+bash+c+css-extras+diff+glsl+latex+jsx&plugins=line-highlight+line-numbers+custom-class+previewers+toolbar+copy-to-clipboard+treeview */
+
+/* Fix Spacing */
+.line-numbers-rows > span {
+  height: 1.43em !important;
+}
+
 code[class*='language-'],
 pre[class*='language-'] {
-  color: #ccc !important;
-  background: 0 0 !important;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important;
-  font-size: 1em !important;
-  text-align: left !important;
-  white-space: pre !important;
-  word-spacing: normal !important;
-  word-break: normal !important;
-  word-wrap: normal !important;
-  line-height: 1.5 !important;
-  -moz-tab-size: 4 !important;
-  -o-tab-size: 4 !important;
-  tab-size: 4 !important;
-  -webkit-hyphens: none !important;
-  -moz-hyphens: none !important;
-  -ms-hyphens: none !important;
-  hyphens: none !important;
+  color: #ccc;
+  background: 0 0;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre-wrap;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4em !important;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
 }
 pre[class*='language-'] {
   padding: 1em !important;
   margin: 0.5em 0 !important;
-  overflow: auto !important;
+  overflow: auto;
 }
 :not(pre) > code[class*='language-'],
 pre[class*='language-'] {
   background: #2d2d2d !important;
 }
 :not(pre) > code[class*='language-'] {
-  padding: 0.1em !important;
-  border-radius: 0.3em !important;
-  white-space: normal !important;
+  padding: 0.1em;
+  border-radius: 0.3em;
+  white-space: normal;
 }
 .token.block-comment,
 .token.cdata,
@@ -97,8 +103,8 @@ pre[class*='language-'] {
   color: green !important;
 }
 pre[data-line] {
-  position: relative !important;
-  padding: 1em 0 1em 3em !important;
+  position: relative;
+  padding: 1em 0 1em 3em;
 }
 .line-highlight {
   position: absolute !important;
@@ -114,8 +120,9 @@ pre[data-line] {
 }
 @media print {
   .line-highlight {
+    print-color-adjust: exact;
     -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    color-scheme: exact !important;
   }
 }
 .line-highlight:before,
@@ -452,6 +459,7 @@ div.code-toolbar > .toolbar > .toolbar-item > button {
   line-height: normal !important;
   overflow: visible !important;
   padding: 0 !important;
+  user-select: none;
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;

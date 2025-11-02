@@ -6,8 +6,6 @@ import beautify from 'js-beautify';
 // if you are intending to use Prism functions manually, you will need to set:
 window.Prism.manual = true;
 
-// window.Prism.plugins.customClass.prefix('prism--');
-
 /**
  * @typedef {Object} PrismParams
  * @property {string} code
