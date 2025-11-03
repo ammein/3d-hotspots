@@ -19,14 +19,14 @@ export const Button = ({ buttonType = 'scream', size = 'large', label, weight = 
 
     case buttonType === 'cheer' || buttonType === 'murmur':
       render = (
-        <>
+        <div className="text-s flex gap-2 flex-row">
           <RightArrow
             style={{
               transform: 'rotate(-90deg)',
             }}
           />
           {label}
-        </>
+        </div>
       );
       break;
 
