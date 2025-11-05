@@ -154,7 +154,7 @@ const RulerPicker = (props) => {
   const handleScrollFrame = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
-    const scrollLeft = el.scrollLeft;
+    const { scrollLeft } = el;
     const newStep = getValueFromScroll(scrollLeft);
 
     setDisplayValue((prev) => {
@@ -252,7 +252,7 @@ const RulerPicker = (props) => {
       {/* Indicator: small centered container so the vertical line is centered exactly */}
       <div
         style={{
-          top: indicatorHeight + 'px',
+          top: `${indicatorHeight}px`,
           transform: `translate(${indicatorXOffset}px, ${-indicatorHeight}px)`, // center horizontally; vertical will be handled below
           width: stepWidth,
           height: indicatorHeight + textHeight + 8, // extra space for value text above

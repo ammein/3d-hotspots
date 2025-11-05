@@ -1,0 +1,157 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { LatexRenderer } from '@/design-system/components/Latex';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import LinkTo from '@storybook/addon-links/react';
+
+<Meta title="Documentation/Maintainer/About Project" />
+
+<div>
+  ## About Project
+  <Paragraph weight='regular' >This project has been developed by <a href='https://github.com/ammein' target='_blank'>Amin Shazrin \<aminshazrin@yahoo.com\></a>.</Paragraph>
+  ### Project Architecture
+  <div className="diagram-container" id="diagram-container">
+  <Mermaid
+    config={{
+      mermaid: {
+        flowchart: {
+          curve: "linear",
+          defaultRenderer: 'elk',
+        },
+        fontFamily: '3ds Regular',
+        startOnLoad: true,
+      },
+    }}
+    chart={`
+    flowchart TB
+      %% Declaration Variables
+      appM[App Management]
+      modelM[Model Management]
+      theatreM[TheatreJS Management]
+      p(Paragraph)
+      title(Title)
+      hotspot(Hotspot)
+      close(Close Button)
+      hotspotuv(Hotspot Unit Vector)
+      mode(Button Mode)
+      rotateruler(Rotate Ruler)
+      tbc(Tracking Button)
+      load(Loading Screen)
+      progress(Loading Progress)
+      main[Main]
+      %% Graph Start
+      app[<h2>App</h2>] m1@==> load
+      subgraph SScreen [<h2>Splash Scene</h2>]
+        direction LR
+        tbc
+        p
+        h[Headline]
+      end
+      load m2@==> SScreen
+      subgraph load [<h2>Loading Scene</h2>]
+        progress
+      end
+      SScreen m3@==> main
+      subgraph main [<h2>Main Scene</h2>]
+        direction TB
+        subgraph msComponent [Main Components]
+          direction TB
+          mode
+          camera[ThreeJS Camera]
+          light[ThreeJS Lights]
+          subgraph 3dComponent [3D Model Component]
+            direction LR
+            hotspot
+            title
+            gltf[GLTF/GLB Model]
+            glsl[GLSL Postprocessing Effect]
+          end
+        end
+        subgraph ns [Node Graph Components]
+          hotspotuv
+          rotateruler
+        end
+      end
+      main m4@==> detail
+      subgraph detail [<h2>Detail Scene</h2>]
+        direction LR
+        close
+        t[Title]
+        para[Paragraph]
+        cta[CTA BUtton]
+      end
+      appHOC@{ shape: win-pane, label: "<h3>Context Provider:</h3>- Locale JSON\\n- Loading Progress Number\\n- Ready State\\n- TheatreJS App Project\\n- Metadata JSON" } -.- appM
+      appM -.-> SScreen
+      appM -.-> load
+      appM -.-> main
+      appM -.-> detail
+      modelHOC@{ shape: win-pane, label: "<h3>Hooks State:</h3>- Mode(Wireframe/Default)\\n- HotspotID\\n- Rotation Degree\\n- Hotspot Data\\n- rotationDegree\\n- rotationSign<h3>Hooks Callback:</h3>- type['mode' | 'hotspot' | 'rotation' | 'hotspot-data' | 'rotation-sign']" } -.- modelM
+      modelM -.-> 3dComponent
+      modelM -.-> msComponent
+      modelM -.-> ns
+      modelM -.-> detail
+      theatreHOC@{ shape: win-pane, label: "<h3>Parameter:</h3><code>[SheetName] : {  [ItemObjectName] : ISheet.Object }</code>\\n<h3>States:</h3>- subscribe" } -.- theatreM
+      theatreM -.-> SScreen
+      theatreM -.-> main
+      theatreM -.-> detail
+      %% Graph Ends
+      %% Main Line Animation
+      classDef animate stroke-dasharray: 9\,5, stroke-dashoffset: 900, animation: dash 5s linear infinite;
+      class m1,m2,m3,m4 animate
+      %% Screen Node Style
+      style app fill:#c85df6,color:#fff;
+      classDef management fill:#ffc44e;
+      class appM,modelM,theatreM,appHOC,modelHOC,theatreHOC management;
+`}
+  />
+</div>
+  <Paragraph weight='regular' >This repository uses a small set of modern libraries and tools to build an interactive, performant web experience. Below is a concise summary of the key packages used and why they are included, plus quick notes on where to look in the codebase to find their integration.</Paragraph>
+  <CodeBlock language="bash" showLineNumbers>
+      {`./src
+├── ./src/assets
+├── ./src/components
+│   ├── ./src/components/context
+│   ├── ./src/components/effect
+│   ├── ./src/components/hoc
+│   └── ./src/components/screens
+├── ./src/design-system
+│   ├── ./src/design-system/atoms
+│   ├── ./src/design-system/components
+│   └── ./src/design-system/icons
+├── ./src/glsl
+├── ./src/helpers
+├── ./src/stories
+└── ./src/stylesheets
+    └── ./src/stylesheets/modules`}
+    </CodeBlock>
+  ### Folder Definitions
+  #### <code>./src/assets</code>
+  <Paragraph weight='regular' >This is where the internal assets stored where the vite build will compiled without using <a href='https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API'>fetch API</a> involved.</Paragraph>
+  #### <code>./src/components/context</code>
+  <Paragraph weight='regular' >Contains React Context Provider that can be read/write to any children of this component(s). For more info: <a href='https://react.dev/learn/passing-data-deeply-with-context'>Passing Data Deeply with Context</a></Paragraph>
+  #### <code>./src/components/effect</code>
+  <Paragraph weight='regular' >Contains react-postprocessing custom effect setup here to achieve 'Fog' effect from splash screen. For more info: <a href='https://react-postprocessing.docs.pmnd.rs/effects/custom-effects'>Custom Effect</a></Paragraph>
+  #### <code>./src/components/hoc</code>
+  <Paragraph weight='regular' >Contains React Higher Order Component for easy manage custom props for each wrapped children. For more info: <a href='https://legacy.reactjs.org/docs/higher-order-components.html'>Higher Order Components</a></Paragraph>
+  #### <code>./src/components/screens</code>
+  <Paragraph weight='regular' >Contains React componenets for screens according to <a href='#project-architecture' target='_self' >Project Architecture</a> above.</Paragraph>
+  #### <code>./src/design-system/atoms</code>
+  <Paragraph weight='regular' >Contains Atoms Design System such as Color, Typography, Styling and more</Paragraph>
+  #### <code>./src/design-system/components</code>
+  <Paragraph weight='regular' >Contains Components Design System that follows Dassault Systemes Branding and even project wide uses.</Paragraph>
+  #### <code>./src/design-system/icons</code>
+  <Paragraph weight='regular' >This is where you can store multiple icons in this folder</Paragraph>
+  #### <code>./src/glsl</code>
+  <Paragraph weight='regular' >This folder contains GLSL codes to run using ThreeJS Shader Material. In this specific project case, I use it for Fog Effect that happens in Splash Screen UI</Paragraph>
+  #### <code>./src/helpers</code>
+  <Paragraph weight='regular' >Any helpers/utilization codes, you may store in this folder</Paragraph>
+  #### <code>./src/stories</code>
+  <Paragraph weight='regular' >This is where all Storybook Documetation stores here. For more info: <a href="https://storybook.js.org/docs">Storybook Docs</a></Paragraph>
+  #### <code>./src/stylesheets</code>
+  <Paragraph weight='regular' >This is where all styling css stores in this folder</Paragraph>
+  #### <code>./src/stylesheets/modules</code>
+  <Paragraph weight='regular' >For the sake of deploy in 3DS webpage, you have to use React Modules CSS so that it does not conflict with the webpage existing styling. For more info: <a href='https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/'>CSS Modules Stylesheet</a></Paragraph>
+</div>

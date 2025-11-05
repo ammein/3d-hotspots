@@ -20,7 +20,7 @@ const AppContext = createContext();
 const stateProject = {
   state: states,
   assets: {
-    baseUrl: import.meta.env.PROD ? import.meta.env.VITE_BASE_URL + '/theatrejs-assets' : '/theatrejs-assets',
+    baseUrl: import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/theatrejs-assets` : '/theatrejs-assets',
   },
 };
 

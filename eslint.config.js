@@ -17,7 +17,8 @@ export default defineConfig([
     'storybook-static',
     'src/glsl',
     'src/assets',
-    'vite.config.js'
+    'vite.config.js',
+    'eslint.config.js'
   ]),
   {
     files: ['**/*.{js,jsx}'],
@@ -42,7 +43,14 @@ export default defineConfig([
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
       'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      'react-hooks/exhaustive-deps': 'warn' // Checks effect dependencies
+      'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
+      // Add or configure specific ES6-related rules here
+      "prefer-const": "error",
+      "no-var": "error",
+      "object-shorthand": "error",
+      "prefer-arrow-callback": "error",
+      "prefer-template": "error",
+      "prefer-destructuring": "error",
     },
   },
 ])

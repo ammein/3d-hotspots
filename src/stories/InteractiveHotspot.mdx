@@ -4,10 +4,10 @@ import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
 
-<Meta title="Documentation/Hotspot Locations" />
+<Meta title="Documentation/Maintainer/Applied Mathematics/Hotspot Locations" />
 
 <div>
-    <Headline type={'h2'} >Hotspot Lines</Headline>
+    ## Hotspot Lines
     <Paragraph weight={'regular'} >Lets create a random vector as an act of hotspots locations:</Paragraph>
     <LatexRenderer latex={`
     Vp1 = (-155.0, 50., 30.)
@@ -68,10 +68,10 @@ import Plot from '@/design-system/components/Plot';
         } }
         ] }} />
 
-    <Headline type={'h2'} >Nearest Hotspot to Camera</Headline>
+    ## Nearest Hotspot to Camera
     <Paragraph>This function is to explain how the hotspot line will be opaque when it is located behind the model (Negate Location)</Paragraph>
     <Paragraph>Dot Product is the perfect method to do this functionality. Assume <LatexRenderer latex={`C`} as='span' displayMode={false} /> represents camera. Here is the formula for how the dot product is:</Paragraph>
-    <Headline type={'h3'} >Component formula:</Headline>
+    ### Component formula:
     <LatexRenderer latex={`
     \\overrightarrow{Vp_1} = \\left\\langle Vp_x, Vp_y, Vp_z \\right\\rangle
 

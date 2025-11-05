@@ -7,6 +7,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { randomHash } from './src/helpers/utils';
 import beautify from 'js-beautify';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
+import mdxMermaid from 'mdx-mermaid'
+import { Mermaid } from 'mdx-mermaid/lib/Mermaid'
 
 // https://vite.dev/config/
 import path from 'node:path';
@@ -171,7 +173,13 @@ export default defineConfig(async ({ mode }) => {
           // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
           storybookTest({
             configDir: path.join(dirname, '.storybook')
-          })],
+          }),
+          // https://www.npmjs.com/package/mdx-mermaid
+          {
+            remarkPlugins: [[mdxMermaid.default, { output: 'svg' }]],
+            components: { mermaid: Mermaid, Mermaid }
+          }
+        ],
         test: {
           name: 'storybook',
           browser: {

@@ -184,7 +184,7 @@ const withLoading = (WrappedComponent) => {
       }
     }, [ready, progress, ellipsesLoading.current]);
 
-    const loadText = ready ? (progress !== 100 ? t('text') + ' ' + assetName : t('loaded')) : t('text');
+    const loadText = ready ? (progress !== 100 ? `${t('text')} ${assetName}` : t('loaded')) : t('text');
 
     return (
       <>
@@ -196,7 +196,7 @@ const withLoading = (WrappedComponent) => {
           weight="bold"
           other={LoadingCSS.LoadingButton}
         >
-          {progress.toFixed(0) + '% ' + loadText}
+          {`${progress.toFixed(0)}% ${loadText}`}
           <span ref={ellipsesLoading} />
         </Button>
         <WrappedComponent progress={progress} loaded={loaded} {...props} />

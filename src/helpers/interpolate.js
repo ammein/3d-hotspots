@@ -9,24 +9,24 @@ import gsap from "gsap"
  * @param {number} t 
  * @returns {import('three').Vector3}
  */
-function spherical_lerp(pos, target, distance, t) {
+const spherical_lerp = (pos, target, distance, t) => {
   pos = pos.clone();
   target = target.clone();
 
-  let rA = pos.length();
-  let rB = target.length();
-  let thetaA = Math.atan2(pos.z, pos.x);
-  let thetaB = Math.atan2(target.z, target.x);
-  let phiA = Math.acos(pos.y / rA)
-  let phiB = Math.acos(target.y / rB)
+  const rA = pos.length();
+  const rB = target.length();
+  const thetaA = Math.atan2(pos.z, pos.x);
+  const thetaB = Math.atan2(target.z, target.x);
+  const phiA = Math.acos(pos.y / rA)
+  const phiB = Math.acos(target.y / rB)
 
-  let r_lerp = gsap.utils.interpolate(rA, rB, t) + distance * Math.sin(Math.PI * t);
-  let theta_lerp = gsap.utils.interpolate(thetaA, thetaB);
-  let phi_lerp = gsap.utils.interpolate(phiA, phiB);
+  const r_lerp = gsap.utils.interpolate(rA, rB, t) + distance * Math.sin(Math.PI * t);
+  const theta_lerp = gsap.utils.interpolate(thetaA, thetaB);
+  const phi_lerp = gsap.utils.interpolate(phiA, phiB);
 
-  let x = r_lerp * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
-  let y = r_lerp * Math.cos(phi_lerp(t));
-  let z = r_lerp * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
+  const x = r_lerp * Math.sin(phi_lerp(t)) * Math.cos(theta_lerp(t));
+  const y = r_lerp * Math.cos(phi_lerp(t));
+  const z = r_lerp * Math.sin(phi_lerp(t)) * Math.sin(theta_lerp(t));
 
   return new Vector3(x, y, z)
 }

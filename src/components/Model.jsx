@@ -38,10 +38,10 @@ import { DEG2RAD } from '@three-math/MathUtils';
  * @property {FocusMetadata | undefined} focus
  */
 
-useGLTF.setDecoderPath(import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_DRACO_PATH);
+useGLTF.setDecoderPath(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_LOCAL_DRACO_PATH}`);
 
 const ktx2Loader = new KTX2Loader();
-ktx2Loader.setTranscoderPath(import.meta.env.VITE_BASE_URL + '/' + import.meta.env.VITE_LOCAL_KTX_PATH);
+ktx2Loader.setTranscoderPath(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_LOCAL_KTX_PATH}`);
 
 const focalRangeDefault = 25.0;
 
@@ -132,7 +132,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
 
   // Error Handling
   if (!gltf) {
-    let error = new Error(
+    const error = new Error(
       `Looks like you trying to load an invalid model paths. Make sure you upload your model into 'public/theatrejs-assets' folder.\nMove your model 'public/theatrejs-assets', then click button "reset" and try again .\n\nYour error model path URL: "${url}"`
     );
 
@@ -153,11 +153,11 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
      * @returns {void}
      */
     (e) => {
-      const intersections = e.intersections;
+      const { intersections } = e;
 
       if (intersections.length > 0 && rest.start && orbitRef.current.state === STATE.NONE && !focus && !isAnimate) {
         /** @type {Hotspots} */
-        let intersect = hotspots.find(({ pointer, name }) =>
+        const intersect = hotspots.find(({ pointer, name }) =>
           intersections.some(({ object }) =>
             pointer ? object.name.indexOf(pointer) >= 0 : object.name.indexOf(name) >= 0
           )
@@ -200,7 +200,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
         .map((val) => val.trim())
         .filter((val) => val.length > 0 && /^\S*$/g.test(val))
         .forEach((name) => {
-          let obj = gltf.scene.getObjectByName(name);
+          const obj = gltf.scene.getObjectByName(name);
 
           if (obj) {
             obj.visible = false;
@@ -262,14 +262,16 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
       gltf.scene.traverse((object) => {
         if (object.type === 'Mesh') {
           /** @type {Hotspots} */
-          let findHotspot = metadata.screens.detail.hotspots.find((val) => val.name === object.name);
+          const findHotspot = metadata.screens.detail.hotspots.find((val) => val.name === object.name);
 
           if (findHotspot && HotspotLinesTheatreJS && object.type === 'Mesh' && findHotspot.name === object.name) {
             setHotspots((prev) => {
               // Clone the incoming position and calculate the line and lineText
-              let origin = object.position.clone();
-              let line = origin.clone().normalize().multiplyScalar(HotspotLinesTheatreJS.scalar);
-              let lineText = line.clone().add(new Vector3(0, 0, Math.sign(origin.z) * HotspotLinesTheatreJS.distance));
+              const origin = object.position.clone();
+              const line = origin.clone().normalize().multiplyScalar(HotspotLinesTheatreJS.scalar);
+              const lineText = line
+                .clone()
+                .add(new Vector3(0, 0, Math.sign(origin.z) * HotspotLinesTheatreJS.distance));
 
               // Create the new data object
               const newData = {
@@ -324,7 +326,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
   // Animations
   useGSAP(() => {
     if (FogTheatreJS && rest.loaded && FogTheatreJS.focalRange) {
-      let gsapRunnerVal = {
+      const gsapRunnerVal = {
         value: 0,
       };
       gsap.to(gsapRunnerVal, {

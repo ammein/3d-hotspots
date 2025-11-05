@@ -41,7 +41,7 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options,
         })
       );
     } catch (e) {
-      throw new Error('Plot error:\n' + e);
+      throw new Error(`Plot error:\n${e}`);
     }
   };
 
@@ -61,7 +61,7 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options,
         xScale = aspectRatio;
         yScale = computeYScale(options.width, options.height, aspectRatio);
       }
-      let finalOptions = {
+      const finalOptions = {
         data: data ? data : undefined,
         xDomain: xScale ? xScale : undefined,
         yDomain: yScale ? yScale : undefined,
@@ -82,7 +82,7 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options,
         })
       );
     } catch (e) {
-      throw new Error('Plot error:\n' + e);
+      throw new Error(`Plot error:\n${e}`);
     }
   }, [calculations, options, aspectRatio, setPlot]);
 

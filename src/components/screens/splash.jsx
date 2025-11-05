@@ -88,7 +88,7 @@ function Splash({ callback, loaded, start, ...rest }) {
           <img
             src={appProject.getAssetUrl(SplashTheatreJS.image)}
             alt="Thumbnail"
-            className={(visibility ? 'animate-blur-appear' : 'animate-blur-dissappear') + ' ' + SplashCSS.Thumbnail}
+            className={`${visibility ? 'animate-blur-appear' : 'animate-blur-dissappear'} ${SplashCSS.Thumbnail}`}
           />
         )}
       </div>

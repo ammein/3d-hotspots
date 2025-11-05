@@ -104,7 +104,7 @@ const Main = ({ start, loaded, ...rest }) => {
                   }}
                   type="h2"
                   weight="bold"
-                  color={HeadlineCSS.Headline + ' headline-title'}
+                  color={`${HeadlineCSS.Headline} headline-title`}
                 ></Headline>
               </div>
               <div className={MainCSS.MaterialButtonContainer}>

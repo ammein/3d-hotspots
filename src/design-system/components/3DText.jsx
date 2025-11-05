@@ -1,6 +1,6 @@
 import { Text3D } from '@react-three/drei';
 
-const fontPath = import.meta.env.PROD ? import.meta.env.VITE_BASE_URL + '/fonts/json/' : '/fonts/json/';
+const fontPath = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/fonts/json/` : '/fonts/json/';
 
 /**
  * @typedef {Object} DassaultText3DProps
@@ -17,35 +17,35 @@ const DassaultText3D = ({ children, weight, ref, ...rest }) => {
 
   switch (weight) {
     case 'light':
-      fontUrl = fontPath + '3DSV2-Light.json';
+      fontUrl = `${fontPath}3DSV2-Light.json`;
       break;
 
     case 'light-italic':
-      fontUrl = fontPath + '3DSV2-LightItalic.json';
+      fontUrl = `${fontPath}3DSV2-LightItalic.json`;
       break;
 
     case 'regular':
-      fontUrl = fontPath + '3DSV2-Regular.json';
+      fontUrl = `${fontPath}3DSV2-Regular.json`;
       break;
 
     case 'italic':
-      fontUrl = fontPath + '3DSV2-Italic.json';
+      fontUrl = `${fontPath}3DSV2-Italic.json`;
       break;
 
     case 'semibold':
-      fontUrl = fontPath + '3DSV2-SemiBold.json';
+      fontUrl = `${fontPath}3DSV2-SemiBold.json`;
       break;
 
     case 'semibold-italic':
-      fontUrl = fontPath + '3DSV2-SemiBoldItalic.json';
+      fontUrl = `${fontPath}3DSV2-SemiBoldItalic.json`;
       break;
 
     case 'bold':
-      fontUrl = fontPath + '3DSV2-Bold.json';
+      fontUrl = `${fontPath}3DSV2-Bold.json`;
       break;
 
     case 'bold-italic':
-      fontUrl = fontPath + '3DSV2-BoldItalic.json';
+      fontUrl = `${fontPath}3DSV2-BoldItalic.json`;
   }
 
   return (

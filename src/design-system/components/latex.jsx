@@ -6,7 +6,7 @@ const renderBlock = (latex, container, displayMode = true) => {
   try {
     katex.render(latex, container, {
       throwOnError: false,
-      displayMode: displayMode,
+      displayMode,
     });
   } catch (err) {
     container.innerHTML = `<span style="color:red;">${err.message}</span>`;

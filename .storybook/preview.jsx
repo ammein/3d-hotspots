@@ -1,10 +1,10 @@
 import '../src/stylesheets/theme.css';
 import './font.css';
-import { Title, Subtitle, Primary, Controls, Stories, Markdown, useOf, Story } from '@storybook/blocks';
+import { Title, Subtitle, Primary, Controls, Stories, Markdown, useOf } from '@storybook/addon-docs/blocks';
 
 /**
  * Get description from resolved of
- * @param {import('@storybook/blocks').DocsContextProps['resolveOf'] & { type: 'story' | 'meta' | 'component' }} resolvedOf
+ * @param {import('@storybook/addon-docs/blocks').DocsContextProps['resolveOf'] & { type: 'story' | 'meta' | 'component' }} resolvedOf
  * @returns
  * @link https://www.rhino-inquisitor.com/how-to-filter-jsdoc-in-storybook-autodocs/
  */
@@ -57,6 +57,7 @@ const ModifiedDescription = (props) => {
   let description = getDescriptionFromResolvedOf(resolvedOf);
 
   if (description) {
+    // eslint-disable-next-line prefer-destructuring
     description = description.split('@param')[0];
     description = description.replace(/@type\s+[{].*[}]/g, '');
     description.trim();
@@ -74,6 +75,7 @@ const preview = {
         date: /Date$/,
       },
     },
+
     docs: {
       page: () => (
         <>
@@ -85,6 +87,13 @@ const preview = {
           <Stories />
         </>
       ),
+    },
+
+    a11y: {
+      // 'todo' - show a11y violations in the test UI only
+      // 'error' - fail CI on a11y violations
+      // 'off' - skip a11y checks entirely
+      test: 'todo',
     },
   },
 };

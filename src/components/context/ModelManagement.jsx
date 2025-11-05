@@ -74,10 +74,15 @@ const reducer = (state, action) => {
 
     default:
       throw new Error(
-        'You did not set any valid type for updating state. \nType supported:' +
-          ['wireframe', 'hotspot', 'rotation', 'hotspot-data', 'rotation-sign']
-            .map((val, i) => '\n' + (i + 1) + '. ' + val)
-            .join(' ')
+        `You did not set any valid type for updating state. \nType supported:${[
+          'wireframe',
+          'hotspot',
+          'rotation',
+          'hotspot-data',
+          'rotation-sign',
+        ]
+          .map((val, i) => `\n${i + 1}. ${val}`)
+          .join(' ')}`
       );
   }
 };

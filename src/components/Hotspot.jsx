@@ -93,7 +93,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         textRef.current.position.set(geometry.points[2].x, geometry.points[2].y, geometry.points[2].z);
         textRef.current.lookAt(lookAtDirection);
 
-        let progressCamera = gsap.utils.clamp(0, 1, opac);
+        const progressCamera = gsap.utils.clamp(0, 1, opac);
 
         const lineMiddle = gsap.utils.interpolate(geometry.points[0], geometry.points[1], progressCamera);
         const lineText = gsap.utils.interpolate(geometry.points[1], geometry.points[2], progressCamera);
@@ -230,8 +230,8 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
                 metadata={metadata}
                 other={HotspotCSS.HotspotButton}
                 style={{
-                  top: CloseButtonTheatreJS.position.top + '%',
-                  left: CloseButtonTheatreJS.position.left + '%',
+                  top: `${CloseButtonTheatreJS.position.top}%`,
+                  left: `${CloseButtonTheatreJS.position.left}%`,
                 }}
                 onClick={props.onClose}
               >

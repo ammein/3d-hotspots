@@ -5,10 +5,10 @@ import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
 import CodeBlock from '@/design-system/components/CodeBlock';
 
-<Meta title="Documentation/Camera Interpolation" />
+<Meta title="Documentation/Maintainer/Applied Mathematics/Camera Interpolation" />
 
 <div>
-    <Headline type={'h2'} >Basic Interpolation</Headline>
+    ## Basic Interpolation
     <Paragraph weight={'regular'} >Now, this is a very basic formula for interpolation between two values with a factor of <LatexRenderer latex={`C`} as='span' displayMode={false} /> that accepts value between <LatexRenderer latex={`0...1`} as='span' displayMode={false} />:</Paragraph>
     <LatexRenderer latex={`
         y = (1 - c) \\cdot y_0 + c \\cdot y_1
@@ -112,7 +112,7 @@ import CodeBlock from '@/design-system/components/CodeBlock';
         return data;
     }} />
 
-    <Headline type={'h2'} >Interpolate Camera Movement using Spherical Coordinates</Headline>
+    ## Interpolate Camera Movement using Spherical Coordinates
     <Paragraph>Now there is a catch in a specific use case when using linear interpolation. If the model has some big or tall buildings, when linear interpolation executes, it will go through the subjects. It is definitely not as intended. Therefore, we need to have interpolation, but in an orbit-like manner. Imagine a satellite orbiting the Earth.</Paragraph>
     <Paragraph>
         Formula as follows:
@@ -285,8 +285,8 @@ import CodeBlock from '@/design-system/components/CodeBlock';
         return data;
     }} />
 
-    <Headline type={'h2'} >Manipulate Arc by making it wider/inner</Headline>
-    <Headline type={'h3'} >Adding a wide orbit bump</Headline>
+    ## Manipulate Arc by making it wider/inner
+    ### Adding a wide orbit bump
     <Paragraph>To push the camera outward during the interpolation, we define:</Paragraph>
     <LatexRenderer latex={`
         \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B} + H \\times sin(\\pi t)
@@ -437,9 +437,9 @@ import CodeBlock from '@/design-system/components/CodeBlock';
 
         return data;
     }} />
-    <Headline type={'h2'}>Code Implementation</Headline>
+    ## Code Implementation
     <Paragraph>You will see how the code implements in javascript with gsap interpolation as per below:</Paragraph>
-    <CodeBlock language="javascript" showLineNumbers>
+    <CodeBlock language="javascript" copyToClipboard showLineNumbers>
       {`function spherical_lerp(pos, target, distance, t) {
             pos = pos.clone();
             target = target.clone();
