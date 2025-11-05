@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { LatexRenderer } from '@/design-system/components/Latex';
+import LatexRenderer from '@/design-system/components/Latex';
 import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
@@ -43,19 +43,19 @@ import LinkTo from '@storybook/addon-links/react';
       progress(Loading Progress)
       main[Main]
       %% Graph Start
-      app[<h2>App</h2>] m1@==> load
-      subgraph SScreen [<h2>Splash Scene</h2>]
+      app[App] m1@==> load
+      subgraph SScreen [Splash Scene]
         direction LR
         tbc
         p
         h[Headline]
       end
       load m2@==> SScreen
-      subgraph load [<h2>Loading Scene</h2>]
+      subgraph load [Loading Scene]
         progress
       end
       SScreen m3@==> main
-      subgraph main [<h2>Main Scene</h2>]
+      subgraph main [Main Scene]
         direction TB
         subgraph msComponent [Main Components]
           direction TB
@@ -76,24 +76,24 @@ import LinkTo from '@storybook/addon-links/react';
         end
       end
       main m4@==> detail
-      subgraph detail [<h2>Detail Scene</h2>]
+      subgraph detail [Detail Scene]
         direction LR
         close
         t[Title]
         para[Paragraph]
         cta[CTA BUtton]
       end
-      appHOC@{ shape: win-pane, label: "<h3>Context Provider:</h3>- Locale JSON\\n- Loading Progress Number\\n- Ready State\\n- TheatreJS App Project\\n- Metadata JSON" } -.- appM
+      appHOC@{ shape: win-pane, label: "Context Provider:\\n- Locale JSON\\n- Loading Progress Number\\n- Ready State\\n- TheatreJS App Project\\n- Metadata JSON" } -.- appM
       appM -.-> SScreen
       appM -.-> load
       appM -.-> main
       appM -.-> detail
-      modelHOC@{ shape: win-pane, label: "<h3>Hooks State:</h3>- Mode(Wireframe/Default)\\n- HotspotID\\n- Rotation Degree\\n- Hotspot Data\\n- rotationDegree\\n- rotationSign<h3>Hooks Callback:</h3>- type['mode' | 'hotspot' | 'rotation' | 'hotspot-data' | 'rotation-sign']" } -.- modelM
+      modelHOC@{ shape: win-pane, label: "Hooks State:\\n- Mode(Wireframe/Default)\\n- HotspotID\\n- Rotation Degree\\n- Hotspot Data\\n- rotationDegree\\n- rotationSign\\nHooks Callback:\\n- type['mode' | 'hotspot' | 'rotation' | 'hotspot-data' | 'rotation-sign']" } -.- modelM
       modelM -.-> 3dComponent
       modelM -.-> msComponent
       modelM -.-> ns
       modelM -.-> detail
-      theatreHOC@{ shape: win-pane, label: "<h3>Parameter:</h3><code>[SheetName] : {  [ItemObjectName] : ISheet.Object }</code>\\n<h3>States:</h3>- subscribe" } -.- theatreM
+      theatreHOC@{ shape: win-pane, label: "Parameter:\\n<code>[SheetName] : {  [ItemObjectName] : ISheet.Object }</code>\\nStates:\\n- subscribe" } -.- theatreM
       theatreM -.-> SScreen
       theatreM -.-> main
       theatreM -.-> detail

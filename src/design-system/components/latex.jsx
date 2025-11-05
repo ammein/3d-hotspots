@@ -66,4 +66,4 @@ const LatexRenderer = ({ as = 'div', latex, displayMode = true }) => {
   );
 };
 
-export { LatexRenderer };
+export default LatexRenderer;
