@@ -17,17 +17,6 @@
 - Python 3.0 & above ([Download Python](https://www.python.org/downloads/))
 - Yarn ([Download Yarn](https://yarnpkg.com/getting-started/install))
 
-## Project Designs
-
-1. Loading Screen
-   ![Loading Screen](./Loading%20Screen.png)
-2. Splash Screen
-   ![Splash Screen](./Splash%20Screen.png)
-3. Main Screen
-   ![Main Screen](./Main.png)
-4. Detail Screen
-   ![Detail Screen](./Details.png)
-
 ## Getting Started
 
 ```bash
@@ -43,6 +32,17 @@ Then refer to `GitLab Pages` in repo page. You will find the right pane that nam
 - glsl-pipeline (WebGL)
 - Lygia (GLSL Library)
 - Storybook (Styling & Documentation Platform)
+
+## Project Designs
+
+1. Loading Screen
+   ![Loading Screen](./Loading%20Screen.png)
+2. Splash Screen
+   ![Splash Screen](./Splash%20Screen.png)
+3. Main Screen
+   ![Main Screen](./Main.png)
+4. Detail Screen
+   ![Detail Screen](./Details.png)
 
 ### Idea
 
