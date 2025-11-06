@@ -1,10 +1,138 @@
-import { Meta } from '@storybook/addon-docs/blocks';
+import { Meta, Canvas, Story } from '@storybook/addon-docs/blocks';
 import LatexRenderer from '@/design-system/components/Latex';
 import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
 import { Fog } from '@/stories/Fog';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import fragmentShader from '@/glsl/main.frag?raw'
 
 <Meta title="Documentation/Maintainer/Applied Mathematics/Fog Effect" />
 
-<Fog cameraPos={[0, 0, 30]} intensity={0.5} shadowMap={true} />
+## WebGL & Lygia
+
+### Fog Effect
+
+<Fog cameraPos={[0, 0, 20]} focalRange={18.0} fogColor="#ffffff" intensity={0.5} shadowMap documentation />
+
+### Behind the scene
+
+#### Code implementation
+Below here is the code implementation with <a href='https://lygia.xyz' target='_blank'>Lygia</a> library to shorten the codebase and ease the prototyping process:
+<CodeBlock copyToClipboard showLineNumbers language='glsl'>
+  {fragmentShader}
+</CodeBlock>
+
+### `inputColor`
+Input Color is where `gl_FragColor` syntax that input with `vec4(r, g, b, a)` in color so that we can manipulate the pixel color from this variable
+
+### `uv`
+UV is where the uv texture from the plane texture is inserted to this postprocessing glsl. For more info: <a href='https://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/'>UV Coordinates</a>
+
+### Linearize Depth
+`linearizeDepth` function is to get the depth value from the depthBuffer texture so that we can manipulate the depth value as `Fog` effect. Here is the code on how `linearizeDepth` function works:
+<CodeBlock language='glsl' showLineNumbers>{`float linearizeDepth(float depth, float near, float far) {
+    depth = 2.0 * depth - 1.0;
+    return (2.0 * near * far) / (far + near - depth * (far - near));
+}
+
+linearizeDepth(depth, CAMERA_NEAR_CLIP, CAMERA_FAR_CLIP);
+`}</CodeBlock>
+Essentially to give you the clear picture, imagine the `focalRange` value represents in `y` as you can see on top example that display value `focalRange`, meanwhile `x` represents as time:
+<LatexRenderer displayMode latex={`
+  \\operatorname{focalRange} = \\sin\\bigg(\\frac{x}{3}\\bigg) 10 + 25
+`} />
+<Plot className='w-full' yAspectRatio={[-125, 125]} options={{
+  width: 800,
+  height: 500,
+  disableZoom: true,
+  title: "Focal Range",
+  xAxis: {
+    label: "Time"
+  },
+  yAxis: {
+    label: "Focal Range",
+  },
+  data: [
+    {
+      fn: "sin(x / 3) * 10 + 25"
+    }
+  ],
+  annotations: [
+    {
+      y: 15,
+      text: 'Foggy'
+    },
+    {
+      y: 35,
+      text: 'Foggy Cleared'
+    }
+  ]
+}} />
+Now that we have depth value, let's see what happen on graph for `linearizeDepth` when `CAMERA_NEAR_CLIP` is `0.1` and `CAMERA_FAR_CLIP` is `100.0`:
+<Plot className='w-full' xAspectRatio={[-1.5, 3.5]} options={{
+  width: 800,
+  height: 500,
+  title: "Linearize Depth",
+  grid: true,
+  disableZoom: true,
+  xAxis: {
+    label: "Distance"
+  },
+  yAxis: {
+    label: "Depth",
+  },
+  data: [
+    {
+      fn: "(2 * 0.1 * 100) / (100 + 0.1 - (2 * x - 1) * (100 - 0.1))",
+      nSamples: 80,
+      closed: true
+    }
+  ],
+  annotations: [
+    {
+      x: 1,
+      text: 'Maximum Distance'
+    },
+  ]
+}} />
+From graph above, you'll see that the linearize depth is exponentially increase when the distance of the model is closer to the camera.
+
+And now finally we will see how this code works:
+<CodeBlock language='glsl'>{`depth = 1. - min( abs(depth  - focalDistance) / focalRange, 1.0);`}</CodeBlock>
+<Plot className='w-full' xAspectRatio={[-1, 180]} options={{
+  width: 800,
+  height: 500,
+  title: "Adjusted Depth",
+  grid: true,
+  xAxis: {
+    label: "Time"
+  },
+  yAxis: {
+    label: "Foggy",
+  },
+  data: [
+    {
+      fn: "1. - min(abs((2 * 0.1 * 100) / (100 + 0.1 - (2 * x - 1) * (100 - 0.1)) - 1.0) / sin(x / 3) * 10 + 25, 1.)",
+      range: [0, Infinity],
+      closed: true
+    },
+    {
+      fn: "sin(x / 3) * 10 + 25"
+    }
+  ],
+  annotations: [
+    {
+      y: 15,
+      text: 'Foggy'
+    },
+    {
+      y: 35,
+      text: 'Foggy Cleared'
+    }
+  ]
+}} />
+> Red line is `focalRange`, blue line is `linearizeDepth`
+
+
+As you can see from blue line above, we get limit depth value to `1.0` whenever the depth is below `1.0` to make the model dissapear in scene. But when depth is above `1.0`, the model started to appear in the scene.

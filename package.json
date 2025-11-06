@@ -37,6 +37,7 @@
     "@theatre/studio": "0.7",
     "@types/three": "^0.180.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "deepmerge": "^4.3.1",
     "glsl-pipeline": "^5.0.0",
     "gsap": "^3.13.0",
     "katex": "0.16.11",

@@ -30,8 +30,7 @@ class FogEffectImpl extends Effect {
 }
 
 /**
- * @component
- *
+ * Fog Effect
  * @param {{ uniforms: import('three').Uniform<FogEffect>, ref: import('react').Ref<import('postprocessing').Effect> }}
  */
 export const FogEffect = ({ uniforms, ref }) => {

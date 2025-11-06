@@ -56,7 +56,6 @@
     ],
     "files.associations": {
         "**/stylesheets/*.css": "tailwindcss",
-        "/**/stories/documentation/*.mdx": "javascriptreact"
     },
     "emmet.includeLanguages": {
         "*.mdx": "javascriptreact"

@@ -9,12 +9,11 @@ import { useState } from 'react';
  * @property {string} language
  * @property {string} children
  * @property {boolean} copyToClipboard
- * @property {import('react-syntax-highlighter').SyntaxHighlighterProps} props
  */
 
 /**
  * Syntax Highlight Block
- * @param {SyntaxHiglightedParams} param0
+ * @param {SyntaxHiglightedParams & import('react-syntax-highlighter').SyntaxHighlighterProps} param0
  * @link https://github.com/react-syntax-highlighter/react-syntax-highlighter?tab=readme-ov-file
  * @returns
  */

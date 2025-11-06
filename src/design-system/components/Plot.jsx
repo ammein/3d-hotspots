@@ -1,6 +1,7 @@
 import { memo, useLayoutEffect, useRef, useCallback } from 'react';
 import functionPlot from 'function-plot';
 import DassaultButton from '@/components/Button';
+import merge from 'deepmerge';
 
 /**
  * @callback Calculations
@@ -13,7 +14,8 @@ import DassaultButton from '@/components/Button';
  * @property {Calculations} calculations
  * @property {boolean} refresh
  * @property {string} buttonText
- * @property {Array<number, number>} aspectRatio
+ * @property {Array<number, number>} xAspectRatio
+ * @property {Array<number, number>} yAspectRatio
  * @property {import('function-plot').FunctionPlotOptions} options
  */
 
@@ -22,7 +24,7 @@ import DassaultButton from '@/components/Button';
  * @param {FunctionPlotParams & import('react').HTMLAttributes<HTMLDivElement>} param0
  * @returns
  */
-const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options, ...props }) => {
+const FunctionPlot = ({ xAspectRatio, yAspectRatio, calculations, refresh, buttonText, options, ...props }) => {
   /** @type {import('react').Ref<HTMLDivElement>} */
   const rootEl = useRef(null);
 
@@ -32,11 +34,18 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options,
     return [-yDiff / 2, yDiff / 2];
   };
 
+  const computeXScale = (width, height, yScale) => {
+    const yDiff = yScale[1] - yScale[0];
+    const xDiff = (width * yDiff) / height;
+    return [-xDiff / 2, xDiff / 2];
+  };
+
   const buttonClick = (e) => {
     e.preventDefault();
     try {
+      const optionsMerged = merge.all([options, setPlot(options)]);
       functionPlot(
-        Object.assign({}, setPlot(options), options, {
+        Object.assign({}, optionsMerged, {
           target: rootEl.current,
         })
       );
@@ -53,38 +62,54 @@ const FunctionPlot = ({ aspectRatio, calculations, refresh, buttonText, options,
       }
 
       let xScale, yScale;
-      if (aspectRatio) {
+      if (xAspectRatio) {
         if (!options.width || !options.height)
           throw new Error(
             'You set aspect ratio without "width" & "height". Please set the "width" & "height" value to maintain aspect ratio'
           );
-        xScale = aspectRatio;
-        yScale = computeYScale(options.width, options.height, aspectRatio);
+        xScale = xAspectRatio;
+        yScale = computeYScale(options.width, options.height, xScale);
+      } else if (yAspectRatio) {
+        if (!options.width || !options.height)
+          throw new Error(
+            'You set aspect ratio without "width" & "height". Please set the "width" & "height" value to maintain aspect ratio'
+          );
+        yScale = yAspectRatio;
+        xScale = computeXScale(options.width, options.height, yScale);
       }
       const finalOptions = {
         data: data ? data : undefined,
+        xAxis: {
+          domain: xScale ? xScale : undefined,
+          ...(options.xAxis ? options.xAxis : undefined),
+        },
+        yAxis: {
+          domain: yScale ? yScale : undefined,
+          ...(options.yAxis ? options.yAxis : undefined),
+        },
         xDomain: xScale ? xScale : undefined,
         yDomain: yScale ? yScale : undefined,
       };
 
       return finalOptions;
     },
-    [aspectRatio, calculations]
+    [xAspectRatio, calculations, yAspectRatio]
   );
 
   // Synchronously
   // Before the browser paints the screen
   useLayoutEffect(() => {
     try {
+      const optionsMerged = merge.all([options, setPlot(options)]);
       functionPlot(
-        Object.assign({}, setPlot(options), options, {
+        Object.assign({}, optionsMerged, {
           target: rootEl.current,
         })
       );
     } catch (e) {
       throw new Error(`Plot error:\n${e}`);
     }
-  }, [calculations, options, aspectRatio, setPlot]);
+  }, [calculations, options, setPlot]);
 
   return (
     <>
