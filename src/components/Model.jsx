@@ -185,7 +185,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
     [rest.start, focus, isAnimate, hotspots, camera.position, controls, dispatch]
   );
 
-  // This Effect Called Multiple Times (TODO: Debug What causes to loop here...)
+  // Animations, Hide Items and Canvas Color.
   useEffect(() => {
     if (actions && animationNames.length > 0) {
       animationNames.forEach((name) => {
@@ -337,6 +337,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
       });
     }
 
+    // When hotspotID is set, animate to location
     if (HotspotCameraTheatreJS && state.hotspotID.length > 0 && gltf && !focus && !isAnimate) {
       /** @type {Hotspots} */
       const getHotspot = hotspots.find((val) => val.name === state.hotspotID);
@@ -347,12 +348,14 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
         cameraLookAt = nextCameraLocation.position;
 
       if (getHotspot && getHotspot.focus) {
+        // Metadata get custom camera position
         if (Array.isArray(getHotspot.focus.position)) {
           cameraPos = new Vector3().fromArray(getHotspot.focus.position);
         } else if (typeof getHotspot.focus.position === 'string') {
           cameraPos = gltf.scene.getObjectByName(getHotspot.focus.position).position;
         }
 
+        // Metadata get custom camera lookAt
         if (Array.isArray(getHotspot.focus.lookAt)) {
           cameraLookAt = new Vector3().fromArray(getHotspot.focus.lookAt);
         } else if (getHotspot.focus.lookAt) {
@@ -360,6 +363,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
         }
       }
 
+      // Distance between position & hotspot
       const positionDistance = cameraPos.clone().normalize().multiplyScalar(HotspotCameraTheatreJS.distance);
 
       const currentCameraPosition = camera.position.clone();
@@ -376,6 +380,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
             const progress = locationTween.progress();
             let newLocation;
 
+            // Orbit Interpolation
             if (HotspotCameraTheatreJS.lerp === 'orbit') {
               newLocation = spherical_lerp(
                 currentCameraPosition,
@@ -383,7 +388,9 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
                 HotspotCameraTheatreJS.orbitDistance,
                 progress
               );
-            } else if (HotspotCameraTheatreJS.lerp === 'linear') {
+            }
+            // Linear Interpolation
+            else if (HotspotCameraTheatreJS.lerp === 'linear') {
               newLocation = gsap.utils.interpolate(currentCameraPosition, positionDistance, progress);
             }
 
@@ -407,7 +414,9 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
           ease: 'sine.in',
         }
       );
-    } else if (state.hotspotID.length === 0 && focus && !isAnimate) {
+    }
+    // HotspotID is empty
+    else if (state.hotspotID.length === 0 && focus && !isAnimate) {
       const currentCameraPosition = camera.position.clone();
       const backToCameraPosition = savedPosition.clone();
 
@@ -465,6 +474,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
 
   // Controls Update
   useEffect(() => {
+    // Only let if focus state is true
     if (focus) {
       // Get Spherical Coordinate to get azimuth & polar
       const spherical = new Spherical();

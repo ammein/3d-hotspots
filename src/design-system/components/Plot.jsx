@@ -14,6 +14,8 @@ import merge from 'deepmerge';
  * @property {Calculations} calculations
  * @property {boolean} refresh
  * @property {string} buttonText
+ * @property {number} xOffset
+ * @property {number} yOffset
  * @property {Array<number, number>} xAspectRatio
  * @property {Array<number, number>} yAspectRatio
  * @property {import('function-plot').FunctionPlotOptions} options
@@ -24,21 +26,37 @@ import merge from 'deepmerge';
  * @param {FunctionPlotParams & import('react').HTMLAttributes<HTMLDivElement>} param0
  * @returns
  */
-const FunctionPlot = ({ xAspectRatio, yAspectRatio, calculations, refresh, buttonText, options, ...props }) => {
+const FunctionPlot = ({
+  xAspectRatio,
+  yAspectRatio,
+  calculations,
+  refresh,
+  buttonText,
+  options,
+  xOffset = 0,
+  yOffset = 0,
+  ...props
+}) => {
   /** @type {import('react').Ref<HTMLDivElement>} */
   const rootEl = useRef(null);
 
-  const computeYScale = (width, height, xScale) => {
-    const xDiff = xScale[1] - xScale[0];
-    const yDiff = (height * xDiff) / width;
-    return [-yDiff / 2, yDiff / 2];
-  };
+  const computeYScale = useCallback(
+    (width, height, xScale) => {
+      const xDiff = xScale[1] - xScale[0];
+      const yDiff = (height * xDiff) / width;
+      return [-yDiff / 2 + yOffset, yDiff / 2 + yOffset];
+    },
+    [yOffset]
+  );
 
-  const computeXScale = (width, height, yScale) => {
-    const yDiff = yScale[1] - yScale[0];
-    const xDiff = (width * yDiff) / height;
-    return [-xDiff / 2, xDiff / 2];
-  };
+  const computeXScale = useCallback(
+    (width, height, yScale) => {
+      const yDiff = yScale[1] - yScale[0];
+      const xDiff = (width * yDiff) / height;
+      return [-xDiff / 2 + xOffset, xDiff / 2 + xOffset];
+    },
+    [xOffset]
+  );
 
   const buttonClick = (e) => {
     e.preventDefault();
@@ -93,7 +111,7 @@ const FunctionPlot = ({ xAspectRatio, yAspectRatio, calculations, refresh, butto
 
       return finalOptions;
     },
-    [xAspectRatio, calculations, yAspectRatio]
+    [calculations, xAspectRatio, yAspectRatio, computeYScale, computeXScale]
   );
 
   // Synchronously

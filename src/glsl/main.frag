@@ -13,8 +13,7 @@ uniform vec3                fogColor;
 #include "lygia/sampler.glsl"
 #include "lygia/space/linearizeDepth.glsl"
 
-void mainImage(const in vec4 inputColor, const in vec2 uv,
-	const in float depthNum, out vec4 outputColor) {
+void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depthNum, out vec4 outputColor) {
     vec4 color = inputColor;
     vec2 st = uv;
 

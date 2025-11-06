@@ -70,7 +70,7 @@ Essentially to give you the clear picture, imagine the `focalRange` value repres
   ]
 }} />
 Now that we have depth value, let's see what happen on graph for `linearizeDepth` when `CAMERA_NEAR_CLIP` is `0.1` and `CAMERA_FAR_CLIP` is `100.0`:
-<Plot className='w-full' xAspectRatio={[-1.5, 3.5]} options={{
+<Plot className='w-full' xAspectRatio={[-70.5, 70.5]} yOffset={30} options={{
   width: 800,
   height: 500,
   title: "Linearize Depth",
@@ -84,8 +84,7 @@ Now that we have depth value, let's see what happen on graph for `linearizeDepth
   },
   data: [
     {
-      fn: "(2 * 0.1 * 100) / (100 + 0.1 - (2 * x - 1) * (100 - 0.1))",
-      nSamples: 80,
+      fn: "(2 * 0.1 * 100) / (100 + 0.1 - (2 * sin(x/3) - 1) * (100 - 0.1))",
       closed: true
     }
   ],
@@ -100,22 +99,22 @@ From graph above, you'll see that the linearize depth is exponentially increase 
 
 And now finally we will see how this code works:
 <CodeBlock language='glsl'>{`depth = 1. - min( abs(depth  - focalDistance) / focalRange, 1.0);`}</CodeBlock>
-<Plot className='w-full' xAspectRatio={[-1, 180]} options={{
+<Plot className='w-full' xAspectRatio={[-1, 180]} yOffset={50} options={{
   width: 800,
   height: 500,
   title: "Adjusted Depth",
   grid: true,
+  disableZoom: true,
   xAxis: {
-    label: "Time"
+    label: "Pixels"
   },
   yAxis: {
-    label: "Foggy",
+    label: "Time",
   },
   data: [
     {
-      fn: "1. - min(abs((2 * 0.1 * 100) / (100 + 0.1 - (2 * x - 1) * (100 - 0.1)) - 1.0) / sin(x / 3) * 10 + 25, 1.)",
+      fn: "1. - min((abs(sin(x/3.) - 1.0) / sin(x / 3) * 10 + 25), 1.)",
       range: [0, Infinity],
-      closed: true
     },
     {
       fn: "sin(x / 3) * 10 + 25"
