@@ -36,13 +36,20 @@ Then refer to `GitLab Pages` in repo page. You will find the right pane that nam
 ## Project Designs
 
 1. Loading Screen
-   ![Loading Screen](./Loading%20Screen.png)
+
+![Loading Screen](./Loading%20Screen.png)
+
 2. Splash Screen
-   ![Splash Screen](./Splash%20Screen.png)
+
+![Splash Screen](./Splash%20Screen.png)
+
 3. Main Screen
-   ![Main Screen](./Main.png)
+
+![Main Screen](./Main.png)
+
 4. Detail Screen
-   ![Detail Screen](./Details.png)
+
+![Detail Screen](./Details.png)
 
 ### Idea
 
