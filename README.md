@@ -5,7 +5,7 @@
 # Project Architecture
 
 ```mermaid
-flowchart TB
+graph TB
     %% Declaration Variables
     appM[App Management]
     modelM[Model Management]
