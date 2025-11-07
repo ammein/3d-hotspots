@@ -9,6 +9,7 @@ import { useState } from 'react';
  * @property {string} language
  * @property {string} children
  * @property {boolean} copyToClipboard
+ * @property {string} copyToClipboardColor
  */
 
 /**
@@ -17,7 +18,7 @@ import { useState } from 'react';
  * @link https://github.com/react-syntax-highlighter/react-syntax-highlighter?tab=readme-ov-file
  * @returns
  */
-const SyntaxHighlightedContent = ({ language, copyToClipboard, children, ...props }) => {
+const SyntaxHighlightedContent = ({ language, copyToClipboard, copyToClipboardColor, children, ...props }) => {
   const [active, setActive] = useState(false);
   const [delayDuration, _setDelayDuration] = useState(3000);
 
@@ -56,8 +57,15 @@ const SyntaxHighlightedContent = ({ language, copyToClipboard, children, ...prop
       </SyntaxHighlighter>
       {copyToClipboard && (
         <div className="absolute top-2 right-2 flex flex-row gap-1 justify-center">
-          {active && <span className="font-bold text-white-100">Copied to Clipboard</span>}
-          <FiClipboard className="text-white-100" onClick={handleCopy} />
+          {active && (
+            <span className={`font-bold ${copyToClipboardColor ? copyToClipboardColor : 'text-white-100'}`}>
+              Copied to Clipboard
+            </span>
+          )}
+          <FiClipboard
+            className={`${copyToClipboardColor ? copyToClipboardColor : 'text-white-100'}`}
+            onClick={handleCopy}
+          />
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { memo, useLayoutEffect, useRef, useCallback } from 'react';
 import functionPlot from 'function-plot';
 import DassaultButton from '@/components/Button';
 import merge from 'deepmerge';
+import { useMediaQuery } from '@uidotdev/usehooks';
 
 /**
  * @callback Calculations
@@ -72,6 +73,8 @@ const FunctionPlot = ({
     }
   };
 
+  const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)');
+
   const setPlot = useCallback(
     (options) => {
       let data = [];
@@ -118,6 +121,12 @@ const FunctionPlot = ({
   // Before the browser paints the screen
   useLayoutEffect(() => {
     try {
+      if (isSmallDevice) {
+        Object.assign(options, {
+          width: (options.width * 4) / 6,
+          height: (options.height * 4) / 6,
+        });
+      }
       const optionsMerged = merge.all([options, setPlot(options)]);
       functionPlot(
         Object.assign({}, optionsMerged, {

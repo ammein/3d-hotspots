@@ -32,6 +32,10 @@ const config = {
     "name": "@storybook/react-vite",
     "options": {}
   },
+  previewBody: (body) => `
+  <script src="//cdnjs.cloudflare.com/ajax/libs/mathjs/1.5.2/math.min.js"></script>
+  ${body}
+  `,
   // Twin recommends adding the babel config here as Next.js disables SWC when .babelrc is added to the root.
   babel: async options => {
     return {

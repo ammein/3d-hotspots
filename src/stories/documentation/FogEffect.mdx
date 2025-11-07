@@ -1,11 +1,12 @@
 import { Meta, Canvas, Story } from '@storybook/addon-docs/blocks';
-import LatexRenderer from '@/design-system/components/Latex';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
 import Headline from '@/components/Headline';
 import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
 import { Fog } from '@/stories/Fog';
 import CodeBlock from '@/design-system/components/CodeBlock';
 import fragmentShader from '@/glsl/main.frag?raw'
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 <Meta title="Documentation/Maintainer/Applied Mathematics/Fog Effect" />
 
@@ -38,12 +39,31 @@ UV is where the uv texture from the plane texture is inserted to this postproces
 
 linearizeDepth(depth, CAMERA_NEAR_CLIP, CAMERA_FAR_CLIP);
 `}</CodeBlock>
-Essentially to give you the clear picture, imagine the `focalRange` value represents in `y` as you can see on top example that display value `focalRange`, meanwhile `x` represents as time:
+
+Step-by-step in simple words:
+	- Input `depth` is the value from the depth buffer. It usually ranges from `0` to `1`, but it is non-linear (squished).	
+  - The first line, ⁠`depth = 2.0 * depth - 1.0;`, changes that `0..1` range into `-1..1`. Think of it as moving the number from a box labeled `[0,1]` into a box labeled `[-1,1]`. This matches the math used by the projection formula [clip space]().	
+  - The return line does the real un-squishing. It applies the inverse of the perspective projection formula. After this math you get a number that is the actual distance from the camera plane, measured along the camera view (a linear depth in same units as ⁠near and ⁠far).
+
+Why that formula? Very short:
+	- Perspective projection turns a camera-space `Z` into a `depth` value by a formula that mixes near and far with `Z` in a way that compresses far distances.	
+  - The return line simply solves that formula for `Z` again, giving you the real distance. The constants ⁠near and ⁠far are the camera’s clipping distances — they tell the formula where the front and back of the visible range are.
+
+Tiny intuition with an example:
+	- If a pixel is very close to the camera (near plane), the linearized depth becomes a small number close to ⁠near.	
+  - If it’s near the back (far plane), it becomes a number close to ⁠far.	
+  - Middle depth values will be spread linearly between ⁠near and ⁠far after this function, so you can do things like fog or depth-based effects that depend on real distance.
+
+Short summary:
+	- Convert `0..1` depth to `-1..1`.	
+  - Use the inverse projection math with near and far to get the real linear distance from the camera.
+
+Essentially to give you the clear picture, imagine the `focalRange` value represents in `y` as you can see on below example that display value `focalRange`, meanwhile `x` represents as time:
 <LatexRenderer displayMode latex={`
   \\operatorname{focalRange} = \\sin\\bigg(\\frac{x}{3}\\bigg) 10 + 25
 `} />
-<Plot className='w-full' yAspectRatio={[-125, 125]} options={{
-  width: 800,
+<Plot className='w-full' yAspectRatio={[-10, 60]} xOffset={35} yOffset={20} options={{
+  width: 600,
   height: 500,
   disableZoom: true,
   title: "Focal Range",
@@ -55,7 +75,8 @@ Essentially to give you the clear picture, imagine the `focalRange` value repres
   },
   data: [
     {
-      fn: "sin(x / 3) * 10 + 25"
+      fn: "sin(x / 3) * 10 + 25",
+      range: [0, Infinity]
     }
   ],
   annotations: [
@@ -69,15 +90,17 @@ Essentially to give you the clear picture, imagine the `focalRange` value repres
     }
   ]
 }} />
-Now that we have depth value, let's see what happen on graph for `linearizeDepth` when `CAMERA_NEAR_CLIP` is `0.1` and `CAMERA_FAR_CLIP` is `100.0`:
-<Plot className='w-full' xAspectRatio={[-70.5, 70.5]} yOffset={30} options={{
-  width: 800,
+In mathematics, linearization is the process of finding a linear function that approximates a non-linear one at a specific point. This is done by finding the function's tangent line at that point, which serves as the linear approximation. When a 3D scene is drawn, the GPU stores a number called "depth" for each pixel to know which things are in front. That stored depth is not a simple straight (linear) distance from the camera — it's squished so we get more precision close to the camera and less far away. The <a href="#linearize-depth" target="_self">function above</a> turns that squished depth back into a real, straight distance between the near and far clipping planes.
+
+Now that we have `depth` value, let's see what happen on graph for `linearizeDepth` when `CAMERA_NEAR_CLIP` is `0.1` and `CAMERA_FAR_CLIP` is `100.0`:
+<Plot className='w-full' yAspectRatio={[-10, 110.5]} yOffset={30} xOffset={50} options={{
+  width: 600,
   height: 500,
   title: "Linearize Depth",
   grid: true,
   disableZoom: true,
   xAxis: {
-    label: "Distance"
+    label: "Time"
   },
   yAxis: {
     label: "Depth",
@@ -85,39 +108,56 @@ Now that we have depth value, let's see what happen on graph for `linearizeDepth
   data: [
     {
       fn: "(2 * 0.1 * 100) / (100 + 0.1 - (2 * sin(x/3) - 1) * (100 - 0.1))",
-      closed: true
+      derivative: {
+        fn: '1332*cos(1/3*x)/(-199.8*sin(1/3*x) + 200)^2',
+        updateOnMouseMove: true
+      },
+      closed: true,
+      range: [0, Infinity]
     }
   ],
   annotations: [
     {
-      x: 1,
-      text: 'Maximum Distance'
+      y: 0.1,
+      text: "CAMERA_NEAR_CLIP"
     },
+    {
+      y: 100,
+      text: "CAMERA_FAR_CLIP"
+    }
   ]
 }} />
 From graph above, you'll see that the linearize depth is exponentially increase when the distance of the model is closer to the camera.
 
+### Effect on the focus weight
+
 And now finally we will see how this code works:
 <CodeBlock language='glsl'>{`depth = 1. - min( abs(depth  - focalDistance) / focalRange, 1.0);`}</CodeBlock>
-<Plot className='w-full' xAspectRatio={[-1, 180]} yOffset={50} options={{
-  width: 800,
+<Plot className='w-full' yAspectRatio={[-10, 110.5]} xOffset={50} options={{
+  width: 600,
   height: 500,
   title: "Adjusted Depth",
   grid: true,
   disableZoom: true,
   xAxis: {
-    label: "Pixels"
+    label: "Time"
   },
   yAxis: {
-    label: "Time",
+    label: "Weight (Depth)",
   },
   data: [
     {
-      fn: "1. - min((abs(sin(x/3.) - 1.0) / sin(x / 3) * 10 + 25), 1.)",
+      fn: "1. - min((abs(((2 * 0.1 * 100) / (100 + 0.1 - (2 * sin(x/3) - 1) * (100 - 0.1))) - 1.0) / sin(x / 3) * 10 + 25), 1.)",
+      closed:true,
+      derivative: {
+        fn: '10/3*abs(20/(-199.8*sin(1/3*x) + 200) - 1.0)*cos(1/3*x)/sin(1/3*x)^2 - 10*(666*(20/(-199.8*sin(1/3*conj(x)) + 200) - 100)*cos(1/3*x)/(-199.8*sin(1/3*x) + 200)^2 + 666*(200/(-199.8*sin(1/3*x) + 200) - 100)*cos(1/3*conj(x))/(-199.8*sin(1/3*conj(x)) + 200)^2)/(abs(200/(-199.8*sin(1/3*x) + 200) - 100)*sin(1/3*x))',
+        updateOnMouseMove: true
+      },
       range: [0, Infinity],
     },
     {
-      fn: "sin(x / 3) * 10 + 25"
+      fn: "sin(x / 3) * 10 + 25",
+      range: [0, Infinity],
     }
   ],
   annotations: [
@@ -128,10 +168,55 @@ And now finally we will see how this code works:
     {
       y: 35,
       text: 'Foggy Cleared'
+    },
+    {
+      y: 0.1,
+      text: "CAMERA_NEAR_CLIP"
+    },
+    {
+      y: 100,
+      text: "CAMERA_FAR_CLIP"
     }
   ]
 }} />
-> Red line is `focalRange`, blue line is `linearizeDepth`
+> Red line is `focalRange`, blue line is `linearizeDepth`. If you over the graph above, you'll see that the derivative slope line represents (Tangent line in blue color) how the new `depth` value acts as fogginess interpolation that uses in interpolation as `t`
 
+turns that distance into a normalized focus weight between `0` and `1`:
+	- `⁠abs(depth - focalDistance)` — how far the pixel is from the focal plane (distance difference).	
+  - ⁠`/ focalRange` — scale that difference so it becomes a fraction of the allowed focus range. If the difference equals ⁠focalRange, this fraction is `1.0`.	
+  - `⁠min(..., 1.0)` — clamp that fraction so it never goes above `1.0`.	
+  - `⁠1.0 - ...` — invert the clamped fraction so:
+	  - If the pixel is **exactly** on the focal plane **(difference = 0)**, `result = 1.0` (**fully in focus**).	
+    - If the pixel is **farther** than ⁠focalRange from the focal plane, `result = 0.0` (**fully out of focus**).	
+    - If the pixel is **somewhere in between**, result is a smooth value between `0.0` and `1.0` (**partial focus**).
+
+<LatexRenderer displayMode latex={`
+  w = 1 - \\min\\!\\left(\\frac{|d - f|}{r},\\,1\\right)
+`} />
+
+where <LatexRenderer latex={`d`} as='span' displayMode={false} /> = linearized depth, <LatexRenderer latex={`f`} as='span' displayMode={false} /> = focalDistance, <LatexRenderer latex={`r`} as='span' displayMode={false} /> = focalRange.
+
+- The focal plane is fixed at distance `1.0` from the camera.	
+- The focus band width <LatexRenderer latex={`r`} as='span' displayMode={false} /> moves between `15` and `35`. That's a large range compared to <LatexRenderer latex={`f = 1.0`} as='span' displayMode={false} />.
+
+Consequences:
+- <LatexRenderer latex={`|d - 1.0|`} as='span' displayMode={false} /> is usually much smaller than r (because <LatexRenderer latex={`r≥15`} as='span' displayMode={false} /> ). That means \(<LatexRenderer latex={`\\frac{|d-1|}{r}`} as='span' displayMode={false} />\) will usually be a small number near `0`, so w will be close to `1.0` for almost every pixel — most of the scene is considered **in focus**.
+- When <LatexRenderer latex={`r`} as='span' displayMode={false} /> is at its minimum (`15`) the falloff is slightly steeper than when <LatexRenderer latex={`r`} as='span' displayMode={false} /> is `35`, but still very wide: a pixel `15` units away from the focal plane would become fully out of focus; but because `focalDistance` is only `1.0`, typical scene depths (depending on your scene scale) may still be within that huge band.
+- As `x` changes over time, <LatexRenderer latex={`r`} as='span' displayMode={false} /> oscillates: the focus band smoothly expands and contracts between `15` and `35`. That causes the computed weight w to slightly vary — more pixels will be near 1.0 when r is larger (`35`), slightly more will drop toward 0 when r is smaller (`15`).
+
+<CodeBlock language='glsl'>{`color.rgb = mix(fogColor, SAMPLER_FNC(inputBuffer, st).rgb, 1.0-depth);`}</CodeBlock>
 
 As you can see from blue line above, we get limit depth value to `1.0` whenever the depth is below `1.0` to make the model dissapear in scene. But when depth is above `1.0`, the model started to appear in the scene.
+
+### Practical intuition
+- With `focalDistance = 1.0` and <LatexRenderer latex={`r`} as='span' displayMode={false} /> between `15` and `35`, the weight map will be almost uniformly `1` (**in-focus**) unless you have objects tens of metres away from the focal plane.
+
+- If you want noticeable depth-of-field centered at `1.0`, choose a much smaller focalRange (for example `0.5` to `5`) so that distances near `1.0` are selectively sharp and others blur.
+
+- If you want a rhythmic effect driven by `x`, your current `focalRange` does that but the effect will be subtle because the range is large.
+
+### If you want more natural falloff
+Replace the hard linear clamp with smoothstep to soften transitions:
+<CodeBlock copyToClipboard language='diff' style={prism} copyToClipboardColor='text-black-100'>{`- depth = 1. - min( abs(depth  - focalDistance) / focalRange, 1.0); 
++ depth =  1.0 - smoothstep(0.0, focalRange, abs(depth - focalDistance));`}</CodeBlock>
+> Or use a bell curve [Gaussian](https://lygia.xyz/math/gaussian) for even smoother, more photographic-looking blur.
