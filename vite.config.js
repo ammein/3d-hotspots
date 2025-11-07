@@ -12,6 +12,8 @@ import { Mermaid } from 'mdx-mermaid/lib/Mermaid'
 
 // https://vite.dev/config/
 import path from 'node:path';
+import { URL } from 'node:url'
+import fs from 'node:fs'
 import readline from 'node:readline'
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -21,7 +23,6 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 let desktopRatio = '16 / 9';
 
 let mobileRatio = '9 / 16';
-
 
 /**
  * Custom HTML Plugin for Dassault Systemes Production
@@ -54,6 +55,71 @@ const htmlPlugin = () => {
   }
 }
 
+/**
+ * Custom Log for Dassault Systems for Maintainer to copy and paste to server admin
+ * @param {string} mode 
+ * @param {object} env 
+ * @returns 
+ */
+function logFinalIndex(mode, env, dist) {
+  return {
+    name: 'log-final-index',
+    closeBundle() {
+      if (mode === 'production' || env.NODE_ENV === 'production') {
+        console.clear()
+
+        try {
+          const outDir = dist;
+          const files = fs.readdirSync(outDir);
+          const indexFile = files.find(f => /^index-[^.]+\.js$/.test(f));
+          if (!indexFile) {
+            console.warn('No index-*.js found in', outDir);
+            return;
+          }
+
+          const filePath = path.join(process.cwd(), outDir, indexFile);
+          const HTMLPath = path.join(process.cwd(), outDir, 'index.html');
+          if (fs.existsSync(filePath) && fs.existsSync(HTMLPath)) {
+            const bundleTag = /<(?<tag>bundle[^\s/>]*)\b[^>]*>([\s\S]*?)<\/\k<tag>>/i;
+            const content = fs.readFileSync(HTMLPath, 'utf-8');
+            const html = content.match(bundleTag);
+            const bundleName = html.groups.tag;
+            console.log('----------------------------------------------')
+            console.log("Model Name:", env.VITE_MODEL_NAME)
+            console.log("Model URL:", env.VITE_BASE_URL + "/" + indexFile)
+            console.log("Bundle Name:", bundleName)
+            console.log('----------------------------------------------')
+          } else {
+            console.warn("Unable to find html bundle in index.html")
+            console.log('----------------------------------------------')
+            console.log("Model Name:", env.VITE_MODEL_NAME)
+            console.log("Model URL:", env.VITE_BASE_URL)
+            console.log('----------------------------------------------')
+          }
+        } catch (err) {
+          console.error('[log-final-index] Error reading file:', err);
+        }
+      }
+    }
+  };
+}
+
+/**
+ * URL Resolve that continue after pathname.
+ * @param {string} base 
+ * @param {string} rel 
+ * @example
+ * // Example:
+ * resolveInsideBase('https://www.domain.com/assets/second-path', '/fonts/ttf/3DSV2-Bold.ttf');
+ * // => 'https://www.domain.com/assets/second-path/fonts/ttf/3DSV2-Bold.ttf'
+ * @returns 
+ */
+function resolveInsideBase(base, rel) {
+  const baseUrl = new URL(base.endsWith('/') ? base : base + '/');
+  const r = rel.startsWith('/') ? rel.slice(1) : rel;
+  return new URL(r, baseUrl).toString();
+}
+
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 /**
  * @author Amin Shazrin https://github.com/ammein
@@ -61,6 +127,9 @@ const htmlPlugin = () => {
 export default defineConfig(async ({ mode }) => {
   // Insert all environment variables into `env`
   const env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+
+  // Final Destination folder
+  const finalDist = mode === "production" ? env.VITE_MODEL_NAME : env.NODE_ENV === "storybook" ? 'public' : "dist"
 
   // Allow production environment variables that matches with this keys
   const production_envs = ["VITE_MODEL_NAME", "VITE_LOCAL_DRACO_PATH", "VITE_LOCAL_KTX_PATH", "VITE_BASE_URL", "VITE_TRACKING_URL"]
@@ -76,13 +145,21 @@ export default defineConfig(async ({ mode }) => {
         ----------------------------------------------------
         There are missing property from your environment variable.
         Here is what the value suppose to be inside file named '.env.production':
-        VITE_MODEL_NAME=<Your-Project-Name>
-        VITE_BASE_URL=https://domain.com/$VITE_MODEL_NAME
-        VITE_LOCAL_DRACO_PATH=three/draco/javascript/
-        # SEO URL for html attribute such as itemscope='http://example.com'
+        # Model Name
+        VITE_MODEL_NAME=<your-model-name>
+        # Model URL
+        VITE_BASE_URL=https://production-domain.com/$VITE_MODEL_NAME
+        # SEO itemtype='http://tracking.domain.com/'
         # More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/itemscope
-        VITE_TRACKING_URL=http://example.com/click
+        VITE_TRACKING_URL=http://tracking.domain.com/
+        # DRACO path in public folder after run 'yarn draco'
+        VITE_LOCAL_DRACO_PATH=three/draco/javascript/
+        # Basis path in public folder after run 'yarn basis'
         VITE_LOCAL_KTX_PATH=examples/jsm/libs/basis/
+        # To disable sourcemap in production
+        VITE_SOURCEMAP=false
+        # IMPORTANT for Interactive Asset export.
+        # (This will enable all files in one single Javascript module file so that it can be played in 3DS Webpage)
         VITE_DEPLOY=true
         ----------------------------------------------------
         \n\n\n
@@ -93,10 +170,6 @@ export default defineConfig(async ({ mode }) => {
   // Only when production
   if (mode === "production" && env.NODE_ENV === 'production') {
     console.clear()
-    console.log('----------------------------------------------')
-    console.log("Model Name:", env.VITE_MODEL_NAME)
-    console.log("Model URL:", env.VITE_BASE_URL)
-    console.log('----------------------------------------------')
 
     // For Bundle Aspect Ratio. Request User to key in inside terminal.
     if (env.VITE_DEPLOY && env.VITE_DEPLOY === 'true') {
@@ -108,7 +181,7 @@ export default defineConfig(async ({ mode }) => {
       const desktopRatioQuestion = await new Promise(resolve => rl.question(`Your bundle desktop ratio is "${desktopRatio}". Confirm? (y/n)\n> `, resolve))
 
       if (desktopRatioQuestion === 'n') {
-        const desktopRatioAnswer = await new Promise(resolve => rl.question(`\n\nWrite your custom ratio in this format. Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio\n\nEx: <width> / <height>\n\n> `, resolve))
+        const desktopRatioAnswer = await new Promise(resolve => rl.question(`\n\nWrite your custom ratio in this format. Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio\n\nEx: <width> / <height>\n\n> `, resolve))
 
         desktopRatio = desktopRatioAnswer;
       }
@@ -116,7 +189,7 @@ export default defineConfig(async ({ mode }) => {
       const mobileRatioQuestion = await new Promise(resolve => rl.question(`Your bundle mobile ratio is "${mobileRatio}". Confirm? (y/n)\n> `, resolve))
 
       if (mobileRatioQuestion === 'n') {
-        const mobileRatioAnswer = await new Promise(resolve => rl.question(`\n\nWrite your custom ratio in this format Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio\n\nEx: <width> / <height>\n\n> `, resolve))
+        const mobileRatioAnswer = await new Promise(resolve => rl.question(`\n\nWrite your custom ratio in this format Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio\n\nEx: <width> / <height>\n\n> `, resolve))
 
         mobileRatio = mobileRatioAnswer;
       }
@@ -127,11 +200,11 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' || mode === 'preview') && env.NODE_ENV === 'production') && htmlPlugin(), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
+    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' || mode === 'preview') && env.NODE_ENV === 'production') && htmlPlugin(), logFinalIndex(mode, env, finalDist), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
       preRenderCSSCode: (cssCode) => {
         // Replace font url from url('/fonts/ttf/3DSV2-BoldItalic.ttf') to url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')
-        if (cssCode.match(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi)) {
-          cssCode = cssCode.replace(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi, env.VITE_BASE_URL + '/$2');
+        for (const match of cssCode.matchAll(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi)) {
+          cssCode = cssCode.replace(match[0], "url(" + resolveInsideBase(env.VITE_BASE_URL, match[2]) + ")")
         }
 
         // Add Desktop Ratio & Mobile Ratio to Parent Container
@@ -147,7 +220,7 @@ export default defineConfig(async ({ mode }) => {
     },
     assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
     build: {
-      outDir: mode === "production" ? env.VITE_MODEL_NAME : env.NODE_ENV === "storybook" ? 'public' : "dist",
+      outDir: finalDist,
       rollupOptions: {
         output: {
           entryFileNames: (chunkInfo) => {

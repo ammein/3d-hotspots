@@ -6,6 +6,7 @@ import Plot from '@/design-system/components/Plot';
 import { Mermaid } from 'mdx-mermaid/Mermaid';
 import CodeBlock from '@/design-system/components/CodeBlock';
 import LinkTo from '@storybook/addon-links/react';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 <Meta title="Getting Started" />
 ## Getting Started
@@ -51,6 +52,97 @@ yarn dev
 
 ### TheatreJS
 This project is using TheatreJS library to ease adjusting parameters that uses GUI to manage the UI of this Interactive Assets.
-<video width="800" height="5 00" controls>
+<video width="800" height="500" controls>
     <source src="https://stream.mux.com/fdTJ3RlxwOZqyBIPwk173xA402dWccqpEbueopN900cVI.m3u8?redundant_streams=true" type="application/x-mpegURL"/>
 </video>
+
+You may proceed to this [TheatreJS](?path=/docs/documentation-user-theatrejs--docs) to know more about how to use Theartre GUI
+
+
+### Deploy
+First you must create a file in root folder of the project called `.env.production`:
+<CodeBlock language="diff" showLineNumbers style={prism}>
+{`.
+    ├── ./.env.development
+    ├── ./.env.preview
++├── ./.env.production
+    ├── ./.gitignore
+    ├── ./.gitlab-ci.yml
+    ├── ./.prettierignore
+    ├── ./.prettierrc
+    ├── ./.storybook
+    ├── ./.vscode
+    ├── ./3D Hotspot.code-profile
+    ├── ./Details.png
+    ├── ./eslint.config.js
+    ├── ./index.html
+    ├── ./intro.gif
+    ├── ./jsconfig.json
+    ├── ./Loading Screen.png
+    ├── ./Main - Wireframe.png
+    ├── ./Main.png
+    ├── ./package.json
+    ├── ./public
+    ├── ./README.md
+    ├── ./scripts
+    ├── ./Splash Screen.png
+    ├── ./src
+    ├── ./vite.config.js
+    └── ./yarn.lock
+
+9 directories, 24 files`}
+</CodeBlock>
+
+In your `.env.production` file:
+<CodeBlock copyToClipboard wrapLongLines language='bash'>
+{`# Model Name
+VITE_MODEL_NAME=<your-model-name>
+# Model URL
+VITE_BASE_URL=https://production-domain.com/$VITE_MODEL_NAME
+# SEO itemtype='http://tracking.domain.com/'
+# More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/itemscope
+VITE_TRACKING_URL=http://tracking.domain.com/
+# DRACO path in public folder after run 'yarn draco'
+VITE_LOCAL_DRACO_PATH=three/draco/javascript/
+# Basis path in public folder after run 'yarn basis'
+VITE_LOCAL_KTX_PATH=examples/jsm/libs/basis/
+# To disable sourcemap in production
+VITE_SOURCEMAP=false
+# IMPORTANT for Interactive Asset export.
+# (This will enable all files in one single Javascript module file so that it can be played in 3DS Webpage)
+VITE_DEPLOY=true
+`}
+</CodeBlock>
+
+Then you will encounter to define ratio for Desktop responsive:
+<CodeBlock language='bash'>
+{`Your bundle desktop ratio is "16 / 9". Confirm? (y/n)
+>`}
+</CodeBlock>
+> If you wish to use default ratio for desktop, simply answer by typing `y` and press `Enter`
+
+If you answer `no`, it will prompt an output as below and you will have to type your own ratio in this format `width / height` as per documented in [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio):
+<CodeBlock language='bash'>
+{`Write your custom ratio in this format. Tips:
+- Replace '<width>' & '<height>' to your desired value
+- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio
+
+Ex: <width> / <height>
+
+>`}
+</CodeBlock>
+
+> Then it will prompt the same output for mobile responsive. You can adjust the value as per needed. 
+
+Then, the Vite will compiled and build folder to your destination folder that were set in `VITE_MODEL_NAME` as folder name. Below is the example output console:
+<CodeBlock language='bash'>
+{`----------------------------------------------
+Model Name: <model-name>
+Model URL: https://domain.com/<model-name>/index-<hashed>.js
+Bundle Name: <bundle-name>
+----------------------------------------------`}
+</CodeBlock>
+
+### Handover
+<Paragraph weight='regular' className='list-decimal !text-[16px]' >1. ZIP/Compress the file and handoff to your server admin to put the folder in server.</Paragraph>
+<Paragraph weight='regular' className='list-decimal !text-[16px]' >2. Copy the final output on your console the `Model Name` `Model Path` & `Bundle Name` to your server admin for easy insert inputs for model configuration.</Paragraph>
