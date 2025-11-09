@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import DassaultButton from '@/components/Button';
+import ButtonStyles from '@/stylesheets/modules/Button.module.css';
 import PlaySVG from '@/design-system/icons/play-big.svg?react';
 import RightArrow from '@/design-system/icons/down-chevron-big.svg?react';
 
@@ -10,6 +11,8 @@ export const Button = ({ buttonType = 'scream', size = 'large', label, weight = 
     case buttonType === 'circle':
       render = (
         <PlaySVG
+          width={16}
+          height={16}
           style={{
             color: 'blue',
           }}
@@ -19,12 +22,20 @@ export const Button = ({ buttonType = 'scream', size = 'large', label, weight = 
 
     case buttonType === 'cheer' || buttonType === 'murmur':
       render = (
-        <div className="text-s flex gap-2 flex-row">
-          <RightArrow
-            style={{
-              transform: 'rotate(-90deg)',
-            }}
-          />
+        <div className="text-s flex gap-2 flex-row align-middle items-center">
+          <div
+            className={`${ButtonStyles.iconContainerBig} ${
+              buttonType === 'cheer' ? ButtonStyles.cheerIconContainer : ''
+            }`}
+          >
+            <RightArrow
+              width={16}
+              height={16}
+              style={{
+                transform: 'rotate(-90deg)',
+              }}
+            />
+          </div>
           {label}
         </div>
       );

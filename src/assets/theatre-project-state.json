@@ -298,10 +298,33 @@
           }
         }
       }
+    },
+    "Scene / Detail": {
+      "staticOverrides": {
+        "byObject": {
+          "Content": {
+            "padding": {
+              "top": 15,
+              "left": 22,
+              "bottom": 22,
+              "right": 15
+            },
+            "radius": 6
+          },
+          "Close Button": {
+            "position": {
+              "top": -3.9367088607594947,
+              "left": -8.139240506329116
+            },
+            "size": "small"
+          }
+        }
+      }
     }
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "BeVElpY8zUK9o3zQ",
     "MdwaDQ-VZxL12mX8",
     "rleQa6IpRzgn9VFv",
     "xQHcO8NdJHNC7NOH",

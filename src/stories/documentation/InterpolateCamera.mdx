@@ -10,7 +10,7 @@ import js_beautify from 'js-beautify';
 
 <div>
     ### Basic Interpolation
-    <Paragraph weight={'regular'} >Now, this is a very basic formula for interpolation between two values with a factor of <LatexRenderer latex={`C`} as='span' displayMode={false} /> that accepts value between <LatexRenderer latex={`0...1`} as='span' displayMode={false} />:</Paragraph>
+    Now, this is a very basic formula for interpolation between two values with a factor of <LatexRenderer latex={`C`} as='span' displayMode={false} /> that accepts value between <LatexRenderer latex={`0...1`} as='span' displayMode={false} />:
     <LatexRenderer latex={`
         y = (1 - c) \\cdot y_0 + c \\cdot y_1
     `} />
@@ -111,40 +111,39 @@ import js_beautify from 'js-beautify';
     }}  />
 
     ### Interpolate Camera Movement using Spherical Coordinates
-    <Paragraph>Now there is a catch in a specific use case when using linear interpolation. If the model has some big or tall buildings, when linear interpolation executes, it will go through the subjects. It is definitely not as intended. Therefore, we need to have interpolation, but in an orbit-like manner. Imagine a satellite orbiting the Earth.</Paragraph>
-    <Paragraph>
-        Formula as follows:
-            <ol style={{
-                listStyleType: "decimal"
-            }}>
-                <li>Convert camera position (relative to target) to spherical coordinates:</li>
-                <ul>
-                    <li><LatexRenderer as='span' latex={`r = \\parallel pos - target \\parallel`} displayMode={false} /></li>
-                    <li><LatexRenderer as='span' latex={`\\theta = arctan2(z, x)`} displayMode={false} /></li>
-                    <li><LatexRenderer as='span' latex={`\\phi = arccos(y/r)`} displayMode={false} /></li>
-                </ul>
-                <li>Interpolate the spherical components:</li>
-                <LatexRenderer as='span' latex={`
-                    \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B}
+    Now there is a catch in a specific use case when using linear interpolation. If the model has some big or tall buildings, when linear interpolation executes, it will go through the subjects. It is definitely not as intended. Therefore, we need to have interpolation, but in an orbit-like manner. Imagine a satellite orbiting the Earth.
+    
+    Formula as follows:
+        <ol style={{
+            listStyleType: "decimal"
+        }}>
+            <li>Convert camera position (relative to target) to spherical coordinates:</li>
+            <ul>
+                <li><LatexRenderer as='span' latex={`r = \\parallel pos - target \\parallel`} displayMode={false} /></li>
+                <li><LatexRenderer as='span' latex={`\\theta = arctan2(z, x)`} displayMode={false} /></li>
+                <li><LatexRenderer as='span' latex={`\\phi = arccos(y/r)`} displayMode={false} /></li>
+            </ul>
+            <li>Interpolate the spherical components:</li>
+            <LatexRenderer as='span' latex={`
+                \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B}
 
-                    \\operatorname{\\theta}(t) = (1 - t) \\times \\theta_{A} + t \\times \\theta_{B}
+                \\operatorname{\\theta}(t) = (1 - t) \\times \\theta_{A} + t \\times \\theta_{B}
 
-                    \\operatorname{\\phi}(t) = (1 - t) \\times \\phi_{A} + t \\times \\phi_{B}
-                `} />
-                <li>Convert back to Cartesian:</li>
-                <LatexRenderer as='span' latex={`
-                    x=r \\times sin(\\phi)⋅cos(\\theta)
+                \\operatorname{\\phi}(t) = (1 - t) \\times \\phi_{A} + t \\times \\phi_{B}
+            `} />
+            <li>Convert back to Cartesian:</li>
+            <LatexRenderer as='span' latex={`
+                x=r \\times sin(\\phi)⋅cos(\\theta)
 
-                    y=r \\times cos(\\phi)
+                y=r \\times cos(\\phi)
 
-                    z=r \\times sin(\\phi) \\times sin(\\theta)
-                `} />
-                <li>Add back to the target</li>
-                <LatexRenderer as='span' latex={`
-                    \\operatorname{P}(t)=target+(x,y,z)
-                `} />
-            </ol>
-    </Paragraph>
+                z=r \\times sin(\\phi) \\times sin(\\theta)
+            `} />
+            <li>Add back to the target</li>
+            <LatexRenderer as='span' latex={`
+                \\operatorname{P}(t)=target+(x,y,z)
+            `} />
+        </ol>
     <Plot refresh={true} options={{
         title: "Spherical interpolation",
         width: 500,
@@ -283,17 +282,15 @@ import js_beautify from 'js-beautify';
 
     ### Manipulate Arc by making it wider/inner
     #### Adding a wide orbit bump
-    <Paragraph>To push the camera outward during the interpolation, we define:</Paragraph>
+    To push the camera outward during the interpolation, we define:
     <LatexRenderer latex={`
         \\operatorname{r}(t) = (1 - t) \\times r_{A} + t \\times r_{B} + H \\times sin(\\pi t)
     `} />
-    <Paragraph>
-        <ul>
-            <li><LatexRenderer as='span' latex={`H > 0`} displayMode={false} />: camera bulges outward (wide arc)</li>
-            <li><LatexRenderer as='span' latex={`H < 0`} displayMode={false} />: camera dips inward (narrow arc)</li>
-            <li><LatexRenderer as='span' latex={`sin(\\pi t)`} displayMode={false} /> symmetric bump that peaks at <LatexRenderer as='span' latex={`t = 0.5`} displayMode={false} /></li>
-        </ul>
-    </Paragraph>
+    <ul>
+        <li><LatexRenderer as='span' latex={`H > 0`} displayMode={false} />: camera bulges outward (wide arc)</li>
+        <li><LatexRenderer as='span' latex={`H < 0`} displayMode={false} />: camera dips inward (narrow arc)</li>
+        <li><LatexRenderer as='span' latex={`sin(\\pi t)`} displayMode={false} /> symmetric bump that peaks at <LatexRenderer as='span' latex={`t = 0.5`} displayMode={false} /></li>
+    </ul>
     <Plot refresh={true} options={{
         title: "Spherical interpolation Arc Manipulation",
         width: 500,
@@ -432,7 +429,7 @@ import js_beautify from 'js-beautify';
         return data;
     }} />
     ### Code Implementation
-    <Paragraph>You will see how the code implements in javascript with gsap interpolation as per below:</Paragraph>
+    You will see how the code implements in javascript with gsap interpolation as per below:
     <CodeBlock language="javascript" copyToClipboard showLineNumbers>
       {js_beautify.js(`/**
  * Lerp but orbit like. Therefore Spherical Coordinates is uses on this function

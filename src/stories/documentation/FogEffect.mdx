@@ -127,7 +127,6 @@ Now that we have `depth` value, let's see what happen on graph for `linearizeDep
     }
   ]
 }} />
-From graph above, you'll see that the linearize depth is exponentially increase when the distance of the model is closer to the camera.
 
 ### Effect on the focus weight
 
@@ -158,16 +157,17 @@ And now finally we will see how this code works:
     {
       fn: "sin(x / 3) * 10 + 25",
       range: [0, Infinity],
+      skipTip: true
     }
   ],
   annotations: [
     {
       y: 15,
-      text: 'Foggy'
+      text: 'Focal Range Min'
     },
     {
       y: 35,
-      text: 'Foggy Cleared'
+      text: 'Focal Range Max'
     },
     {
       y: 0.1,
@@ -179,7 +179,7 @@ And now finally we will see how this code works:
     }
   ]
 }} />
-> Red line is `focalRange`, blue line is `linearizeDepth`. If you over the graph above, you'll see that the derivative slope line represents (Tangent line in blue color) how the new `depth` value acts as fogginess interpolation that uses in interpolation as `t`
+> Red line is `focalRange`, blue line is `linearizeDepth`. If you hover the graph above, you'll see that the derivative slope line represents (Tangent line in blue color) how the new `depth` value acts as fogginess interpolation that uses in interpolation as `t`
 
 turns that distance into a normalized focus weight between `0` and `1`:
 	- `⁠abs(depth - focalDistance)` — how far the pixel is from the focal plane (distance difference).	

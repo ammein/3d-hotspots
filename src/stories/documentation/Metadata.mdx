@@ -1,0 +1,96 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import LinkTo from '@storybook/addon-links/react';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+<Meta title="Documentation/User/Metadata" />
+
+## Metadata
+
+### Requirement
+You need to finish this [Visual Studio Code Profile Installation](?path=/docs/getting-started--docs#visual-studio-code-profile-installation) in order to do this metadata configuration smoothly.
+
+### Metadata Configuration
+
+<CodeBlock language='json' copyToClipboard showLineNumbers>
+{`{
+    "tracking": {
+        "category": "<your-category>", // <meta itemProp="category" content={metadata.tracking.category} />
+        "action": "<action>" // <meta itemProp="action" content={metadata.tracking.action} />
+    },
+    "screens": {
+        "detail": {
+            "hotspots": [
+                {
+                    "name": "<mesh-name>",
+                    "pointer": "<group-similar-mesh-name>",
+                    "link": "https://domain.com/example-link-cta",
+                    "focus": {
+                        "position": [
+                            0.20, 1.92, 1.35
+                        ],
+                        "lookAt": [
+                            0.07, 0.89, -0.66
+                        ]
+                    }
+                },
+        ...
+            ]
+        }
+    }
+}`}
+</CodeBlock>
+
+### `tracking.category` 
+The value for this key is setup for SEO tracking for specific **category** that has been specified by Dassault Systemes. Put your category value for your specific SEO format on this key.
+
+### `tracking.action` 
+The value for this key is setup for SEO tracking for specific **action** that has been specified by Dassault Systemes. Put your **action** value for your specific SEO format on this key.
+
+### `screens.detail.hotspots[0...n]` 
+Arrays for hotspots that stores all fixed hotspots key so that it can be configured its related information in `Intl` format in `lang` folder. Then refer to [Intl](?path=/docs/documentation-user-intl-locale--docs) documentation for further configuration that related to metadata format.
+
+### `hotspots[0...n].name`
+You need to specify specific `name` of the mesh and insert into `name` value in `metadata.json` file. For example:
+<video width="1920" height="1080" controls>
+    <source src="/gltf-inspect.mp4" type="video/mp4"/>
+</video>
+> As you can see from the video, you will see the type of the object when selected. Make sure the `type` of the object is called `Mesh`
+
+## Optional Keys
+### `hotspots[0...n].pointer` (Optional)
+This is optional value if your mesh contains multiple meshes but in a same group object. This is usefull for click action instead of let enable one specific object that were part of the same mesh grouped object.
+
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{`{
+    "tracking": {
+        "category": "<your-category>", // <meta itemProp="category" content={metadata.tracking.category} />
+        "action": "<action>" // <meta itemProp="action" content={metadata.tracking.action} />
+    },
+    "screens": {
+        "detail": {
+            "hotspots": [
+                {
+                    "name": "<mesh-name>",
+                    "pointer": "<group-similar-mesh-name>",
+                    "link": "https://domain.com/example-link-cta",
+                    "focus": {
+                        "position": [
+                            0.20, 1.92, 1.35
+                        ],
+                        "lookAt": [
+                            0.07, 0.89, -0.66
+                        ]
+                    }
+                },
+        ...
+            ]
+        }
+    }
+}`}
+</CodeBlock>

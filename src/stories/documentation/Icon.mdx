@@ -1,0 +1,63 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import LinkTo from '@storybook/addon-links/react';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+<Meta title="Documentation/Maintainer/Icons" />
+
+## Upload Icon
+If you wanted to upload new icons, please upload this directory folder path:
+<CodeBlock language="bash" showLineNumbers>
+{`./src
+├── ./src/design-system
+│   └── ./src/design-system/icons`}
+    </CodeBlock>
+
+
+### Adjust Icon Attributes
+When you export from figma or any other vector platform, the svg file has its appropriate `width` & `height` attribute to it. 
+
+You have to delete `width`, `height` attribute and assign `fill` or `color` or `stroke-color` to `currentColor` so that you can customize overall svg color from `div` container using `color` attribute:
+<CodeBlock language='diff' style={prism} copyToClipboardColor='text-black-100'>{`- <svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+- <path d="M1.68555 0.5L1.68569 ..." fill="black"/>
+- </svg>
++ <svg viewBox="0 0 11 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
++ <path d="M1.68555 0.5L1.68569 ..." fill="currentColor"/>
++ </svg>
+`}</CodeBlock>
+
+### JSX SVG Implementation
+
+This project is able to import SVG files as react component by setting `?react` at the end of import file:
+<CodeBlock language="jsx" showLineNumbers>
+{`import SVG from '@/design-system/icons/file.svg?react';`}
+</CodeBlock>
+
+Then in return component, you can do as manual normal JSX syntax format do:
+<CodeBlock language="jsx" showLineNumbers>
+{`import SVG from '@/design-system/icons/file.svg?react';
+
+const TestSVG = () => {
+    return (
+        <SVG />
+    )
+}`}
+</CodeBlock>
+
+You can also add some svg attribute to it. For example you want to specify `width` or `height` of the SVG:
+<CodeBlock language="diff" style={prism} copyToClipboardColor='text-black-100'>
+{`import SVG from '@/design-system/icons/file.svg?react';
+
+const TestSVG = () => {
+    return (
+-         <SVG />
++         <SVG width={50} height={50} />
+    )
+}`}
+</CodeBlock>
+> This way you set SVG container to be `50px` in `width` & `height`
