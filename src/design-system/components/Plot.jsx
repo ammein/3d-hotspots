@@ -136,7 +136,7 @@ const FunctionPlot = ({
     } catch (e) {
       throw new Error(`Plot error:\n${e}`);
     }
-  }, [calculations, options, setPlot]);
+  }, [calculations, isSmallDevice, options, setPlot]);
 
   return (
     <>
