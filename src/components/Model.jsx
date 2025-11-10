@@ -229,7 +229,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
         .__experimental_getKeyframes(rest.theatreObjects.Fog.props.focalRange)
         .flatMap((val, i, total) => (i === 0 || i === total.length - 1 ? val.position : null))
         .filter((v) => v !== null);
-      if (FogRange.length > 0) {
+      if (FogRange.length > 1) {
         sheet.sequence.play({ range: FogRange });
       }
     }
@@ -486,12 +486,15 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
       const currentAzimuth = spherical.theta; // azimuth (around Y)
       const currentPolar = spherical.phi; // polar (down from Y)
 
-      controls.minPolarAngle = Math.max(0, currentPolar - HotspotCameraTheatreJS.focusVerticalMinAngle * DEG2RAD);
-      controls.maxPolarAngle = Math.min(Math.PI, currentPolar + HotspotCameraTheatreJS.focusVerticalMaxAngle * DEG2RAD);
+      controls.minPolarAngle = Math.max(0, currentPolar - HotspotCameraTheatreJS.focus.verticalMinAngle * DEG2RAD);
+      controls.maxPolarAngle = Math.min(
+        Math.PI,
+        currentPolar + HotspotCameraTheatreJS.focus.verticalMaxAngle * DEG2RAD
+      );
 
       // Enable only certain angle rotation
-      controls.minAzimuthAngle = currentAzimuth - HotspotCameraTheatreJS.focusHorizontalMinAngle * DEG2RAD;
-      controls.maxAzimuthAngle = currentAzimuth + HotspotCameraTheatreJS.focusHorizontalMaxAngle * DEG2RAD;
+      controls.minAzimuthAngle = currentAzimuth - HotspotCameraTheatreJS.focus.horizontalMinAngle * DEG2RAD;
+      controls.maxAzimuthAngle = currentAzimuth + HotspotCameraTheatreJS.focus.horizontalMaxAngle * DEG2RAD;
     }
   }, [focus, controls, HotspotCameraTheatreJS]);
 
@@ -626,25 +629,27 @@ const theatreJSModel = withTheatreManagement(Model, 'Model Controller', {
         label: 'Orbit Distance',
         nudgeMultiplier: 0.1,
       }),
-      focusHorizontalMinAngle: types.number(30, {
-        range: [0, 360],
-        label: 'Max Focus Horizontal Angle',
-        nudgeMultiplier: 1,
-      }),
-      focusHorizontalMaxAngle: types.number(30, {
-        range: [0, 360],
-        label: 'Max Focus Horizontal Angle',
-        nudgeMultiplier: 1,
-      }),
-      focusVerticalMinAngle: types.number(30, {
-        range: [0, 360],
-        label: 'Max Focus Vertical Angle',
-        nudgeMultiplier: 1,
-      }),
-      focusVerticalMaxAngle: types.number(30, {
-        range: [0, 360],
-        label: 'Max Focus Vertical Angle',
-        nudgeMultiplier: 1,
+      focus: types.compound({
+        horizontalMinAngle: types.number(30, {
+          range: [0, 360],
+          label: 'Max Horizontal Angle',
+          nudgeMultiplier: 1,
+        }),
+        horizontalMaxAngle: types.number(30, {
+          range: [0, 360],
+          label: 'Max Horizontal Angle',
+          nudgeMultiplier: 1,
+        }),
+        verticalMinAngle: types.number(30, {
+          range: [0, 360],
+          label: 'Max Vertical Angle',
+          nudgeMultiplier: 1,
+        }),
+        verticalMaxAngle: types.number(30, {
+          range: [0, 360],
+          label: 'Max Vertical Angle',
+          nudgeMultiplier: 1,
+        }),
       }),
     },
     options: {

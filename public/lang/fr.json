@@ -14,16 +14,19 @@
     "Robot_ArmPart2": {
       "label": "Bras robotisé",
       "description": "Lorem ipsum ac integer bibendum justo euismod in euismod gravida sit nisi augue diam penatibus egestas eu ut velit velit mauris iaculis quisque nec faucibus diam habitant semper non elementum iaculis morbi sed maecenas amet etiam vitae scelerisque aenean faucibus.",
+      "link": "https://fr.wikipedia.org/wiki/Bras_manipulateur",
       "button": "Voir plus"
     },
     "Tree_Low_Poly_-_Folliage_3004": {
       "label": "Arbre",
       "description": "ThreeJS",
+      "link": "https://threejs.org",
       "button": "Voir les informations sur ThreeJS"
     },
     "Bottle_Line_-_Static_body_grey_silver": {
       "label": "Embouteillage",
       "description": "Les chaînes d'embouteillage sont des lignes de production qui embouteillent à grande échelle un produit liquide, souvent une boisson.[1] De nombreux aliments préparés sont également mis en bouteille, comme les sauces, les sirops, les marinades, les huiles et les vinaigres. Les chaînes d'embouteillage comprennent généralement des équipements d'étiquetage, de bouchage, d'horodatage, etc. Un équipement de contrôle qualité est souvent inclus.",
+      "link": "https://en.wikipedia.org/wiki/Bottling_line",
       "button": "Découvrez comment la bouteille est fabriquée"
     }
   },

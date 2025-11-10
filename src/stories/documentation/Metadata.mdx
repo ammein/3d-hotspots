@@ -20,8 +20,8 @@ You need to finish this [Visual Studio Code Profile Installation](?path=/docs/ge
 <CodeBlock language='json' copyToClipboard showLineNumbers>
 {`{
     "tracking": {
-        "category": "<your-category>", // <meta itemProp="category" content={metadata.tracking.category} />
-        "action": "<action>" // <meta itemProp="action" content={metadata.tracking.action} />
+        "category": "<your-category>", // <meta itemprop="category" content="<your-category>" />
+        "action": "<action>" // <meta itemprop="action" content="<action>" />
     },
     "screens": {
         "detail": {
@@ -29,7 +29,6 @@ You need to finish this [Visual Studio Code Profile Installation](?path=/docs/ge
                 {
                     "name": "<mesh-name>",
                     "pointer": "<group-similar-mesh-name>",
-                    "link": "https://domain.com/example-link-cta",
                     "focus": {
                         "position": [
                             0.20, 1.92, 1.35
@@ -55,7 +54,7 @@ The value for this key is setup for SEO tracking for specific **action** that ha
 ### `screens.detail.hotspots[0...n]` 
 Arrays for hotspots that stores all fixed hotspots key so that it can be configured its related information in `Intl` format in `lang` folder. Then refer to [Intl](?path=/docs/documentation-user-intl-locale--docs) documentation for further configuration that related to metadata format.
 
-### `hotspots[0...n].name`
+### `screens.detail.hotspots[n].name`
 You need to specify specific `name` of the mesh and insert into `name` value in `metadata.json` file. For example:
 <video width="1920" height="1080" controls>
     <source src="/gltf-inspect.mp4" type="video/mp4"/>
@@ -63,34 +62,30 @@ You need to specify specific `name` of the mesh and insert into `name` value in 
 > As you can see from the video, you will see the type of the object when selected. Make sure the `type` of the object is called `Mesh`
 
 ## Optional Keys
-### `hotspots[0...n].pointer` (Optional)
+### `screens.detail.hotspots[n].pointer` (Optional)
 This is optional value if your mesh contains multiple meshes but in a same group object. This is usefull for click action instead of let enable one specific object that were part of the same mesh grouped object.
 
-<CodeBlock language='js' copyToClipboard showLineNumbers>
-{`{
-    "tracking": {
-        "category": "<your-category>", // <meta itemProp="category" content={metadata.tracking.category} />
-        "action": "<action>" // <meta itemProp="action" content={metadata.tracking.action} />
-    },
-    "screens": {
-        "detail": {
-            "hotspots": [
-                {
-                    "name": "<mesh-name>",
-                    "pointer": "<group-similar-mesh-name>",
-                    "link": "https://domain.com/example-link-cta",
-                    "focus": {
-                        "position": [
-                            0.20, 1.92, 1.35
-                        ],
-                        "lookAt": [
-                            0.07, 0.89, -0.66
-                        ]
-                    }
-                },
-        ...
-            ]
-        }
-    }
-}`}
+Say if `pointer` is `"robot_arm"`:
+
+<CodeBlock language='javascript' showLineNumbers>
+{`object.name.indexOf(pointer)`}
 </CodeBlock>
+
+Mesh's name that are matched:
+<CodeBlock language='text' showLineNumbers>
+{`Matches:
+✅ Robot_Arm_2
+✅ Robot_Arm_Length
+✅ Robot_Arm_Mechanic
+❌ Mechanic_Arm
+❌ Mechanic_Arm_Length
+❌ Mechanic_Arm_Long`}
+</CodeBlock>
+
+> This way you can click meshes that are matches with the pointer name on that specific hotspot item.
+
+### `screens.detail.hotspots[n].focus.position` (Optional)
+This is optional if you need to have custom position when click this specific hotspot. Useful if the model is facing opposite the camera that you need to reposition the camera when in focus to detail object. The value needs to have **3 number** in a **single array** that represents `x`, `y` and `z` position.
+
+### `screens.detail.hotspots[n].focus.lookAt` (Optional)
+This is also an optional if you need to have custom camera look at towards when click this specific hotspot. Usefull if the model is needed to be a custom overview viewing experience. The value needs to have **3 number** in a **single array** that represents `x`, `y` and `z` position.

@@ -133,7 +133,10 @@
               "b": 1,
               "a": 1
             },
-            "size": 34.16605063291139
+            "size": 34.16605063291139,
+            "focus": {
+              "follow": true
+            }
           },
           "Content": {
             "radius": 9.493670886075954,
@@ -194,7 +197,12 @@
             }
           },
           "HotspotCamera": {
-            "distance": 4
+            "distance": 4,
+            "focus": {
+              "verticalMinAngle": 0,
+              "verticalMaxAngle": 50,
+              "horizontalMaxAngle": 60
+            }
           }
         }
       },
@@ -317,6 +325,9 @@
               "left": -8.139240506329116
             },
             "size": "small"
+          },
+          "CTA Button": {
+            "openNewTab": false
           }
         }
       }
@@ -324,6 +335,7 @@
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "dkEE-3bnc8s5brzk",
     "BeVElpY8zUK9o3zQ",
     "MdwaDQ-VZxL12mX8",
     "rleQa6IpRzgn9VFv",

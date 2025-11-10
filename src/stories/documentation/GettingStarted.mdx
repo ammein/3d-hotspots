@@ -94,7 +94,7 @@ First you must create a file in root folder of the project called `.env.producti
 </CodeBlock>
 
 In your `.env.production` file:
-<CodeBlock copyToClipboard wrapLongLines language='bash'>
+<CodeBlock copyToClipboard showLineNumbers wrapLongLines language='bash'>
 {`# Model Name
 VITE_MODEL_NAME=<your-model-name>
 # Model URL
@@ -102,17 +102,18 @@ VITE_BASE_URL=https://production-domain.com/$VITE_MODEL_NAME
 # SEO itemtype='http://tracking.domain.com/'
 # More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/itemscope
 VITE_TRACKING_URL=http://tracking.domain.com/
-# DRACO path in public folder after run 'yarn draco'
+# DRACO path in public folder after run 'yarn draco' & to locate public folder to Draco Folder
 VITE_LOCAL_DRACO_PATH=three/draco/javascript/
-# Basis path in public folder after run 'yarn basis'
+# Basis path in public folder after run 'yarn basis' & to locate public folder to Basis Folder
 VITE_LOCAL_KTX_PATH=examples/jsm/libs/basis/
 # To disable sourcemap in production
 VITE_SOURCEMAP=false
 # IMPORTANT for Interactive Asset export.
-# (This will enable all files in one single Javascript module file so that it can be played in 3DS Webpage)
-VITE_DEPLOY=true
-`}
+# (This will compile all files in one single Javascript module file so that it can be played in 3DS Webpage)
+VITE_DEPLOY=true`}
 </CodeBlock>
+
+> You also need to configure the same SEO value for `tracking` in [metadata configuration](?path=/docs/documentation-user-metadata--docs#trackingcategory)
 
 Then you will encounter to define ratio for Desktop responsive:
 <CodeBlock language='bash'>

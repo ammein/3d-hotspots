@@ -12,7 +12,6 @@ import { types } from '@theatre/core';
  * @property {string} hostpotName
  * @property {boolean} hidden
  * @property {Function} onClose
- * @property {string} link
  */
 
 /**
@@ -20,7 +19,7 @@ import { types } from '@theatre/core';
  * @param { Detail & import('@/components/hoc/TheatreManagement').TheatreReturnValue } 0
  * @returns
  */
-const Detail = ({ hotspotName, hidden, onClose, link, ...props }) => {
+const Detail = ({ hotspotName, hidden, onClose, ...props }) => {
   const { metadata } = useApp();
 
   const t = useTranslations(`Hotspots.${hotspotName}`);
@@ -68,8 +67,8 @@ const Detail = ({ hotspotName, hidden, onClose, link, ...props }) => {
           <CloseIcon width={16} height={16} />
         </Button>
         <p>{t('description')}</p>
-        {link && (
-          <a href={link}>
+        {t.has('link') && (
+          <a href={t('link')} target={ButtonTheatreJS.openNewTab ? '_blank' : '_self'}>
             <Button
               buttonType={ButtonTheatreJS.type}
               size={ButtonTheatreJS.size}
@@ -137,6 +136,9 @@ const DetailTheatreJS = withTheatreManagement(Detail, 'Scene / Detail', {
         'semibold-italic': 'Semibold Italic',
         regular: 'Regular',
         italic: 'Italic',
+      }),
+      openNewTab: types.boolean(false, {
+        label: 'New Tab?',
       }),
     },
     options: {

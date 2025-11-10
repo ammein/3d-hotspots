@@ -11,3 +11,117 @@ import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 <Meta title="Documentation/User/Intl (Locale)" />
 
 ## Intl format
+This project is using this package [use-intl](https://www.npmjs.com/package/use-intl?activeTab=readme) package.
+
+<CodeBlock language='json' copyToClipboard showLineNumbers>
+{`{
+  "Splash": {
+    "title": "<Splash-Title>",
+    "button": "<Splash-Button-Label>",
+    "seo": "<Splash-Button-ItemProp-Label-SEO-Meta>",
+    "description": "<Splash-Screen-Description>"
+  },
+  "Loading": {
+    "text": "<Loading-Text>",
+    "font": "<Loading-Font-Text>",
+    "model": "<Loading-Model-Text>",
+    "loaded": "<Loaded-Text>"
+  },
+  "Hotspots": {
+    "<Mesh-Name>": {
+      "label": "<Label-Title>",
+      "description": "<Hotspot-Description>",
+      "link": "https://example.com/link",
+      "seo": "<Hotspot-Button-ItemProp-Label-SEO-Meta>",
+      "button": "<Hotspot-Button-Label>"
+    },
+    ...
+  },
+  "UI": {
+    "wireframe": {
+      "label": "<Wireframe-Button-Label>",
+      "seo": "<Wireframe-Button-ItemProp-Label-SEO-Meta>"
+    },
+    "solid": {
+      "label": "<Solid-Button-Label>",
+      "seo": "<Solid-Button-ItemProp-Label-SEO-Meta>"
+    }
+  }
+}`}
+</CodeBlock>
+
+## Splash
+
+### `Splash.title`
+Title in the Splash Screen UI
+
+### `Splash.button`
+Button label in the Splash Screen UI
+
+### `Splash.seo`
+Button seo from the `<meta itemprop="label" content='<seo-label-here>' />` in the Splash Screen UI
+
+### `Splash.description`
+Splash screen description in the Splash Screen UI
+
+## Loading
+
+### `Loading.text`
+Loading text. See example in <a href="#example-loading-text" target='_self'>Loading Text Example</a>
+
+### `Loading.font`
+Font text after loading text. See example in <a href="#example-loading-text" target='_self'>Loading Text Example</a>
+
+### `Loading.model`
+Model text after loading text. See example in <a href="#example-loading-text" target='_self'>Loading Text Example</a>
+
+### `Loading.loaded`
+Loaded text when the loading is finished. See example in <a href="#example-loading-text" target='_self'>Loading Text Example</a>
+
+### Example Loading Text
+For example:
+<CodeBlock language='json' showLineNumbers>
+{`{
+    "Loading": {
+        "text": "Loading",
+        "font": "Font",
+        "model": "Model",
+        "loaded": "Asset Loaded"
+    },
+}`}
+</CodeBlock>
+
+> It will become like this `0% Loading` , `5% Loading Text` , `50% Loading Model` , `100% Asset Loaded`
+
+## Hotspots
+
+### `Hotspots.<Mesh-Name>`
+The `<Mesh-Name>` should be specific to the ones that you did in [metadata hotspots](?path=/docs/documentation-user-metadata--docs#screensdetailhotspotsnname). If the name is not matched, the details will not be displayed in the browser.
+
+### `Hotspots.<Mesh-Name>.label`
+Label title text of a mesh that will be pinpoint as hotspot.
+
+### `Hotspots.<Mesh-Name>.description`
+Hotspot description for the specific Hotspot UI.
+
+### `Hotspots.<Mesh-Name>.link`
+Hotspot CTA (Call To Action) button url for specific language. There are specific use case when the url provided contains specific language for the reader.
+
+### `Hotspots.<Mesh-Name>.button`
+Hotspot CTA Action Button Label
+
+### `Hotspots.<Mesh-Name>.seo`
+Button seo from the `<meta itemprop="label" content='<seo-label-here>' />` for the specific hotspot
+
+## UI
+### `UI.wireframe.label`
+Button Label for wireframe toggle mode on 3D Model
+
+### `UI.wireframe.seo`
+Button seo from the `<meta itemprop="label" content='<seo-label-here>' />` for the wireframe mode button
+
+### `UI.solid.label`
+Button Label for solid toggle mode on 3D Model
+
+### `UI.solid.seo`
+Button seo from the `<meta itemprop="label" content='<seo-label-here>' />` for the solid mode button

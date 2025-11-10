@@ -9,7 +9,6 @@
                 {
                     "name": "Robot_ArmPart2",
                     "pointer": "Robot_Arm",
-                    "link": "https://en.wikipedia.org/wiki/Robotic_arm",
                     "focus": {
                         "position": [
                             0.20, 1.92, 1.35
@@ -20,13 +19,11 @@
                     }
                 },
                 {
-                    "name": "Tree_Low_Poly_-_Folliage_3004",
-                    "link": "https://threejs.com"
+                    "name": "Tree_Low_Poly_-_Folliage_3004"
                 },
                 {
                     "name": "Bottle_Line_-_Static_body_grey_silver",
-                    "pointer": "Bottle_Line",
-                    "link": "https://en.wikipedia.org/wiki/Bottling_line"
+                    "pointer": "Bottle_Line"
                 }
             ]
         }

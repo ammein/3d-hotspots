@@ -1,5 +1,5 @@
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Color, Vector3 } from 'three';
 import { DassaultText3D } from '@/design-system/components/3DText';
 import { useTranslations } from 'use-intl';
@@ -10,15 +10,14 @@ import { getTextScale, stableLookAt } from '@/helpers/utils';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { MeshLineGeometry, MeshLineMaterial, raycast } from 'meshline';
-import { useApp } from '@/components/context/AppManagement';
 import Detail from './scenes/detail';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
 /**
  * @typedef {Object} Hotspot
- * @property {typeof MeshLineMaterial} material
- * @property {typeof MeshLineGeometry} geometry
+ * @property {MeshLineMaterial} material
+ * @property {MeshLineGeometry} geometry
  * @property {boolean} start
  * @property {string} hotspotName
  * @property {string} id
@@ -42,8 +41,6 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
 
   const { Text: TextTheatreJS } = props.theatre;
 
-  const { metadata } = useApp();
-
   /** @type {import('@react-three/fiber').RootState & { controls: import('@/components/Orbit').PowerOrbitControls }} */
   const { camera, gl } = useThree();
 
@@ -55,18 +52,19 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
     .normalize()
     .add(new Vector3(geometry.points[2].x, geometry.points[2].y, geometry.points[2].z));
 
-  const link = useMemo(() => {
-    const getLink = metadata.screens.detail.hotspots.find((val) => val.name === hotspotName);
+  // const scalar = new Vector3()
+  //   .subVectors(
+  //     new Vector3(geometry.points[1].x, geometry.points[1].y, geometry.points[1].z),
+  //     new Vector3(geometry.points[0].x, geometry.points[0].y, geometry.points[0].z)
+  //   )
+  //   .length();
 
-    if (getLink) {
-      if (getLink['link']) {
-        return getLink['link'];
-      }
-      return null;
-    }
-
-    return null;
-  }, [hotspotName, metadata.screens.detail.hotspots]);
+  // const distance = Math.abs(
+  //   new Vector3().subVectors(
+  //     new Vector3(geometry.points[2].x, geometry.points[2].y, geometry.points[2].z),
+  //     new Vector3(geometry.points[1].x, geometry.points[1].y, geometry.points[1].z)
+  //   ).z
+  // );
 
   const [lookAtDirection, setLookAtDirection] = useState(initialLookAt);
 
@@ -97,6 +95,15 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         textRef.current.material.opacity = gsap.utils.clamp(0, 1, opac);
       } else if (focus && id.length > 0) {
         stableLookAt(textRef.current, camera.position);
+        // const cameraDirection = new Vector3();
+        // camera.getWorldDirection(cameraDirection);
+        // const lineDir = cameraDirection.clone().multiplyScalar(scalar);
+        // const secondLine = geometry.points[0].clone().add(lineDir);
+        // lineRef.current.geometry.setPoints([
+        //   geometry.points[0],
+        //   secondLine,
+        //   secondLine.add(new Vector3(0, 0, Math.sign(geometry.points[0].z) * distance)),
+        // ]);
         // textRef.current.lookAt(camera.position);
       } else if (!focus && id !== hotspotName && id.length > 0) {
         lineRef.current.material.opacity = 0;
@@ -125,7 +132,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
           lineRef.current.getWorldPosition(new Vector3()),
           camera,
           gl,
-          TextTheatreJS.focusSize
+          TextTheatreJS.focus.size
         );
 
         const lineAnimate = gsap.to(
@@ -159,12 +166,12 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         prev.clone().applyAxisAngle(new Vector3(0, 1, 0), TextTheatreJS.direction * DEG2RAD)
       );
     } else if (TextTheatreJS && !hidden && focus) {
-      if (textSizeRef.current !== TextTheatreJS.focusSize) {
+      if (textSizeRef.current !== TextTheatreJS.focus.size) {
         const textSize = getTextScale(
           lineRef.current.getWorldPosition(new Vector3()),
           camera,
           gl,
-          TextTheatreJS.focusSize
+          TextTheatreJS.focus.size
         );
         textSizeRef.current = textSize;
       }
@@ -195,7 +202,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
                 .convertSRGBToLinear()}
               transparent
             />
-            <Detail link={link} hotspotName={hotspotName} hidden={hidden} onClose={props.onClose} />
+            <Detail hotspotName={hotspotName} hidden={hidden} onClose={props.onClose} />
           </DassaultText3D>
         </>
       )}
@@ -246,8 +253,13 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
       size: types.number(14.742, {
         range: [1, 100],
       }),
-      focusSize: types.number(33.57, {
-        range: [1, 100],
+      focus: types.compound({
+        size: types.number(33.57, {
+          range: [1, 100],
+        }),
+        follow: types.boolean(false, {
+          label: 'Follow Camera',
+        }),
       }),
     },
     options: {
