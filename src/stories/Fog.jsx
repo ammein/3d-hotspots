@@ -5,6 +5,7 @@ import Effects from '@/components/Effects';
 import { useEffect, useRef, useState } from 'react';
 import { Html, OrbitControls } from '@react-three/drei';
 import { Vector3, DirectionalLight, Color, Uniform } from 'three';
+import HeadPLY from '@/stories/assets/head.ply';
 
 extend({ DirectionalLight });
 
@@ -107,7 +108,7 @@ export const Fog = ({
         <OrbitControls enableZoom={documentation ? false : true} />
         <ambientLight intensity={intensity} />
         <PlyModel
-          url={'/head.ply'}
+          url={HeadPLY}
           cameraPos={cameraPos}
           debug={debug}
           fogColor={new Color(fogColor)}

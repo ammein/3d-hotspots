@@ -6,6 +6,7 @@ import Plot from '@/design-system/components/Plot';
 import { Mermaid } from 'mdx-mermaid/Mermaid';
 import CodeBlock from '@/design-system/components/CodeBlock';
 import LinkTo from '@storybook/addon-links/react';
+import ModelUpload from '@/stories/assets/modelupload.mp4'
 
 <Meta title="Documentation/User/TheatreJS" />
 
@@ -57,5 +58,5 @@ You must upload any `*.glb` `*.gltf` into this `public` folder that is located i
 
 Then you can import the file in TheatreJS UI in your local browser like this:
 <video width="1920" height="1080" controls>
-    <source src="/modelupload.mp4" type="video/mp4"/>
+    <source src={ModelUpload} type="video/mp4"/>
 </video>

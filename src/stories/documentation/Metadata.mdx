@@ -7,6 +7,7 @@ import { Mermaid } from 'mdx-mermaid/Mermaid';
 import CodeBlock from '@/design-system/components/CodeBlock';
 import LinkTo from '@storybook/addon-links/react';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import GLTFInspect from '@/stories/assets/gltf-inspect.mp4'
 
 <Meta title="Documentation/User/Metadata" />
 
@@ -57,7 +58,7 @@ Arrays for hotspots that stores all fixed hotspots key so that it can be configu
 ### `screens.detail.hotspots[n].name`
 You need to specify specific `name` of the mesh and insert into `name` value in `metadata.json` file. For example:
 <video width="1920" height="1080" controls>
-    <source src="/gltf-inspect.mp4" type="video/mp4"/>
+    <source src={GLTFInspect} type="video/mp4"/>
 </video>
 > As you can see from the video, you will see the type of the object when selected. Make sure the `type` of the object is called `Mesh`
 

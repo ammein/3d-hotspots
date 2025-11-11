@@ -218,7 +218,7 @@ export default defineConfig(async ({ mode }) => {
         '@three-extras': path.resolve(dirname, './node_modules/three/examples/jsm')
       },
     },
-    assetsInclude: ['public/**/*.glb', 'public/**/*.gltf'],
+    assetsInclude: ['public/**/*.glb', 'public/**/*.gltf', 'src/stories/assets/*.mp4', 'src/stories/assets/*.ply'],
     build: {
       outDir: finalDist,
       rollupOptions: {
