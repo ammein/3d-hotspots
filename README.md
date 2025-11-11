@@ -24,7 +24,7 @@
 git clone https://gitlab.com/dsvideoteam/3d/3d-hotspots.git
 ```
 
-Then refer to `GitLab Pages` in repo page. You will find the right pane that named `Project Information` and you will find a button named `GitLab Pages`. Click it to get started.
+Then refer to the link on right pane for Project Setup in this repo page. You will find a section called `About` and you will find a button named [Storybook Page](https://ammein.github.io/3d-hotspots/). Click it to get started.
 
 ### Features Uses
 
