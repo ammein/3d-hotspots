@@ -32,8 +32,23 @@ lint:
       when: always
     - when: never
 
+storybook-extra-files:
+  stage: storybook-extra
+  script:
+    - yarn basis-production && yarn draco-production && yarn lygia-production
+  # Must add matching rules to pipeline. Otherwise,
+  # it will show empty that were releated from `build-storybook`
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: never
+
 storybook-tests:
   stage: story-test
+  needs:
+    - job: storybook-extra
   # Make sure to grab the latest version of the Playwright image
   # https://playwright.dev/docs/docker#pull-the-image
   image: mcr.microsoft.com/playwright:v1.52.0-noble
