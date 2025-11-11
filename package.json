@@ -17,6 +17,7 @@
     "test-storybook": "yarn --silent playwright install && vitest --project=storybook",
     "storybook": "storybook dev -p 6006",
     "storybook-gitlab": "NODE_ENV=storybook storybook build",
+    "storybook-github": "yarn basis-production && yarn draco-production && yarn lygia-production && NODE_ENV=storybook storybook build",
     "storybook-local": "yarn basis-production && yarn draco-production && yarn lygia-production && NODE_ENV=storybook storybook build && npx http-server storybook-static",
     "lygia": "chmod 777 ./scripts/lygia.sh && ./scripts/lygia.sh",
     "lygia-production": "chmod 777 ./scripts/lygia-production.sh && ./scripts/lygia-production.sh",
