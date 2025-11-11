@@ -2,7 +2,6 @@ image: node:lts
 
 stages:
   - lint
-  - story-extra-files
   - story-test
   - build
   - deploy
@@ -33,19 +32,6 @@ lint:
       when: always
     - when: never
 
-storybook-extra-files:
-  stage: story-extra-files
-  script:
-    - yarn basis-production && yarn draco-production && yarn lygia-production
-  # Must add matching rules to pipeline. Otherwise,
-  # it will show empty that were releated from `build-storybook`
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
-    - when: never
-
 storybook-tests:
   stage: story-test
   needs:
@@ -54,6 +40,7 @@ storybook-tests:
   # https://playwright.dev/docs/docker#pull-the-image
   image: mcr.microsoft.com/playwright:v1.52.0-noble
   script:
+    - yarn basis-production && yarn draco-production && yarn lygia-production
     - yarn test-storybook
   # Must add matching rules to pipeline. Otherwise,
   # it will show empty that were releated from `build-storybook`
@@ -92,6 +79,7 @@ pages:
       artifacts: true
   script:
     - set -euo pipefail
+    - yarn basis-production && yarn draco-production && yarn lygia-production
     - echo "Move Storybook to /public"
     - mkdir -p public
     - echo "/ /storybook-static/index.html 301" > public/_redirects
