@@ -34,8 +34,6 @@ lint:
 
 storybook-tests:
   stage: story-test
-  needs:
-    - job: storybook-extra-files
   # Make sure to grab the latest version of the Playwright image
   # https://playwright.dev/docs/docker#pull-the-image
   image: mcr.microsoft.com/playwright:v1.52.0-noble
