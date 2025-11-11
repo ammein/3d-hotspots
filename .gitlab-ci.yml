@@ -33,7 +33,7 @@ lint:
     - when: never
 
 storybook-extra-files:
-  stage: storybook-extra
+  stage: story-extra-files
   script:
     - yarn basis-production && yarn draco-production && yarn lygia-production
   # Must add matching rules to pipeline. Otherwise,
@@ -48,7 +48,7 @@ storybook-extra-files:
 storybook-tests:
   stage: story-test
   needs:
-    - job: storybook-extra
+    - job: storybook-extra-files
   # Make sure to grab the latest version of the Playwright image
   # https://playwright.dev/docs/docker#pull-the-image
   image: mcr.microsoft.com/playwright:v1.52.0-noble
