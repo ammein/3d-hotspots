@@ -48,7 +48,7 @@ replace_git(){
 }
 
 main(){
-    if [[ ! -d "$basis_local_path""/$basis_project_name" ]]; then
+    if [[ ! -d "$basis_local_path""/$basis_project_name" && -z $PROD ]]; then
         echo "Basis not exists"
         check_local_basis_folder
         cd $basis_local_path
@@ -57,11 +57,18 @@ main(){
         git checkout $basis_branch
 
     elif [[ -n $PROD ]]; then
-        echo "basis exists on Production"
+        if [[ ! -d "$basis_local_path""/$basis_project_name" ]];then
+            echo "Basis not exists"
+            check_local_basis_folder
+        else
+            echo "basis exists on Production"
+        fi
         cd $basis_local_path
         replace_git
         sparse_info
         git checkout $basis_branch
+        echo "Delete basis .git folder for production"
+        rm -rf .git
     else
         echo "basis exists"
         cd $basis_local_path

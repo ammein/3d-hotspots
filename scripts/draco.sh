@@ -47,7 +47,7 @@ replace_git(){
 }
 
 main(){
-    if [[ ! -d "$draco_local_path""/$draco_project_name" ]]; then
+    if [[ ! -d "$draco_local_path""/$draco_project_name" && -z $PROD ]]; then
         echo "Draco not exists"
         check_local_draco_folder
         cd $draco_local_path
@@ -55,11 +55,18 @@ main(){
         sparse_info
         git checkout $draco_branch
     elif [[ -n $PROD ]]; then
-        echo "draco exists on Production"
+        if [[ ! -d "$draco_local_path""/$draco_project_name" ]]; then
+            echo "Draco not exists"
+            check_local_draco_folder
+        else
+            echo "draco exists on Production"
+        fi
         cd $draco_local_path
         replace_git
         sparse_info
         git checkout $draco_branch
+        echo "Delete draco .git folder for production"
+        rm -rf .git
     else
         echo "Draco exists"
         cd $draco_local_path

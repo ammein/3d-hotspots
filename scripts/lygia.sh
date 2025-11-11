@@ -45,6 +45,10 @@ prune_lygia() {
         echo $'Python 3 is not installed. \nYou may removed your unused lygia files manually...'
         echo $'Skipped...'
     fi
+    if [[ -n $PROD ]]; then
+        echo "Delete .git folder for PRODUCTION"
+        rm -rf "$1/.git"
+    fi
 }
 
 check_npm_version(){

@@ -65,7 +65,7 @@ function logFinalIndex(mode, env, dist) {
   return {
     name: 'log-final-index',
     closeBundle() {
-      if (mode === 'production' || env.NODE_ENV === 'production') {
+      if ((mode === 'production' || env.NODE_ENV === 'production') && !env.NODE_ENV === 'storybook') {
         console.clear()
 
         try {
