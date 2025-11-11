@@ -1,0 +1,111 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+
+<Meta title="Documentation/Maintainer/Contributing Guidelines" />
+
+## Contribute Project
+
+### Setup Project
+This project is free to contribute but you need to have at least Git experience to contribute to this project.
+
+First you need to clone the project:
+<CodeBlock language='bash' copyToClipboard>
+{`git clone https://gitlab.com/dsvideoteam/3d/3d-hotspots.git`}
+</CodeBlock>
+
+Then you need to create a new branch with the name of a new feature. Say you want to add `hotspot feature`, you can create a new branch like this:
+<CodeBlock language='bash' copyToClipboard>
+{`git checkout -b hotspot-feature`}
+</CodeBlock>
+> This will checkout to newly created branch. If you are not ready to checkout and simply wanted to just create a new branch, simply run `git branch hotspot-feature`
+
+Now you are ready to do whatever you want on your newly created branch once successfully checking out to your desired new branch.
+
+## Code Guidelines
+
+### General Guidelines
+* Follow a consistent **code style** throughout the project.
+* Use **arrow functions** for all function expressions.
+
+### File Structure
+* Organize files by **type** rather than feature.
+* Use **PascalCase** for component filenames (e.g., `MyComponent.js`).
+* Use **camelCase** for other JavaScript files & Scenes (e.g., `utils.js`).
+
+### Import Statements
+* Use **absolute imports** for components and utilities. (e.g., `import Body from '@/components/Body.jsx'`). Refer to `jsconfig.json` and `vite.config.js` for module aliases.
+
+### Components
+* Use **functional components** and **hooks** instead of class components.
+* Define components using **arrow functions**.
+
+<CodeBlock language='jsx' copyToClipboard showLineNumbers>
+{`const MyComponent = () => {
+    return <div>Hello World</div>;
+};`}
+</CodeBlock>
+
+### State Management
+* Use the **useState** and useEffect hooks for state management.
+* Avoid using class-based state management.
+<CodeBlock language='jsx' showLineNumbers>
+{`const [count, setCount] = useState(0);
+
+useEffect(() => {
+  // Side effects here
+}, []);`}
+</CodeBlock>
+
+### JSX Guidelines
+* Use **self-closing tags** for elements without children.
+* Keep JSX expressions on a single line if they fit within 80 characters.
+* Use **template literals** for dynamic class names.
+<CodeBlock language='jsx' showLineNumbers>
+{`const className = \`button \${isActive ? 'active' : ''}\`;
+return <button className={className}>Click Me</button>;`}
+</CodeBlock>
+
+### Styling
+Strictly use **CSS Modules** only for specific tag classes. You can implement tailwindcss inside css using `@apply` key. If you created new module css, you must place the file inside `stylesheet/modules`
+<CodeBlock language="bash" showLineNumbers>
+{`./src
+└── ./src/stylesheets
+    └── ./src/stylesheets/modules`}
+    </CodeBlock>
+
+And inside css, you have to add `@reference` & `@source` to `theme.css` inside `stylesheets` folder. Here is for example:
+<CodeBlock language='css' showLineNumbers copyToClipboard>
+{`@source "../theme.css";
+@reference "../theme.css";
+
+.Canvas {
+  @apply size-full mx-auto block;
+}`}
+</CodeBlock>
+
+### Comments
+* Use [**JSDoc**](https://jsdoc.app) for function documentation.
+* Write meaningful comments for complex logic.
+
+### Testing
+* Write tests using **Storybook Test**, **Jest** and **React Testing Library**.
+* Aim for at least **80% test coverage**.
+
+### Version Control
+* Commit often with **meaningful commit messages**.
+* Use branches for new features and bug fixes.
+
+### Push to Repo
+Before you are going to push to your newly created branch repo. Make sure you check your code linter to run checks on your local project either the code is following guideline or not. Simply run command:
+<CodeBlock language='bash' copyToClipboard>
+{`yarn lint`}
+</CodeBlock>
+> If you have errors on the console output after running `yarn lint`, fix all the code for all those highlighted errors that were highlighted by eslint.
+
+## Conclusion
+Following these guidelines will help maintain a clean, efficient, and readable codebase. Remember to review and update these guidelines as necessary to adapt to project needs.

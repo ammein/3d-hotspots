@@ -20,6 +20,7 @@ export const Foggy = {
     intensity: 0.5,
     shadowMap: true
   },
+  tags: ['!test'],
   parameters: {
     docs: {
       description: {
@@ -40,6 +41,7 @@ export const FoggyClear = {
     intensity: 0.5,
     shadowMap: true
   },
+  tags: ['!test'],
   parameters: {
     docs: {
       description: {

@@ -17,7 +17,7 @@ gsap.registerPlugin(useGSAP);
 gsap.registerPlugin(TextPlugin);
 gsap.registerPlugin(ScrambleTextPlugin);
 
-function InnerApp({ loaded }) {
+const InnerApp = ({ loaded }) => {
   const [start, setStart] = useState(false);
   const [animated, setAnimation] = useState(false);
 
@@ -51,16 +51,16 @@ function InnerApp({ loaded }) {
       </Canvas>
     </>
   );
-}
+};
 
 const InnerAppLoads = withLoading(InnerApp);
 
-function App(_props) {
+const App = (_props) => {
   return (
     <AppProvider>
       <InnerAppLoads />
     </AppProvider>
   );
-}
+};
 
 export default App;

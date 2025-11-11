@@ -5,7 +5,7 @@ import { Html } from '@react-three/drei';
 import Headline from '@/components/Headline';
 import Body from '@/components/Body';
 
-function Error({ errorStatus, errorMessage, reset }) {
+const Error = ({ errorStatus, errorMessage, reset }) => {
   const [close, setClose] = useState(false);
 
   const closeClick = useCallback(
@@ -45,6 +45,6 @@ function Error({ errorStatus, errorMessage, reset }) {
       </div>
     </Html>
   );
-}
+};
 
 export default Error;

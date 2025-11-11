@@ -30,7 +30,7 @@ extend({ OrbitControls });
  * @param {OrthoUIControls} param0
  * @returns
  */
-function Controls({ ref, cameraRef, degree, sign, makeDefault }) {
+const Controls = ({ ref, cameraRef, degree, sign, makeDefault }) => {
   // local refs for smoothing
   const currentAzimuthRef = useRef(null);
   const orbitControlsRef = useRef();
@@ -79,7 +79,7 @@ function Controls({ ref, cameraRef, degree, sign, makeDefault }) {
   useImperativeHandle(ref, () => orbitControlsRef.current, []);
 
   return <orbitControls ref={orbitControlsRef} args={[cameraRef.current, domElement]} />;
-}
+};
 
 /*
   From this forum

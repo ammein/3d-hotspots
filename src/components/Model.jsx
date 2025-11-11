@@ -50,7 +50,7 @@ const focalRangeDefault = 25.0;
  * @param {{ url: string, useDraco: boolean, useMeshOptimize: boolean, animationNames: string[], hideItems: [] } & import('@/components/hoc/TheatreManagement').TheatreReturnValue & { ready: boolean }} param0
  * @returns
  */
-function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hideItems = [], ...rest }) {
+const Model = ({ url, useDraco, useMeshOptimize = true, animationNames = [], hideItems = [], ...rest }) => {
   const sheet = useCurrentSheet();
 
   const dispatch = useModelDispatch();
@@ -554,7 +554,7 @@ function Model({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
       <Orbit ref={orbitRef} makeDefault rotate={state.hotspotID.length > 0 ? false : true} />
     </>
   );
-}
+};
 
 Model.displayName = 'Model';
 

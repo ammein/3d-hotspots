@@ -31,9 +31,9 @@ class ThreeErrorBoundary extends Component {
      * @param {import('react').ComponentProps} extraProps
      * @returns
      */
-    function addExtraProps(Component, extraProps) {
+    const addExtraProps = (Component, extraProps) => {
       return <Component {...Component.props} {...extraProps} />;
-    }
+    };
 
     if (this.state.hasError) {
       return addExtraProps(this.props.fallback, {

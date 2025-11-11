@@ -47,7 +47,7 @@ const AppManagement = ({ children }) => {
   useEffect(() => {
     let cancelled = false;
 
-    async function init() {
+    const init = async () => {
       if (appProject.isReady && Object.keys(translations).length > 0 && Object.keys(metadataValue).length > 0) {
         setReady(true);
         return;
@@ -73,7 +73,7 @@ const AppManagement = ({ children }) => {
         if (import.meta.env.DEV) console.error('init load failed', err);
         if (!cancelled) setReady(false);
       }
-    }
+    };
 
     init();
 

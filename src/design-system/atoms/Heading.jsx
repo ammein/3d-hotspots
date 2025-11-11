@@ -14,7 +14,7 @@ import styles from '@/stylesheets/modules/Heading.module.css';
  * @param {Heading} 0
  * @returns
  */
-export default function Heading({ weight = 'semibold', color = '', type = 'h1', className = '', ...rest }) {
+const Heading = ({ weight = 'semibold', color = '', type = 'h1', className = '', ...rest }) => {
   const Tag = type || 'h1';
   const typeClass = styles[type] || styles.h1;
 
@@ -37,4 +37,6 @@ export default function Heading({ weight = 'semibold', color = '', type = 'h1', 
       {children}
     </Tag>
   );
-}
+};
+
+export default Heading;

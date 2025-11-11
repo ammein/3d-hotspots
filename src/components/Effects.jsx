@@ -12,7 +12,7 @@ import { FogEffect } from '@/components/effect/FogPostProcessing';
  * @param {EffectsParams} param0
  * @returns
  */
-export default function Effects({ uniformsFog, fogRef }) {
+const Effects = ({ uniformsFog, fogRef }) => {
   return (
     <EffectComposer>
       <FogEffect
@@ -23,6 +23,8 @@ export default function Effects({ uniformsFog, fogRef }) {
       />
     </EffectComposer>
   );
-}
+};
 
 Effects.displayName = 'Fog Postprocessing';
+
+export default Effects;

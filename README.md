@@ -29,6 +29,8 @@ Then refer to `GitLab Pages` in repo page. You will find the right pane that nam
 ### Features Uses
 
 - GSAP (Animation)
+- react-three/fiber
+- react-postprocessing
 - glsl-pipeline (WebGL)
 - Lygia (GLSL Library)
 - Storybook (Styling & Documentation Platform)

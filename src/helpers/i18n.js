@@ -6,7 +6,7 @@ let responseJSON = {};
  * @param {string} [lang='en'] - Language code to load translations for
  * @returns {Promise<void>} Promise that resolves when translations are loaded
  */
-async function loadFromJSON(url) {
+const loadFromJSON = async (url) => {
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -20,7 +20,7 @@ async function loadFromJSON(url) {
     }
 }
 
-function getLanguage() {
+const getLanguage = () => {
     // First check URL parameter
     const url = new URL(window.location.href);
     const urlLang = url.searchParams.get('lang');

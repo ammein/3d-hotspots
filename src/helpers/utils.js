@@ -63,7 +63,7 @@ import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useRef } from 'react'
 
-function Label({ target }) {
+const Label = ({ target }) => {
     const textRef = useRef()
     const { camera, size } = useThree()
 

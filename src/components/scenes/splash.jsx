@@ -14,7 +14,7 @@ import { useApp } from '../context/AppManagement';
  * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue & { callback: Function, loaded: boolean, start: boolean }} param0
  * @returns
  */
-function Splash({ callback, loaded, start, ...rest }) {
+const Splash = ({ callback, loaded, start, ...rest }) => {
   const t = useTranslations('Splash');
   const [visibility, setVisibility] = useState(false);
   const headline = useRef();
@@ -94,7 +94,7 @@ function Splash({ callback, loaded, start, ...rest }) {
       </div>
     )
   );
-}
+};
 
 const SplashTheatreJS = withTheatreManagement(Splash, 'Scene / Splash', {
   Splash: {

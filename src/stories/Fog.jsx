@@ -8,7 +8,7 @@ import { Vector3, DirectionalLight, Color, Uniform } from 'three';
 
 extend({ DirectionalLight });
 
-function PlyModel({ url, cameraPos = [0, 0, 3], debug, fogColor, focalRange, documentation, htmlRef }) {
+const PlyModel = ({ url, cameraPos = [0, 0, 3], debug, fogColor, focalRange, documentation, htmlRef }) => {
   const obj = useLoader(PLYLoader, url);
   /** @type {import('react').Ref<import('postprocessing').Effect>} */
   const shaderRef = useRef();
@@ -68,7 +68,7 @@ function PlyModel({ url, cameraPos = [0, 0, 3], debug, fogColor, focalRange, doc
           fogRef={shaderRef}
         />
       </mesh>
-      {documentation && (
+      {documentation && htmlRef && (
         <Html portal={htmlRef} wrapperClass={/* tailwindcss */ 'left-0 pointer-events-none size-full !transform-none'}>
           <p className="absolute top-0 left-0 text-nowrap">
             Focal Range: <code>{focalRangeVal.toFixed(2)}</code>
@@ -77,7 +77,7 @@ function PlyModel({ url, cameraPos = [0, 0, 3], debug, fogColor, focalRange, doc
       )}
     </>
   );
-}
+};
 
 export const Fog = ({
   intensity = 0.5,
