@@ -77,7 +77,7 @@ const preview = {
     },
 
     docs: {
-      toc: true, // 👈 Enables the table of contents
+      toc: true,
       page: () => (
         <>
           <Title />

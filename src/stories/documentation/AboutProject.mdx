@@ -7,7 +7,11 @@ import { Mermaid } from 'mdx-mermaid/Mermaid';
 import CodeBlock from '@/design-system/components/CodeBlock';
 import LinkTo from '@storybook/addon-links/react';
 
-<Meta title="Documentation/Maintainer/About Project" />
+<Meta title="Documentation/Maintainer/About Project" parameters={{
+  docs: {
+    toc: false
+  }
+}} />
 
 <div>
   ## About Project
@@ -104,6 +108,56 @@ import LinkTo from '@storybook/addon-links/react';
       style app fill:#c85df6,color:#fff;
       classDef management fill:#ffc44e;
       class appM,modelM,theatreM,appHOC,modelHOC,theatreHOC management;
+`}
+  />
+
+This project is solely developed by me, with no other development team involved, as I was in the marketing team and no one had prior knowledge in development or mathematical knowledge. The timeline outlined below shows my **3 months of progress**:
+<Mermaid
+    config={{
+      mermaid: {
+        timeline: {
+          theme: "forest"
+        },
+        fontFamily: '3ds Regular',
+        startOnLoad: true,
+      },
+    }}
+    chart={`
+    timeline
+      title Timeline of 3D Hotspots Interactive Asset Development (2025)
+      section Aug 1 - Aug 8
+          UX Planning : Study 3DS Website
+                      : Get to know user behaviour
+                      : Create Wireframes
+          Logic Planning (Mathematical and Execution Planning)
+                      : Study Vite Configuration Codes: Research ThreeJS: Research Mathematical Formula
+          UI Designs
+                      : Study Dassault Systemes Branding: Create Look & Feel Moodboard: Create Wireframes for User Interactions: Create UI Designs
+      section Aug 11 - Aug 29
+          Project Architecture
+                      : React Component Structure Planning
+          Python Sage Math
+                      : Executes & Debug Mathematical Formula using Sage Math
+                      : Testing Use Cases
+          WebGL (GLSLViewer)
+                      : Research Depth Postprocessing
+                      : Testing Fog GLSL
+      section Sep 1 - Oct 30
+          ReactJS, ThreeJS & TheatreJS
+                      : Setup ReactJS Environment
+                      : Setup Components
+                      : Setup Design Systems
+                      : Hotspot implementations and testing
+                      : Create Model Components
+                      : Add Error Boundary and Error Handling for better user experience
+                      : Implement HOC for TheatreJS for better management
+                      : Implement other HOC Managements for better props handling.
+          GLSL
+                      : Implement GLSL from GLSLViewer codes that has been tested into 'react-postprocessing' package.
+          Storybook
+                      : Project's Documentation & Progress
+                      : Plot for Formula Showcase
+                      : Branding Stories
 `}
   />
 </div>
