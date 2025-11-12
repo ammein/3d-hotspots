@@ -1,0 +1,368 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import ViteConfig from '../../../vite.config?raw'
+import js_beautify from 'js-beautify';
+
+<Meta title="Documentation/Maintainer/Reusable Vite Config" />
+
+## Reusable Vite Config for Interactive Asset
+**You can use this config for your next interactive asset (Dassault Systemes Interactive Assets)**. You may use some [reusable codes](#reusable-codes) for your own vite build. But if you use react environment, you can basically copy and paste any reusable codes below for your own fit. Below is the code that I manage to set it up and tested specifically for Interactive Asset Build:
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(ViteConfig)}
+</CodeBlock>
+
+## Explanation Code Step By Step
+### Vite Build Flows
+<Mermaid
+    config={{
+      mermaid: {
+        flowchart: {
+          curve: "basis",
+          defaultRenderer: 'elk',
+        },
+        fontFamily: '3ds Regular',
+        startOnLoad: true,
+      },
+    }}
+    chart={`
+    flowchart TB
+        env[Environment Variables]
+        filter[Filter Production Environment Variables]
+        react[React Vite Plugin \n@vitejs/plugin-react]
+        svgr[SVGR Vite Plugin \nvite-plugin-svgr]
+        tailwindcss[TailwindCSS Vite Plugin \n@tailwindcss/vite]
+        glsl[GLSL Vite Plugin \nvite-plugin-glsl]
+        htmlTransform[Custom HTML Transform Vite Plugin]
+        cssTransform[Custom CSS Transform Vite Plugin]
+        defaultPortURL[Default Port Number -> 4173]
+        baseURL@{ shape: diamond, label: "VITE_BASE_URL?" }
+        exit(Exit)
+        vite(Vite Build) ==> env
+        env --> D@{ shape: diamond, label: "Vite Mode/\nEnvironment Variables ?" }
+        %% Production Flows
+        D -.->|production|filter
+        filter --> E@{ shape: diamond, label: "If production environments contains empty on some variable?" }
+        E yesEmpty@-->|yes|errorEmpty@{ shape: lean-r, label: "Throw Error with message to adjust the .env.production file" }
+        errorEmpty --> exit
+        E noEmpty@-->|no|deploy@{ shape: diamond, label: "VITE_DEPLOY is available?" }
+        deploy yesDeploy@-->|yes|desktopRatioQ@{ shape: diamond, label: "Confirm Default Desktop Ratio?" }
+        desktopRatioQ yesDesktopRatio@-->|yes| desktopRatioInput@{ shape: lean-r, label: "Adjust Custom Desktop Ratio" }
+        desktopRatioInput --> mobileRatioQ@{ shape: diamond, label: "Adjust Default Mobile Ratio?" }
+        desktopRatioQ noDesktopRatio@-->|no| mobileRatioQ
+        mobileRatioQ yesMobileRatio@-->|yes| mobileRatioInput@{ shape: lean-r, label: "Adjust Custom Mobile Ratio" }
+        mobileRatioQ noMobileRatio@-->|no| react
+        deploy noDeploy@-->|no| react
+        mobileRatioInput --> react
+        react --> svgr
+        svgr --> tailwindcss
+        tailwindcss --> glsl
+        glsl --> htmlProdQ@{ shape: diamond, label: "Production?" }
+        htmlProdQ yesHtmlProd@-->|yes| htmlTransform
+        htmlTransform --> cssProdQ@{ shape: diamond, label: "Production?" }
+        cssProdQ yesCSSProdQ@-->|yes| cssTransform
+        cssTransform --> resolve
+        subgraph resolve [Resolve Alias]
+            direction LR
+            src[\"@\"]
+            threeMath[\"@three-math\"]
+            threeExtras[\"@three-extras\"]
+        end
+        resolve --> buildProdQ@{ shape: diamond, label: "Production or Preview?" }
+        buildProdQ yesBuildProd@-->|production| buildProd
+        subgraph buildProd [Build Production]
+            direction LR
+            outDir[outDir = VITE_MODEL_NAME]
+            entryFileNames[Hashed Filenames]
+            sourcemap[sourcemap = VITE_SOURCEMAP]
+        end
+        buildProd --> logFinalProdQ@{ shape: diamond, label: "Production?" }
+        logFinalProdQ yesLogFinalProd@-->|yes| logFinalIndexProd
+        subgraph logFinalIndexProd [Log Final Index Production]
+            modelName@{ shape: lean-r, label: "VITE_MODEL_NAME" }
+            modelURL@{ shape: lean-r, label: "VITE_BASE_URL/index-[hashed].js" }
+            bundleName@{ shape: lean-r, label: "Bundle Name" }
+        end
+        logFinalProdQ noLogFinalProd@-->|no| exit
+        logFinalIndexProd --> exit
+        %% Development Flows
+        D -.->|development| react
+        htmlProdQ noHtmlProd@-->|no| cssProdQ
+        cssProdQ noCSSProdQ@-->|no| resolve
+        buildProdQ noBuildProd@-->|no| buildDev
+        subgraph buildDev [Build Development]
+            direction LR
+            outDirDev[outDir = dist]
+            entryFileNamesDev[Hashed Filenames]
+        end
+        buildDev --> logFinalProdQ
+        %% Preview Flows
+        D -.->|preview| react
+        buildProdQ yesPreviewQ@-->|preview| preview
+        subgraph preview [Preview Vite]
+            direction TB
+            baseURL yesBaseURL@-->|yes| matchPORT@{ shape: diamond, label: "Match PORT [:digits{4}]?" }
+            matchPORT yesPortNumber@-->|yes| portURL[Custom Port Number]
+            matchPORT noPortNumber@-->|no| defaultPortURL
+            baseURL noBaseURL@-->|no| defaultPortURL
+        end
+        preview --> exit
+        classDef no stroke:#ff0000,stroke-width:2px,color:red;
+        classDef yes stroke:#379e00,stroke-width:2px,color:red;
+        class noEmpty,noDeploy,noDesktopRatio,noMobileRatio,noHtmlProd,noCSSProdQ,noBuildProd,noLogFinalProd,noBaseURL,noPortNumber no; 
+        class yesEmpty,yesDeploy,yesDesktopRatio,yesMobileRatio,yesHtmlProd,yesCSSProdQ,yesBuildProd,yesLogFinalProd,yesBaseURL,yesPortNumber yes; 
+`}
+  />
+
+## Reusable codes
+
+### `dirname`
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(`const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));`)}
+</CodeBlock>
+
+> This code is to get `dirname` inside vite config. Naturally vite config don't have Nodejs environment. However, since we are only running this on local shell/terminal. We can import `import path from 'node:path';` `import { fileURLToPath } from 'node:url';` to make use of NodeJS functions to get current directory.
+
+### `htmlPlugin`
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(`/**
+ * Custom HTML Plugin for Dassault Systemes Production
+ * @author Amin Shazrin https://github.com/ammein
+ * @param {string} mode 
+ * @param {string} name 
+ * @returns 
+ */
+const htmlPlugin = () => {
+  return {
+    name: 'html-transform',
+    /**
+     * Transform Index HTML
+     * @param {string} html 
+     * @returns 
+     */
+    transformIndexHtml(html) {
+      html = html.replace('<!-- DASSAULT_SEO_TRACKING_SCRIPT (DON\'T REMOVE THIS) -->', '<script type="text/javascript" src="https://tracking.3ds.com/stat/tc_global_iframe.js"></script>')
+
+      return beautify.html(html.replace(
+        /\b(src|href)\s*=\s*"(\/[^"]*)"/g,
+        (m, attr, path) => {
+          return \`\${attr}="\${'.' + path}"\`;
+        }), {
+        indent_with_tabs: true,
+        indent_size: 2,
+        max_preserve_newlines: 1
+      })
+    },
+  }
+}`)}
+</CodeBlock>
+
+The idea here is to transform any local url inside HTML to valid *http/https* links for production due to how interactive asset is placed inside 3DS Webpage. If you see the `index.html` in root directory, you will find this code:
+
+<CodeBlock language="html" showLineNumbers>
+{js_beautify.html(`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/stylesheets/theme.css" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <bundle-3d-hotspots></bundle-3d-hotspots>
+    <script type="module" src="/src/start.jsx"></script>
+    <!-- DASSAULT_SEO_TRACKING_SCRIPT (DON'T REMOVE THIS) -->
+  </body>
+</html>
+`)}
+</CodeBlock>
+
+So it will transform html wherever the code matches `src` or `href` and change the link to local path from `/path/to/file` `./path/to/file`
+
+### `logFinalIndex`
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(`/**
+ * Custom Log for Dassault Systems for Maintainer to copy and paste to server admin
+ * @param {string} mode 
+ * @param {object} env 
+ * @returns 
+ */
+function logFinalIndex(mode, env, dist) {
+  return {
+    name: 'log-final-index',
+    closeBundle() {
+      if ((mode === 'production' || env.NODE_ENV === 'production') && !env.NODE_ENV === 'storybook') {
+        console.clear()
+
+        try {
+          const outDir = dist;
+          const files = fs.readdirSync(outDir);
+          const indexFile = files.find(f => /^index-[^.]+\.js$/.test(f));
+          if (!indexFile) {
+            console.warn('No index-*.js found in', outDir);
+            return;
+          }
+
+          const filePath = path.join(process.cwd(), outDir, indexFile);
+          const HTMLPath = path.join(process.cwd(), outDir, 'index.html');
+          if (fs.existsSync(filePath) && fs.existsSync(HTMLPath)) {
+            const bundleTag = /<(?<tag>bundle[^\s/>]*)\b[^>]*>([\s\S]*?)<\/\k<tag>>/i;
+            const content = fs.readFileSync(HTMLPath, 'utf-8');
+            const html = content.match(bundleTag);
+            const bundleName = html.groups.tag;
+            console.log('----------------------------------------------')
+            console.log("Model Name:", env.VITE_MODEL_NAME)
+            console.log("Model URL:", env.VITE_BASE_URL + "/" + indexFile)
+            console.log("Bundle Name:", bundleName)
+            console.log('----------------------------------------------')
+          } else {
+            console.warn("Unable to find html bundle in index.html")
+            console.log('----------------------------------------------')
+            console.log("Model Name:", env.VITE_MODEL_NAME)
+            console.log("Model URL:", env.VITE_BASE_URL)
+            console.log('----------------------------------------------')
+          }
+        } catch (err) {
+          console.error('[log-final-index] Error reading file:', err);
+        }
+      }
+    }
+  };
+}`)}
+</CodeBlock>
+This code is to output into console to this [Final Output](?path=/docs/getting-started--docs#final-output) format. Basically the code is using `fs` NodeJS functionality to get the file name after the vite is successfully build that called the event `closeBundle`.
+
+#### Explanation of `logFinalIndex`
+
+The `logFinalIndex` function is designed to log specific information about a final index bundle in a production environment. Here's how it works:
+
+##### 1. Function Definition
+The function `logFinalIndex` takes three parameters: `mode`, `env`, and `dist`. It returns an object with a `name` property and a `closeBundle` method.
+
+##### 2. Name Property
+The returned object has a `name` property set to `'log-final-index'`.
+
+##### 3. closeBundle Method
+This method is defined to execute when the bundle is closed.
+
+##### 4. Environment Check
+Inside `closeBundle`, it checks if the `mode` is `'production'` or if the environment variable `NODE_ENV` is set to `'production'`, and ensures that `NODE_ENV` is not `'storybook'`. If these conditions are met, it proceeds with the logging process.
+
+##### 5. Clear Console
+The console is cleared using `console.clear()` to keep the output tidy.
+
+##### 6. Try-Catch Block
+A `try-catch` block is used to handle any errors that may occur during the file operations.
+
+##### 7. Directory and File Handling
+The variable `outDir` is assigned the value of `dist`, which indicates the output directory. It reads the contents of the directory using `fs.readdirSync(outDir)` and stores the filenames in `files`.
+
+##### 8. Find Index File
+It searches for a file matching the pattern `index-[^.]+\.js` (e.g., `index-1.js`) using `Array.find()`. If no such file is found, it logs a warning and exits the function.
+
+##### 9. Construct File Paths
+It constructs the full path for the index file and the `index.html` file using `path.join()`.
+
+##### 10. Check File Existence
+It checks if both the index file and the HTML file exist using `fs.existsSync()`. If both files exist, it proceeds to read the HTML file.
+
+##### 11. Extract Bundle Tag
+It defines a regex pattern `bundleTag` to match the bundle tag in the HTML content. The HTML content is read and matched against the regex to extract the bundle name.
+
+##### 12. Log Model Information
+It logs the model name and URL constructed from the environment variables, along with the extracted bundle name. Console output is formatted for clarity.
+
+##### 13. Handle Missing HTML Bundle
+If the HTML file or index file does not exist, it logs a warning indicating that it couldn't find the HTML bundle and still logs the model name and URL.
+
+##### 14. Error Handling
+If any error occurs during file reading or processing, it catches the error and logs it to the console.
+
+##### Summary
+This function is a useful utility for logging important information about the final index bundle in a production build, ensuring that developers can verify the correct files are present and logged properly. It handles errors gracefully and provides clear console output for handover purposes.
+
+
+Also this code is to get the **specific tag that starts with `<bundle-*>` inside `index.html`**:
+<CodeBlock language='js'>
+{js_beautify.js(`const bundleTag = /<(?<tag>bundle[^s/>]*)[^>]*>([sS]*?)</k < tag >> /i;
+                        const content = fs.readFileSync(HTMLPath, 'utf-8');
+                        const html = content.match(bundleTag);
+                        const bundleName = html.groups.tag;`)}
+</CodeBlock>
+
+### `resolveInsideBase`
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(`
+/**
+ * URL Resolve that continue after pathname.
+ * @param {string} base 
+ * @param {string} rel 
+ * @example
+ * // Example:
+ * resolveInsideBase('https://www.domain.com/assets/second-path', '/fonts/ttf/3DSV2-Bold.ttf');
+ * // => 'https://www.domain.com/assets/second-path/fonts/ttf/3DSV2-Bold.ttf'
+ * @returns 
+ */
+function resolveInsideBase(base, rel) {
+  const baseUrl = new URL(base.endsWith('/') ? base : base + '/');
+  const r = rel.startsWith('/') ? rel.slice(1) : rel;
+  return new URL(r, baseUrl).toString();
+}`)}
+</CodeBlock>
+
+This code is just a helper that the url of a 3DS Server must not start from origin. It should start from subpath (basically the whole url). Example: `resolveInsideBase('https://www.domain.com/assets/second-path', '/fonts/ttf/3DSV2-Bold.ttf');` will output into `'https://www.domain.com/assets/second-path/fonts/ttf/3DSV2-Bold.ttf'`
+
+### `node:readline`
+<CodeBlock language='js' copyToClipboard showLineNumbers>
+{js_beautify.js(`// For Bundle Aspect Ratio. Request User to key in inside terminal.
+    if (env.VITE_DEPLOY && env.VITE_DEPLOY === 'true') {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      const desktopRatioQuestion = await new Promise(resolve => rl.question(\`Your bundle desktop ratio is "\${desktopRatio}". Confirm? (y/n)\n> \`, resolve))
+
+      if (desktopRatioQuestion === 'n') {
+        const desktopRatioAnswer = await new Promise(resolve => rl.question(\`\n\nWrite your custom ratio in this format. Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio\n\nEx: <width> / <height>\n\n> \`, resolve))
+
+        desktopRatio = desktopRatioAnswer;
+      }
+
+      const mobileRatioQuestion = await new Promise(resolve => rl.question(\`Your bundle mobile ratio is "\${mobileRatio}". Confirm? (y/n)\n> \`, resolve))
+
+      if (mobileRatioQuestion === 'n') {
+        const mobileRatioAnswer = await new Promise(resolve => rl.question(\`\n\nWrite your custom ratio in this format Tips:\n- Replace '<width>' & '<height>' to your desired value\n- For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio\n\nEx: <width> / <height>\n\n> \`, resolve))
+
+        mobileRatio = mobileRatioAnswer;
+      }
+
+      rl.close()
+
+    }
+  }`)}
+</CodeBlock>
+This is the code where we can take an advantage on user to get the ratio for desktop & mobile for 3DS deploy build. The code is basically read prompt after asking the question and assign to variable if custom ratio is required from user. For more info, click [Readline | NodeJS](https://nodejs.org/api/readline.html)
+
+### `cssInjectedByJsPlugin`
+
+<CodeBlock language="js">
+{js_beautify.js(`cssInjectedByJsPlugin({
+      preRenderCSSCode: (cssCode) => {
+        // Replace font url from url('/fonts/ttf/3DSV2-BoldItalic.ttf') to url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')
+        for (const match of cssCode.matchAll(/url\\(\\s*(['"]?)(\\/[^'")]+)\\1\\s*\\)/gi)) {
+          cssCode = cssCode.replace(match[0], "url(" + resolveInsideBase(env.VITE_BASE_URL, match[2]) + ")")
+        }
+
+        // Add Desktop Ratio & Mobile Ratio to Parent Container
+        return cssCode + \`div:has(bundle-3d-hotspots) {aspect-ratio: \${desktopRatio};}@media (max-width:480px) {div:has(bundle-3d-hotspots) {aspect-ratio: \${mobileRatio};}}\`
+      }
+    })`)}
+</CodeBlock>
+
+This code will beautifully replace any `url()` tag inside css from `url('/fonts/ttf/3DSV2-BoldItalic.ttf')` to `url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')`. This code is using [vite-plugin-css-injected-by-js 🤯](https://www.npmjs.com/package/vite-plugin-css-injected-by-js)
