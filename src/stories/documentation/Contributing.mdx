@@ -5,6 +5,7 @@ import Paragraph from '@/components/Body';
 import Plot from '@/design-system/components/Plot';
 import { Mermaid } from 'mdx-mermaid/Mermaid';
 import CodeBlock from '@/design-system/components/CodeBlock';
+import js_beautify from 'js-beautify';
 
 <Meta title="Documentation/Maintainer/Contributing Guidelines" />
 
@@ -45,9 +46,9 @@ Now you are ready to do whatever you want on your newly created branch once succ
 * Define components using **arrow functions**.
 
 <CodeBlock language='jsx' copyToClipboard showLineNumbers>
-{`const MyComponent = () => {
+{js_beautify.js(`const MyComponent = () => {
     return <div>Hello World</div>;
-};`}
+};`, { "e4x": true })}
 </CodeBlock>
 
 ### State Management
@@ -68,6 +69,135 @@ useEffect(() => {
 <CodeBlock language='jsx' showLineNumbers>
 {`const className = \`button \${isActive ? 'active' : ''}\`;
 return <button className={className}>Click Me</button>;`}
+</CodeBlock>
+
+### Theatre.js Guidelines
+Say that your react component setup like this:
+<CodeBlock language='jsx' showLineNumbers>
+{js_beautify.js(`
+const CustomComponent = (props) => {
+  return (
+    <p>{"Custom Component"}</p>
+  )
+}
+
+return CustomComponent;
+`, {
+  "e4x": true,
+})}
+</CodeBlock>
+
+Then simply import at the top of the file for Theatre Management HOC like this:
+<CodeBlock language='jsx' showLineNumbers copyToClipboard>
+{js_beautify.js(`
+import { types } from '@theatre/core';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';`, {
+  "e4x": true,
+  "brace_style": "collapse,preserve-inline"
+})}
+</CodeBlock>
+
+Then implement to the Custom Component's Functional Component into `withTheatreManagement`:
+<CodeBlock language='jsx' showLineNumbers>
+{js_beautify.js(`
+import { types } from '@theatre/core';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';
+
+const CustomComponent = (props) => {
+  return (
+    <p>{"Custom Component"}</p>
+  )
+}
+
+const CustomComponentTheatreJS = withTheatreManagement(CustomComponent, 'Custom', {
+  Text: {
+    props: {
+      text: types.string("Default String"),
+    }
+  }
+})
+
+return CustomComponentTheatreJS;
+`, {
+  "e4x": true,
+  "brace_style": "collapse,preserve-inline"
+})}
+</CodeBlock>
+
+You see that `withTheatreManagement` accepts 3 parameters. These are the parameters value type arrange in order:
+<ol>
+  <li className='list-decimal'>React Component</li>
+  <li className='list-decimal'>[Sheet Name](https://www.theatrejs.com/docs/latest/manual/sheets) that executes as:</li>
+   <CodeBlock language='js' showLineNumbers>
+   {`// project is a Project created earlier through getProject
+    const mySheet = project.sheet('Custom')`}
+   </CodeBlock>
+   <li className='list-decimal'>[Sheets Objects](https://www.theatrejs.com/docs/latest/manual/objects) & [Options](https://www.theatrejs.com/docs/latest/manual/objects#reconfiguring-existing-objects)</li>
+   <CodeBlock language='js' showLineNumbers>
+   {js_beautify.js(`{
+    "<LayerName>": {
+      props: {
+        "<PropName>": types.number(0),
+        // ...
+      },
+      options: {
+        reconfigure: boolean // default: undefined
+      }
+    },
+    r3f: boolean // default: true
+   }`)}
+   </CodeBlock>
+   <blockquote>
+   Anything key value that wrapped with `<...>` symbol is your own custom key name. `<LayerName>` will be grouped all the props in it. `<PropName>` is the [prop](https://www.theatrejs.com/docs/latest/manual/prop-types) of your `<LayerName>`. You can define whatever prop(s) in `LayerName`. As for `options`, you can refer here as per [documentation](https://www.theatrejs.com/docs/latest/manual/objects#reconfiguring-existing-objects). 
+   </blockquote>
+   <blockquote>
+   `r3f` however, the theatrejs is designed for all `react-three-fiber` components by default. If your component is outside of [`Canvas`](https://r3f.docs.pmnd.rs/api/canvas) area (If your component is not bound to react-three-fiber component's children), you might want to set it to `false`.
+   </blockquote>
+</ol>
+
+Then you can get the theatrejs prop's value like this:
+<CodeBlock language='jsx' showLineNumbers>
+{js_beautify.js(`
+import { types } from '@theatre/core';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';
+
+/**
+ * Custom Component
+ * @param {import('@/components/hoc/TheatreManagement').TheatreReturnValue} props
+ * @returns
+ */
+const CustomComponent = (props) => {
+  // Grab the TheatreJS Prop(s) here
+  const { Text: TextTheatreJS } = props.theatre
+
+  return (
+    <>
+      {/* Append to the p textContent */}
+      <p>{TextTheatreJS.text}</p>
+    </>
+  )
+}
+
+const CustomComponentTheatreJS = withTheatreManagement(CustomComponent, 'Custom', {
+  Text: {
+    props: {
+      text: types.string("Default String"),
+    }
+  }
+})
+
+return CustomComponentTheatreJS;
+`, {
+  "e4x": true,
+  "brace_style": "collapse,preserve-inline"
+})}
+</CodeBlock>
+
+Your Custom component will product output like this:
+<CodeBlock language='html'>
+{js_beautify.html(`
+<p>Default String</p>
+`)}
 </CodeBlock>
 
 ### Styling

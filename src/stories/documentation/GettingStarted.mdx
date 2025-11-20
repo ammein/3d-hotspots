@@ -100,7 +100,9 @@ In your `.env.production` file:
 VITE_MODEL_NAME=<your-model-name>
 # Model URL
 VITE_BASE_URL=https://production-domain.com/$VITE_MODEL_NAME
-# SEO itemtype='http://tracking.domain.com/'
+# HTML Script URL for SEO <script type="text/javascript" src="\${env.VITE_SEO_SCRIPT_URL}"></script>
+VITE_SEO_SCRIPT_URL=https://tracking.domain.com/tracking.js
+# SEO itemtype='https://tracking.domain.com/'
 # More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/itemscope
 VITE_TRACKING_URL=http://tracking.domain.com/
 # DRACO path in public folder after run 'yarn draco' & to locate public folder to Draco Folder
@@ -115,6 +117,13 @@ VITE_DEPLOY=true`}
 </CodeBlock>
 
 > You also need to configure the same SEO value for `tracking` in [metadata configuration](?path=/docs/documentation-user-metadata--docs#trackingcategory)
+
+
+#### Build
+Then run this command to build the application:
+<CodeBlock copyToClipboard showLineNumbers wrapLongLines language='bash'>
+{`yarn build`}
+</CodeBlock>
 
 Then you will encounter to define ratio for Desktop responsive:
 <CodeBlock language='bash'>

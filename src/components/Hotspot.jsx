@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Color, Vector3 } from 'three';
 import { DassaultText3D } from '@/design-system/components/3DText';
 import { useTranslations } from 'use-intl';
-import withTheatreManagement from './hoc/TheatreManagement';
+import withTheatreManagement from '@/components/hoc/TheatreManagement';
 import { types } from '@theatre/core';
 import { DEG2RAD, RAD2DEG } from '@three-math/MathUtils';
 import { getTextScale, stableLookAt } from '@/helpers/utils';
@@ -95,16 +95,7 @@ const Hotspot = ({ geometry, material, start = false, hotspotName, id, focus, ..
         textRef.current.material.opacity = gsap.utils.clamp(0, 1, opac);
       } else if (focus && id.length > 0) {
         stableLookAt(textRef.current, camera.position);
-        // const cameraDirection = new Vector3();
-        // camera.getWorldDirection(cameraDirection);
-        // const lineDir = cameraDirection.clone().multiplyScalar(scalar);
-        // const secondLine = geometry.points[0].clone().add(lineDir);
-        // lineRef.current.geometry.setPoints([
-        //   geometry.points[0],
-        //   secondLine,
-        //   secondLine.add(new Vector3(0, 0, Math.sign(geometry.points[0].z) * distance)),
-        // ]);
-        // textRef.current.lookAt(camera.position);
+        textRef.current.position.set(geometry.points[2].x, geometry.points[2].y, geometry.points[2].z);
       } else if (!focus && id !== hotspotName && id.length > 0) {
         lineRef.current.material.opacity = 0;
         textRef.current.material.opacity = 0;
@@ -256,9 +247,6 @@ const HotspotTheatreJS = withTheatreManagement(Hotspot, 'Text Hotspot', {
       focus: types.compound({
         size: types.number(33.57, {
           range: [1, 100],
-        }),
-        follow: types.boolean(false, {
-          label: 'Follow Camera',
         }),
       }),
     },

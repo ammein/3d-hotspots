@@ -36,7 +36,8 @@ You need to finish this [Visual Studio Code Profile Installation](?path=/docs/ge
                         ],
                         "lookAt": [
                             0.07, 0.89, -0.66
-                        ]
+                        ],
+                        "follow": true
                     }
                 },
         ...
@@ -89,4 +90,7 @@ Mesh's name that are matched:
 This is optional if you need to have custom position when click this specific hotspot. Useful if the model is facing opposite the camera that you need to reposition the camera when in focus to detail object. The value needs to have **3 number** in a **single array** that represents `x`, `y` and `z` position.
 
 ### `screens.detail.hotspots[n].focus.lookAt` (Optional)
-This is also an optional if you need to have custom camera look at towards when click this specific hotspot. Usefull if the model is needed to be a custom overview viewing experience. The value needs to have **3 number** in a **single array** that represents `x`, `y` and `z` position.
+This is also an optional if you need to have custom camera look at towards when click this specific hotspot. Useful if the model is needed to be a custom overview viewing experience. The value needs to have **3 number** in a **single array** that represents `x`, `y` and `z` position.
+
+### `screens.detail.hotspots[n].focus.follow` (Optional)
+This is also an optional if you need to want the hotspot label to follow camera. This is useful when you set the custom focus position behind the hotspot's direction, the label somehow behind the object. By setting this value to `true`, the hotspot label will follow the camera position. The value accepts **boolean value** only.

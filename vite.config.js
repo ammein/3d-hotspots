@@ -31,7 +31,7 @@ let mobileRatio = '9 / 16';
  * @param {string} name 
  * @returns 
  */
-const htmlPlugin = () => {
+const htmlPlugin = (env) => {
   return {
     name: 'html-transform',
     /**
@@ -40,7 +40,9 @@ const htmlPlugin = () => {
      * @returns 
      */
     transformIndexHtml(html) {
-      html = html.replace('<!-- DASSAULT_SEO_TRACKING_SCRIPT (DON\'T REMOVE THIS) -->', '<script type="text/javascript" src="https://tracking.3ds.com/stat/tc_global_iframe.js"></script>')
+      if (env.VITE_SEO_SCRIPT_URL) {
+        html = html.replace(`<!-- DASSAULT_SEO_TRACKING_SCRIPT (DON\'T REMOVE THIS) -->`, `<script type="text/javascript" src="${env.VITE_SEO_SCRIPT_URL}"></script>`)
+      }
 
       return beautify.html(html.replace(
         /\b(src|href)\s*=\s*"(\/[^"]*)"/g,
@@ -65,7 +67,7 @@ function logFinalIndex(mode, env, dist) {
   return {
     name: 'log-final-index',
     closeBundle() {
-      if ((mode === 'production' || env.NODE_ENV === 'production') && !env.NODE_ENV === 'storybook') {
+      if ((mode === 'production' || env.NODE_ENV === 'production') && env.NODE_ENV !== 'storybook') {
         console.clear()
 
         try {
@@ -200,7 +202,7 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' || mode === 'preview') && env.NODE_ENV === 'production') && htmlPlugin(), logFinalIndex(mode, env, finalDist), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
+    plugins: [react(), svgr(), tailwindcss(), glsl(), ((mode === 'production' || mode === 'preview') && env.NODE_ENV === 'production') && htmlPlugin(env), logFinalIndex(mode, env, finalDist), (mode === 'production' && env.NODE_ENV === 'production') && cssInjectedByJsPlugin({
       preRenderCSSCode: (cssCode) => {
         // Replace font url from url('/fonts/ttf/3DSV2-BoldItalic.ttf') to url('http://domain.com/fonts/ttf/3DSV2-BoldItalic.ttf')
         for (const match of cssCode.matchAll(/url\(\s*(['"]?)(\/[^'")]+)\1\s*\)/gi)) {

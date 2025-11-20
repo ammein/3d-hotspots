@@ -28,6 +28,7 @@ import { DEG2RAD } from '@three-math/MathUtils';
  * @typedef {Object} FocusMetadata
  * @property {Array<number> | string} position
  * @property {Array<number> | string} lookAt
+ * @property {boolean} follow
  */
 
 /**
@@ -36,6 +37,7 @@ import { DEG2RAD } from '@three-math/MathUtils';
  * @property {string} pointer
  * @property {import('three').Vector3[]} lines
  * @property {FocusMetadata | undefined} focus
+ * @property {import('three').Object3D} object3D
  */
 
 useGLTF.setDecoderPath(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_LOCAL_DRACO_PATH}`);
@@ -274,11 +276,13 @@ const Model = ({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
                 .add(new Vector3(0, 0, Math.sign(origin.z) * HotspotLinesTheatreJS.distance));
 
               // Create the new data object
+              /** @type {Hotspots} */
               const newData = {
                 name: findHotspot.name,
                 pointer: findHotspot.pointer ? findHotspot.pointer : null,
                 lines: [origin, line, lineText],
                 focus: findHotspot.focus,
+                object3D: object,
               };
 
               // Check if a similar hotspot already exists
@@ -520,7 +524,33 @@ const Model = ({ url, useDraco, useMeshOptimize = true, animationNames = [], hid
                     })
                   }
                   geometry={{
-                    points: val.lines,
+                    points: val.lines.map((v, indexLine) => {
+                      if (
+                        HotspotLinesTheatreJS &&
+                        (HotspotLinesTheatreJS.focus.follow || (val.focus && val.focus.follow)) &&
+                        focus &&
+                        val.name === state.hotspotID
+                      ) {
+                        const origin = val.object3D.position.clone();
+                        const cameraDirection = new Vector3()
+                          .subVectors(camera.position.clone(), origin.clone())
+                          .normalize();
+                        switch (true) {
+                          case indexLine === 1: {
+                            v = v.clone().add(cameraDirection);
+                            break;
+                          }
+                          case indexLine === 2: {
+                            v = v.clone().add(cameraDirection);
+                            break;
+                          }
+                        }
+
+                        return v;
+                      } else {
+                        return v;
+                      }
+                    }),
                   }}
                   material={{
                     lineWidth: HotspotLinesTheatreJS.width,
@@ -586,6 +616,11 @@ const theatreJSModel = withTheatreManagement(Model, 'Model Controller', {
         range: [1, 10],
         nudgeMultiplier: 0.1,
         label: 'Length',
+      }),
+      focus: types.compound({
+        follow: types.boolean(false, {
+          label: 'Follow Camera',
+        }),
       }),
       distance: types.number(1.0, {
         range: [0, 10],
