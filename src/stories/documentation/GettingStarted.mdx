@@ -105,15 +105,45 @@ VITE_SEO_SCRIPT_URL=https://tracking.domain.com/tracking.js
 # SEO itemtype='https://tracking.domain.com/'
 # More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/itemscope
 VITE_TRACKING_URL=http://tracking.domain.com/
-# DRACO path in public folder after run 'yarn draco' & to locate public folder to Draco Folder
+# To locate draco public folder directory from react vite client
 VITE_LOCAL_DRACO_PATH=three/draco/javascript/
-# Basis path in public folder after run 'yarn basis' & to locate public folder to Basis Folder
-VITE_LOCAL_KTX_PATH=examples/jsm/libs/basis/
+# To locate basis public folder directory from react vite client
+VITE_LOCAL_KTX_PATH=three/three.js/examples/jsm/libs/basis/
 # To disable sourcemap in production
 VITE_SOURCEMAP=false
 # IMPORTANT for Interactive Asset export.
 # (This will compile all files in one single Javascript module file so that it can be played in 3DS Webpage)
 VITE_DEPLOY=true`}
+</CodeBlock>
+
+#### `VITE_LOCAL_DRACO_PATH` 
+As stated in the comment line above `VITE_LOCAL_DRACO_PATH`, this is only client file directory that will be searching `public` using standard Vite's [Static Asset Handling](https://vite.dev/guide/assets). Your public folder inside `three` folder should be like this after run `yarn draco`:
+<CodeBlock language='bash' showLineNumbers>
+{`./public/three
+├── draco
+│   └── javascript
+│       ├── draco_decoder_gltf.js
+│       ├── draco_decoder_gltf.wasm
+│       ├── draco_decoder.js
+│       ├── draco_decoder.wasm
+│       ├── draco_encoder_wrapper.js
+│       ├── draco_encoder.js
+│       ├── draco_encoder.wasm
+│       ├── draco_wasm_wrapper_gltf.js
+│       └── draco_wasm_wrapper.js`}
+</CodeBlock>
+
+#### `VITE_LOCAL_KTX_PATH` 
+As stated in the comment line above `VITE_LOCAL_KTX_PATH`, this is only client file directory that will be searching `public` using standard Vite's [Static Asset Handling](https://vite.dev/guide/assets). Your public folder inside `three` folder should be like this after run `yarn basis`:
+<CodeBlock language='bash' showLineNumbers>
+{`./public/three
+└── three.js
+    └── examples
+        └── jsm
+            └── libs
+                └── basis
+                    ├── basis_transcoder.js
+                    └── basis_transcoder.wasm`}
 </CodeBlock>
 
 > You also need to configure the same SEO value for `tracking` in [metadata configuration](?path=/docs/documentation-user-metadata--docs#trackingcategory)

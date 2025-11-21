@@ -34,23 +34,23 @@
 
 /* Scream hover (only applies when .enabledHover exists on the element) */
 .scream-enabledHover:hover {
-  @apply hover:!text-denimblue hover:!bg-white-100 hover:outline-2 hover:!outline-denimblue hover:!outline-offset-[-2px] dark:hover:!bg-denimblue dark:hover:!text-white-100 dark:hover:!outline-white-100;
+  @apply hover:!text-denimblue hover:!bg-white-100 hover:outline-2 hover:!outline-denimblue hover:!outline-offset-[-2px];
 }
 
 /* Shout (outlined pill) */
 .shout {
-  @apply bg-transparent text-blue outline-2 outline-blue outline-offset-[-2px] rounded-[28px] dark:text-white-100 dark:outline-white-100;
+  @apply bg-transparent text-blue outline-2 outline-blue outline-offset-[-2px] rounded-[28px];
 }
 .shoutGrey {
   @apply bg-transparent rounded-full outline-2 !outline-black-64 outline-offset-[-2px] text-black-64;
 }
 .shout-enabledHover:hover {
-  @apply hover:!text-white-100 hover:!bg-denimblue dark:hover:!text-denimblue dark:hover:!bg-white-100;
+  @apply hover:!text-white-100 hover:!bg-denimblue;
 }
 
 /* Cheer */
 .cheer {
-  @apply bg-transparent text-blue p-0 gap-2 dark:text-white-100 [&>svg]:rounded-full [&>svg]:p-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:border-2 [&>svg]:border-blue;
+  @apply bg-transparent text-blue p-0 gap-2 [&>svg]:rounded-full [&>svg]:p-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:border-2 [&>svg]:border-blue;
 }
 
 .cheerIconContainer {
@@ -67,7 +67,7 @@
 
 /* Murmur */
 .murmur {
-  @apply bg-transparent text-blue p-0 gap-2 dark:text-white-100 [&>svg]:w-4 [&>svg]:h-4;
+  @apply bg-transparent text-blue p-0 gap-2 [&>svg]:w-4 [&>svg]:h-4;
 }
 
 /* Size helpers: icon present */

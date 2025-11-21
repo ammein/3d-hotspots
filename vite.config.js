@@ -42,6 +42,8 @@ const htmlPlugin = (env) => {
     transformIndexHtml(html) {
       if (env.VITE_SEO_SCRIPT_URL) {
         html = html.replace(`<!-- DASSAULT_SEO_TRACKING_SCRIPT (DON\'T REMOVE THIS) -->`, `<script type="text/javascript" src="${env.VITE_SEO_SCRIPT_URL}"></script>`)
+      } else {
+        html = html.replace(`<!-- DASSAULT_SEO_TRACKING_SCRIPT (DON\'T REMOVE THIS) -->`, ``)
       }
 
       return beautify.html(html.replace(

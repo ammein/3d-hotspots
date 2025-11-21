@@ -19,12 +19,21 @@
 
 ## Getting Started
 
+### Git Global Setup
+
+```bash
+git config --global user.name "YourAccountUserName"
+git config --global user.email "YourAccountEmail"
+```
+
+### Clone Repo
+
 ```bash
 # Clone this library
 git clone https://gitlab.com/dsvideoteam/3d/3d-hotspots.git
 ```
 
-Then refer to the link on this repo page or click [Storybook Page](https://ammein.github.io/3d-hotspots/) to learn more about the project.
+Then refer to `GitLab Pages` in repo page. You will find the right pane that named `Project Information` and you will find a button named `GitLab Pages`. Click it to get started.
 
 ### Features Uses
 

@@ -1,0 +1,170 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LatexRenderer from '@/design-system/components/LatexRenderer';
+import Headline from '@/components/Headline';
+import Paragraph from '@/components/Body';
+import Plot from '@/design-system/components/Plot';
+import { Mermaid } from 'mdx-mermaid/Mermaid';
+import CodeBlock from '@/design-system/components/CodeBlock';
+import LinkTo from '@storybook/addon-links/react';
+import BasisScript from '../../../scripts/basis.sh?raw';
+import DracoScript from '../../../scripts/draco.sh?raw';
+import LygiaScript from '../../../scripts/lygia.sh?raw';
+
+
+<Meta title="Documentation/Maintainer/Bash Script" />
+
+## Bash Script Guideline
+> You might not need to adjust this script. Only needed if the specific repo changes its name, path or even your custom static asset handling path.
+
+### Basis
+This is how the overall code to grab Basis transcoder from Three.js repo:
+<CodeBlock language='bash' showLineNumbers>{BasisScript}</CodeBlock>
+
+### Adjustable Basis's Bash Script Value
+
+#### `basis_project_name`
+This would be the name of the Three.js git repo. Change this if the repo name is somehow changed
+
+#### `basis_git_url`
+This would be the Three.js github repo url path. Change this if the owner of the repo changes the URL.
+
+#### `basis_branch`
+This is the default branch name of the Three.js git repo. Change this value if the owner make other branch as default.
+
+#### `basis_path`
+This is the directory path that contains these files for Basis Transcoder (Refer: [`VITE_LOCAL_KTX_PATH`](?path=/docs/getting-started--docs#vite_local_ktx_path)). At the moment of development by [Amin Shazrin](https://github.com/ammein), the file names and its extensions are like this:
+<CodeBlock>
+{`./public/three
+└── three.js
+    └── examples
+        └── jsm
+            └── libs
+                └── basis
+                    ├── basis_transcoder.js
+                    └── basis_transcoder.wasm`}
+</CodeBlock>
+
+> If the those files located somewhere else, you may adjust the `basis_path` value.
+
+#### `basis_local_path`
+This is the directory path to store the files that will be import from `basis_path` into local directory folder. Usually due to how Vite's [Static Asset Handling](https://vite.dev/guide/assets) managed, `public` folder it is. Also, if you notice from the local path, I grouped all of the imports in a single folder called `three`. Change the value if you wish to store to somewhere else in your local project directory.
+
+#### `except_basis_path`
+This is arrays of path or file name or even extensions that excludes all matches path inside `basis_path` directory. Change or Add more item into this bash array if needed. For more info about Bash Array format, refer [here](https://www.w3schools.com/bash/bash_arrays.php).
+
+### Draco
+This is how the overall code to grab Draco transcoder from Google repo:
+<CodeBlock language='bash' showLineNumbers>{DracoScript}</CodeBlock>
+
+### Adjustable Draco's Bash Script Value
+
+#### `draco_project_name`
+This would be the name of the Draco git repo. Change this if the repo name is somehow changed
+
+#### `draco_git_url`
+This would be the Draco github repo url path. Change this if the owner of the repo changes the URL.
+
+#### `draco_branch`
+This is the default branch name of the Draco git repo. Change this value if the owner make other branch as default.
+
+#### `draco_path`
+This is the directory path that contains these files for Draco Transcoder (Refer: [`VITE_LOCAL_DRACO_PATH`](?path=/docs/getting-started--docs#vite_local_draco_path)). At the moment of development by [Amin Shazrin](https://github.com/ammein), the file names and its extensions are like this:
+<CodeBlock>
+{`./public/three
+├── draco
+│   └── javascript
+│       ├── draco_decoder_gltf.js
+│       ├── draco_decoder_gltf.wasm
+│       ├── draco_decoder.js
+│       ├── draco_decoder.wasm
+│       ├── draco_encoder_wrapper.js
+│       ├── draco_encoder.js
+│       ├── draco_encoder.wasm
+│       ├── draco_wasm_wrapper_gltf.js
+│       └── draco_wasm_wrapper.js`}
+</CodeBlock>
+
+> If the those files located somewhere else, you may adjust the `draco_path` value.
+
+#### `draco_local_path`
+This is the directory path to store the files that will be import from `draco_path` into local directory folder. Usually due to how Vite's [Static Asset Handling](https://vite.dev/guide/assets) managed, `public` folder it is. Also, if you notice from the local path, I grouped all of the imports in a single folder called `three`. Change the value if you wish to store to somewhere else in your local project directory.
+
+#### `except_draco_path`
+This is arrays of path or file name or even extensions that excludes all matches path inside `draco_path` directory. Change or Add more item into this bash array if needed. For more info about Bash Array format, refer [here](https://www.w3schools.com/bash/bash_arrays.php).
+
+### Lygia
+This is how the overall code to grab [Lygia](https://lygia.xyz/) GLSL Package Library:
+<CodeBlock language='bash' showLineNumbers>{LygiaScript}</CodeBlock>
+
+### Adjustable Lygia's Bash Script Value
+
+#### `lygia_folder_name`
+This is the custom name of your local folder. You can change the name if you wish to save as your own custom folder name for this specific lygia files.
+
+#### `lygia_git_url`
+This would be the Lygia github repo url path. Change this if the owner of the repo changes the URL.
+
+#### `default_lygia_path`
+This is the path to your local folder if you did run `yarn lygia`. This will be ignore if you run `yarn lygia <custom-path>`
+
+#### `prune_file`
+This is the specific file to prune other unrelated files that is available for you to use. My bash script will automatically detect the filename and run `python` to it. It will request an input for you to choose which folder to use. Adjust the value if the filename or file path is located somewhere else. As you can see from the lygia package library, you will see the filename `prune.py` is located on its root project folder:
+<CodeBlock language='text'>
+{`Lygia
+├── animation
+├── biome.jsonc
+├── color
+├── CONTRIBUTE.md
+├── DESIGN.md
+├── distort
+├── draw
+├── EXAMPLES.md
+├── filter
+├── generative
+├── geometry
+├── LICENSE.md
+├── lighting
+├── math
+├── math.glsl
+├── morphological
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── prune.py
+├── README_GLSL.md
+├── README_METAL.md
+├── README_WebGPU.md
+├── README_WESL.md
+├── README.md
+├── sample
+├── sample.glsl
+├── sampler.glsl
+├── sdf
+├── sdf.glsl
+├── simulate
+├── space
+├── test
+├── tsconfig.json
+├── version.glsl
+├── version.wesl
+├── vitest.config.ts
+├── webpack.config.js
+└── wesl.toml`}
+</CodeBlock>
+
+### Other Adjustable Lygia's Bash Script Value
+
+#### `LYGIA_FILE_TYPES`
+This is arrays of filetype that were requested when running the `prune.py` file. Add more File Type if the Lygia library has more file types. Change or Add more item into this bash array if needed. For more info about Bash Array format, refer [here](https://www.w3schools.com/bash/bash_arrays.php).
+
+#### `GITHUB_RAW`
+This is the raw github URL that will output file contents in text format. Change the URL path if Github somehow change to different url.
+
+#### `REPO_OWNER`
+This is the name of the repo owner. Change if the repo has been transfered to different owner.
+
+#### `REPO_NAME`
+This is the name of the repo itself. Change if the repo has changed to different name.
+
+#### `BRANCH`
+This is the default branch name of the Lygia git repo. Change this value if the owner make other branch as default.

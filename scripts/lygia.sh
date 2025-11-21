@@ -5,11 +5,12 @@
 
 # Flexible Values that suits to your needs...
 lygia_folder_name="lygia"
+lygia_git_url="https://github.com/patriciogonzalezvivo/lygia.git"
 default_lygia_path="./src/glsl"
 prune_file="prune.py"
-path=$1
 
 # Constant Values (YOU NOT MIGHT CHANGE THIS VALUES)
+path=$1
 LYGIA_FILE_TYPES=("glsl" "hlsl" "msl" "wgsl" "cuh") # Remove/Add the lists of lygia options files available to this array
 GITHUB_RAW="https://raw.githubusercontent.com" # Github Raw URL
 REPO_OWNER="patriciogonzalezvivo"  # Change this if lygia is transfered to other repo owner
@@ -136,12 +137,12 @@ check_lygia() {
 if [[ -z $path ]]; then
     check_lygia
     echo "Add to default path submodule \"$default_lygia_path/$lygia_folder_name\""
-    npx degit https://github.com/patriciogonzalezvivo/lygia.git "$default_lygia_path/$lygia_folder_name"
+    npx degit $lygia_git_url "$default_lygia_path/$lygia_folder_name"
     prune_lygia "$default_lygia_path/$lygia_folder_name"
 else
     check_lygia "$path/$lygia_folder_name"
     # Add manually to some path
     echo "Clone to $path/$lygia_folder_name"
-    npx degit https://github.com/patriciogonzalezvivo/lygia.git "$path/$lygia_folder_name"
+    npx degit $lygia_git_url "$path/$lygia_folder_name"
     prune_lygia "$path/$lygia_folder_name"
 fi
