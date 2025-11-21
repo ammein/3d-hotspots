@@ -51,11 +51,11 @@ import js_beautify from 'js-beautify';
         errorEmpty --> exit
         E noEmpty@-->|no|deploy@{ shape: diamond, label: "VITE_DEPLOY is available?" }
         deploy yesDeploy@-->|yes|desktopRatioQ@{ shape: diamond, label: "Confirm Default Desktop Ratio?" }
-        desktopRatioQ yesDesktopRatio@-->|yes| desktopRatioInput@{ shape: lean-r, label: "Adjust Custom Desktop Ratio" }
-        desktopRatioInput --> mobileRatioQ@{ shape: diamond, label: "Adjust Default Mobile Ratio?" }
-        desktopRatioQ noDesktopRatio@-->|no| mobileRatioQ
-        mobileRatioQ yesMobileRatio@-->|yes| mobileRatioInput@{ shape: lean-r, label: "Adjust Custom Mobile Ratio" }
-        mobileRatioQ noMobileRatio@-->|no| react
+        desktopRatioQ noDesktopRatio@-->|no| desktopRatioInput@{ shape: lean-r, label: "Adjust Custom Desktop Ratio" }
+        desktopRatioInput --> mobileRatioQ@{ shape: diamond, label: "Confirm Default Mobile Ratio?" }
+        desktopRatioQ yesDesktopRatio@-->|yes| mobileRatioQ
+        mobileRatioQ noMobileRatio@-->|no| mobileRatioInput@{ shape: lean-r, label: "Adjust Custom Mobile Ratio" }
+        mobileRatioQ yesMobileRatio@-->|yes| react
         deploy noDeploy@-->|no| react
         mobileRatioInput --> react
         react --> svgr
