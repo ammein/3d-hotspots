@@ -30,7 +30,7 @@ git config --global user.email "YourAccountEmail"
 
 ```bash
 # Clone this library
-git clone https://gitlab.com/dsvideoteam/3d/3d-hotspots.git
+git clone https://github.com/ammein/3d-hotspots.git
 ```
 
 Then refer to `GitLab Pages` in repo page. You will find the right pane that named `Project Information` and you will find a button named `GitLab Pages`. Click it to get started.
