@@ -33,7 +33,7 @@ git config --global user.email "YourAccountEmail"
 git clone https://github.com/ammein/3d-hotspots.git
 ```
 
-Then refer to the link on right pane for Project Setup in this repo page. You will find a section called `About` and you will find a button named [Storybook Page](https://ammein.github.io/3d-hotspots/). Click it to get started.
+Then refer to the link in the right pane for Project Setup on this repository page. You will find a section called `About`, which contains a link to the [Storybook Page](https://ammein.github.io/3d-hotspots/). Click it to get started.
 
 ### Features Uses
 
